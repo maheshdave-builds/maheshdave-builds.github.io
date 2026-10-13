@@ -1,34 +1,37 @@
 # Mahesh Dave — Adobe Commerce Portfolio
 
-A responsive React + Vite portfolio using a warm neutral, forest-green and bronze design system, with light/dark themes and subtle motion. Portfolio copy is grounded in `Mahesh_Dave_Resume_2026.pdf`; external project links and certification verification links are omitted because the resume did not provide them.
+Responsive React + Vite portfolio with a forest-green, bronze, and warm-neutral visual system, animated sections, persistent light/dark preference, resume download, project showcase, certifications, experience, education, and a Supabase-backed blog.
 
 ## Stack
 
 - React 19 + Vite
 - Tailwind CSS 4 and custom CSS design tokens
 - Framer Motion and Lucide icons
-- Supabase Auth/PostgREST via a small browser REST adapter
+- Supabase Auth, PostgREST, Row Level Security, and Storage through a small browser adapter
 
 ## Run locally
 
 ```bash
 npm install
 cp .env.example .env.local
-# Fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+# Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 npm run dev
 ```
 
-Without Supabase configuration, the public portfolio works and the blog shows its empty state; `/admin` displays setup instructions. With Supabase configured, published blog posts load from the database and the admin login uses Supabase Auth.
+The public portfolio retains resume-derived bundled content when the Supabase content tables are empty. Run `supabase/schema.sql` to initialize the schema, security policies, media bucket, and starter content. `/admin` requires a Supabase account whose trusted `app_metadata` contains `{"role":"admin"}`. No public registration or hardcoded demo credentials are provided.
 
-## Supabase
+## Admin features
 
-Run `supabase/schema.sql` in the Supabase SQL editor. Create the first admin user manually in Auth and set trusted `app_metadata.role` to `admin`. Review all policies before launch. Never expose a service-role key in frontend code. See [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) and [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md).
+- Dashboard with live database counts
+- Profile, projects, certifications, experience, education, and site settings CRUD
+- Searchable record lists and numeric display ordering
+- Blog drafts, publishing/unpublishing, preview, unique slugs, and a visual rich-text toolbar
+- Supabase Storage image uploads with size/type validation
+- Database RLS policies for admin-only writes and public-only published content
 
-## Important current scope
+See [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) and [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for configuration and verification steps.
 
-The portfolio uses resume-derived bundled data for experience, projects, certifications, education, and technical toolkit. Supabase schema/RLS covers these entities, but dedicated admin CRUD forms and database-driven public rendering for those sections are not complete yet. Blog has basic draft/publish editing; its editor is a lightweight HTML textarea with formatting buttons, not a full WYSIWYG editor. Article detail pages, cover-image upload, and a media-library UI are also outstanding. The contact action uses email and does not pretend to submit a form.
-
-## Build
+## Build and verify
 
 ```bash
 npm run build
@@ -36,10 +39,4 @@ npm run lint
 npm run preview
 ```
 
-## Portfolio refresh notes
-
-- The Vite entry point now mounts the React portfolio application (including the responsive navigation, light/dark theme, resume download, animated project cards, certifications, and blog listing).
-- The supplied resume PDF is available at `/Mahesh_Dave_Resume_2026.pdf`.
-- Existing project links and Adobe credential-verification URLs were recovered from the original HTML included in the uploaded archive. Project/demo links are shown only where they were present in that source.
-- Supabase is optional for the public portfolio; configure `.env.local` using `.env.example` to enable the blog and admin login.
-- Review `ADMIN_GUIDE.md` and `DEPLOYMENT_GUIDE.md` for setup and current CMS limitations before deployment.
+Do not deploy until the production build succeeds and Supabase permissions have been tested with anonymous, ordinary authenticated, and administrator sessions.

@@ -28,8 +28,23 @@ class Query {
  single(){this.singleMode=true;return this}
  then(resolve,reject){const prefer=[];if(this.returning)prefer.push('return=representation');if(this.method==='POST')prefer.push('return=representation');const path=`/rest/v1/${encodeURIComponent(this.table)}?${this.params.toString()}`;return request(path,{method:this.method,body:this.payload?JSON.stringify(this.payload):undefined,headers:prefer.length?{Prefer:prefer.join(',')}:{} }).then(result=>{if(!result.error&&this.singleMode){const data=Array.isArray(result.data)?result.data[0]||null:result.data;return resolve({...result,data})}return resolve(result)},reject)}
 }
+async function storageRequest(path, options = {}) {
+ const headers = { apikey: anonKey, Authorization: `Bearer ${currentSession?.access_token || anonKey}`, ...(options.headers || {}) }
+ const response = await fetch(`${url}/storage/v1${path}`, { ...options, headers })
+ const body = response.status === 204 ? null : await response.json().catch(() => null)
+ if (!response.ok) return { data: null, error: { message: body?.message || body?.error || `Storage request failed (${response.status})`, status: response.status } }
+ return { data: body, error: null }
+}
 export const supabase = enabled ? {
  from(table){return new Query(table)},
+ storage:{
+  async upload(bucket,path,file){
+   const response=await fetch(`${url}/storage/v1/object/${encodeURIComponent(bucket)}/${path.split('/').map(encodeURIComponent).join('/')}`,{method:'POST',headers:{apikey:anonKey,Authorization:`Bearer ${currentSession?.access_token||anonKey}`,'Content-Type':file.type,'x-upsert':'true'},body:file})
+   const body=await response.json().catch(()=>null);if(!response.ok)return {data:null,error:{message:body?.message||body?.error||`Upload failed (${response.status})`}}
+   return {data:{...body,path,bucket,publicUrl:`${url}/storage/v1/object/public/${encodeURIComponent(bucket)}/${path.split('/').map(encodeURIComponent).join('/')}`},error:null}
+  },
+  async list(bucket){const result=await storageRequest(`/object/list/${encodeURIComponent(bucket)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prefix:'',limit:100,offset:0,sortBy:{column:'created_at',order:'desc'}})});if(result.error)return result;return {data:(result.data||[]).map(item=>({...item,publicUrl:`${url}/storage/v1/object/public/${encodeURIComponent(bucket)}/${item.name.split('/').map(encodeURIComponent).join('/')}`})),error:null}}
+ },
  auth:{
   async getSession(){return {data:{session:currentSession},error:null}},
   onAuthStateChange(callback){listeners.add(callback);return {data:{subscription:{unsubscribe(){listeners.delete(callback)}}}}},

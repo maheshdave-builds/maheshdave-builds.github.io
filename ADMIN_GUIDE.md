@@ -1,40 +1,75 @@
-# Admin guide
+# Admin Studio Guide
 
-## Access and authentication
+## Sign in and permissions
 
-Open `/admin`. Sign-in uses Supabase Auth password authentication; there is no public registration UI. Create the administrator account manually in Supabase Dashboard → Authentication → Users. Then set that user's **app metadata** to include `{"role":"admin"}` using a trusted administrative path (Dashboard or a server-side admin tool). Do not put admin role in user-editable metadata. The database RLS policies check this claim on every protected write. Test policies with an ordinary user and anon access before launch.
+- Open `/admin` on the deployed site.
+- Create the administrator in Supabase Dashboard → Authentication → Users. Do not enable public sign-up.
+- Set trusted **app metadata** to `{"role":"admin"}` using a trusted Supabase administrative workflow. Do not use user-editable `user_metadata` for authorization.
+- The UI checks the admin claim for a clearer experience, and the database RLS policies independently enforce permissions for every read/write. Never rely on the UI check alone.
+- To sign out, use the bottom of the admin sidebar.
 
-## Configure Supabase
+## First-time Supabase setup
 
-1. Create a Supabase project and copy its Project URL and anon/publishable key.
-2. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-3. In SQL Editor, run `supabase/schema.sql`.
-4. Create the first administrator in Auth, and set trusted app metadata `role=admin`.
-5. Set the site's production URL in Supabase Auth → URL Configuration and add local/production redirect URLs as appropriate.
+1. Create a Supabase project.
+2. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to the project URL and public anon/publishable key.
+3. Run `supabase/schema.sql` in the Supabase SQL Editor. It creates tables, RLS policies, the public-read `portfolio-media` bucket, and idempotent seed content from the supplied resume.
+4. Create the administrator and set `app_metadata.role` to `admin` through a trusted admin workflow.
+5. In Authentication → URL Configuration, configure the production site URL and permitted redirect URLs.
+6. Restart the Vite dev server after changing environment variables.
 
-The public anon key is designed to be exposed in browser applications. Never use a service-role key in frontend environment variables.
+Never place a service-role key in frontend code or any `VITE_` environment variable.
 
-## Blog
+## Managing content
 
-In `/admin`, choose Blog. Create an article, set title/slug/category/excerpt/content and status. Content is stored as HTML; the toolbar provides basic formatting actions but the current editor is a lightweight HTML textarea, not a full WYSIWYG editor. Save as draft or publish. Public queries and RLS only return published posts with a publication date not in the future. Slugs are unique at the database level. Edit an article to update it; confirm before deleting. Published article detail routes are available at `/blog/:slug`; image insertion and cover upload are not implemented in the current UI.
+### Profile
 
-## Other content, images and settings
+Use Profile to edit the name, title, intro, about copy, public email, social URLs (valid JSON object), resume URL, and portrait URL. The first profile record is used by the public site. Leave URLs blank only when the field is optional.
 
-The schema includes tables for profile, projects, certifications, experience, education and site settings, but the current admin UI only has complete record editing for blog posts. Other sections display records and a refresh action; dedicated CRUD forms, reordering, and media-library upload controls remain to be completed. Until then, use Supabase Table Editor carefully. Public portfolio sections currently use resume-derived bundled data for these areas, so database changes to those tables do not yet update the public sections.
+Example social URL JSON:
 
-Create a public `portfolio-media` bucket (the SQL sets it up) for public-facing images. The storage policies allow public reads and only admin-role uploads/updates/deletes. Validate file type/size in any future upload UI, and do not delete assets referenced by content.
+```json
+{
+  "linkedin": "https://www.linkedin.com/in/your-profile/",
+  "github": "https://github.com/your-account",
+  "stackexchange": "https://magento.stackexchange.com/users/70881/mahesh-dave"
+}
+```
 
-## Current limitations
+### Projects, certifications, experience, and education
 
-- No contact-form backend is included; contact is via email.
-- LinkedIn, GitHub, and Magento Stack Exchange links were taken from the existing portfolio HTML bundled with the supplied ZIP; confirm the profiles are yours before launch.
-- Certification verification URLs and project demo/repository links were not supplied, so no invented links are shown.
-- The portfolio's blog listing fetches published posts from Supabase. Article-detail routing, rich WYSIWYG editing, image upload, and CRUD forms for non-blog entities remain unfinished.
+Each section provides create/edit/delete forms, search, published controls where available, and a numeric display order. Project technologies are comma-separated. Project `client_links` accepts a JSON array such as `[{"name":"Example","url":"https://example.com/"}]`. URLs should include `https://`. Public sections read these records from Supabase when records exist; the bundled resume-derived content remains a fallback before the database is populated.
 
-## Implementation status (important)
+Deleting a record is permanent and asks for confirmation. Display order is ascending.
 
-The public portfolio now includes the resume PDF, the green/bronze animated visual system, light/dark theme switching, resume-derived project and certification content, and a published-article detail route at `/blog/:slug`. The admin login and Blog create/edit/delete/publish workflow are connected to Supabase when configured.
+### Blog and visual editor
 
-The following requested CMS features are **not yet implemented in this version**: dedicated CRUD forms and ordering controls for Profile, Projects, Certifications, Experience and Education; Storage upload/media-library UI; cover-image upload; and a full WYSIWYG editor (the current blog content field accepts HTML and provides a small formatting toolbar). Those sections are currently read-only in the admin UI and must not be treated as fully manageable from the dashboard. Do not launch with the expectation that all CMS requirements are complete.
+- Select Blog, then create an article.
+- Set a title, unique URL slug, category, excerpt, cover image URL, content, status, and publication date.
+- Use the visual editor toolbar for bold, italic, underline, headings, paragraphs, ordered/unordered lists, blockquotes, links, undo, and redo.
+- Use Preview article to review the rendered content before saving.
+- Save draft to keep it private, or choose Published and click Publish article. Unpublishing is done by changing status back to Draft and saving.
+- Published posts appear at `/blog/<slug>` and in the public Blog section. RLS only allows public queries to return published posts with a publication date not in the future.
+- Slugs are unique at the database level. If a slug already exists, choose another one; the database will reject duplicates.
 
-Project repository/demo URLs and per-certificate verification URLs were not present in the supplied resume, so none are fabricated. The LinkedIn URL was matched to a public profile; confirm it is yours before publishing.
+Article HTML is sanitized before saving and rendering. Do not paste untrusted script/embed code.
+
+### Media library
+
+Upload JPG, PNG, WebP, AVIF, or GIF files up to 5 MB. The UI shows the resulting public URL, which can be copied into image URL fields. Storage listing/upload is backed by Supabase Storage. Do not remove images that are still referenced by published content.
+
+### Site Settings
+
+This section lets you maintain key/value JSON settings in `site_settings`. Only approved public keys are readable anonymously by the RLS policy. The current frontend primarily uses the Profile record for public identity and links.
+
+## Troubleshooting
+
+- **Supabase not configured:** check `.env.local`, restart the dev server, and confirm the URL/key are from the same project.
+- **Invalid login:** confirm the user exists in Supabase Auth and email/password login is enabled for that account.
+- **Administrator access required:** set trusted `app_metadata.role` to `admin`; then sign out/in to refresh the session claims.
+- **Permission denied / empty lists:** confirm `supabase/schema.sql` ran successfully and that the RLS policies exist. Check browser Network/Console for the returned PostgREST error.
+- **Duplicate slug/name:** choose a unique slug or certification name.
+- **Image upload fails:** verify the `portfolio-media` bucket exists, the account has the admin claim, and the file is an allowed image under 5 MB.
+
+## Contact form
+
+The contact section uses a mailto link. No fake form submission is presented; add a server-side form provider only if you want messages stored or sent through the website.

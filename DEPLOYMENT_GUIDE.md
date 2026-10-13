@@ -1,44 +1,49 @@
-# Deployment guide
+# Deployment Guide
 
 ## Local development
 
-Requirements: Node.js 20+ and npm. From the project root:
+Requirements: Node.js 20+ and npm.
 
 ```bash
 npm install
 cp .env.example .env.local
-# edit .env.local with the Supabase project URL and anon/publishable key
+# Edit .env.local with your Supabase URL and public anon/publishable key.
 npm run dev
 ```
 
-Build and lint with `npm run build` and `npm run lint`; preview a production build with `npm run preview`.
+Before release:
 
-## Supabase setup
+```bash
+npm run build
+npm run lint
+npm run preview
+```
+
+## Supabase initialization
 
 1. Create a Supabase project.
-2. Run `supabase/schema.sql` in the SQL Editor to create content tables, RLS policies, and the `portfolio-media` bucket/policies.
-3. Create the administrator in Authentication → Users, then set `app_metadata.role` to `admin` using a trusted admin workflow. Never use user-editable metadata as the authorization source.
-4. Configure Authentication → URL Configuration with your local development URL and production domain. Add the correct redirect URLs for the domain used to sign in.
-5. Configure `.env.local` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Only public/anon credentials belong in browser builds.
+2. Run `supabase/schema.sql` in the SQL Editor. The script creates the content tables, Row Level Security policies, `portfolio-media` bucket and initial resume-derived records. It is designed to be safe to re-run for seeded content.
+3. Create the administrator in Authentication → Users. Set trusted `app_metadata.role` to `admin` through a trusted administrative workflow; do not use user-editable metadata.
+4. Configure Authentication → URL Configuration with the exact local and production site URLs.
+5. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to `.env.local` for local development and to the hosting provider's build environment for production.
+6. Sign out and back in after changing admin metadata so the session contains the updated claims.
+
+Only the public anon/publishable key belongs in browser code. Never expose the service-role key.
 
 ## Production deployment
 
-This is a Vite + React single-page application. Run `npm run build`; deploy the generated `dist/` directory to a static host (Netlify, Vercel, Cloudflare Pages, or GitHub Pages). Configure the host's SPA fallback to serve `index.html` for `/admin` and other application routes. Add the same two Vite environment variables in the host's project settings and rebuild. The bundled resume PDF and image files are served from the public root.
+This is a React + Vite single-page app. Build and deploy the generated `dist/` directory to a static host such as Netlify, Vercel, Cloudflare Pages, or GitHub Pages. Configure SPA fallback/rewrites so `/admin` and `/blog/<slug>` serve `index.html`; without this, direct navigation to nested routes can return a host-level 404. Configure the environment variables before building. The app assumes domain-root paths for `/admin`, `/md_pic.jpeg`, and `/Mahesh_Dave_Resume_2026.pdf`; GitHub Pages repository subpaths need a matching Vite `base` and asset-path review.
 
-For GitHub Pages, configure the correct base path if deploying below a repository subpath; the current app assumes domain-root paths (`/admin`, `/md_pic.jpeg`, `/Mahesh_Dave_Resume_2026.pdf`). A custom domain/root deployment is the simplest fit.
+## Security validation checklist
 
-## Security checklist
+- Confirm RLS is enabled on every content table.
+- Test anonymous reads: only published projects/certifications/experience/education, safe profile content, and published blog posts should be visible.
+- Test anonymous writes and ordinary authenticated writes: all must be denied.
+- Test admin writes using an account with trusted `app_metadata.role=admin`.
+- Confirm drafts are not returned through public REST queries or article routes.
+- Confirm no service-role key is present in source, `.env.example`, or frontend build output.
+- Keep Auth redirect URLs narrow and review Storage policies before launch.
 
-- Never expose a Supabase service-role key in `.env`, frontend code, or deployment build variables prefixed with `VITE_`.
-- Keep RLS enabled on every table and verify anon users cannot query drafts or write content.
-- Confirm only accounts with trusted `app_metadata.role=admin` can write rows and storage objects.
-- Keep production Auth redirect URLs narrow and accurate; rotate credentials if exposed.
-- Review SQL policies after schema changes and test them using anon, ordinary authenticated, and admin sessions.
+## Limitations / external setup
 
-## Remaining manual work
-
-The current implementation includes a Supabase REST/Auth adapter and a basic blog draft/publish UI. The public listing reads published posts, but individual article pages, full rich-text WYSIWYG editing, image uploads, and dedicated CRUD/reordering forms for profile/projects/certifications/experience/education/settings are not complete. Do not describe those as implemented until they are built and verified. The current portfolio sections for resume content remain bundled in source data.
-
-## Implementation status and verification notes
-
-The public article route `/blog/:slug` reads only published posts permitted by the Supabase RLS policy. The admin dashboard supports Supabase Auth login/logout and blog-post CRUD, but dedicated CRUD/reordering forms for profile, projects, certifications, experience, education and site settings, as well as image upload/media library and a full WYSIWYG editor, remain incomplete. The project has not been successfully built in this environment because package installation did not complete; run `npm install`, `npm run build`, and `npm run lint` in your development environment before deployment.
+The app does not create an administrator account automatically; that must be done in Supabase. Email contact uses `mailto:` rather than a message-storing contact form. Supabase configuration is required for persistent admin edits, database-backed content, and image uploads. Validate the deployment with `npm run build`, `npm run lint`, and the security checklist before announcing the site.
