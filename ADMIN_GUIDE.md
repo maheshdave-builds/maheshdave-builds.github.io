@@ -16,7 +16,7 @@ The public anon key is designed to be exposed in browser applications. Never use
 
 ## Blog
 
-In `/admin`, choose Blog. Create an article, set title/slug/category/excerpt/content and status. Content is stored as HTML; the toolbar provides basic formatting actions but the current editor is a lightweight HTML textarea, not a full WYSIWYG editor. Save as draft or publish. Public queries and RLS only return published posts with a publication date not in the future. Slugs are unique at the database level. Edit an article to update it; confirm before deleting. Article detail routes and image insertion/cover upload are not yet implemented in the current UI.
+In `/admin`, choose Blog. Create an article, set title/slug/category/excerpt/content and status. Content is stored as HTML; the toolbar provides basic formatting actions but the current editor is a lightweight HTML textarea, not a full WYSIWYG editor. Save as draft or publish. Public queries and RLS only return published posts with a publication date not in the future. Slugs are unique at the database level. Edit an article to update it; confirm before deleting. Published article detail routes are available at `/blog/:slug`; image insertion and cover upload are not implemented in the current UI.
 
 ## Other content, images and settings
 
@@ -27,6 +27,14 @@ Create a public `portfolio-media` bucket (the SQL sets it up) for public-facing 
 ## Current limitations
 
 - No contact-form backend is included; contact is via email.
-- Social profile URLs were not embedded in the supplied resume; update the temporary generic social URLs before launch.
+- LinkedIn, GitHub, and Magento Stack Exchange links were taken from the existing portfolio HTML bundled with the supplied ZIP; confirm the profiles are yours before launch.
 - Certification verification URLs and project demo/repository links were not supplied, so no invented links are shown.
 - The portfolio's blog listing fetches published posts from Supabase. Article-detail routing, rich WYSIWYG editing, image upload, and CRUD forms for non-blog entities remain unfinished.
+
+## Implementation status (important)
+
+The public portfolio now includes the resume PDF, the green/bronze animated visual system, light/dark theme switching, resume-derived project and certification content, and a published-article detail route at `/blog/:slug`. The admin login and Blog create/edit/delete/publish workflow are connected to Supabase when configured.
+
+The following requested CMS features are **not yet implemented in this version**: dedicated CRUD forms and ordering controls for Profile, Projects, Certifications, Experience and Education; Storage upload/media-library UI; cover-image upload; and a full WYSIWYG editor (the current blog content field accepts HTML and provides a small formatting toolbar). Those sections are currently read-only in the admin UI and must not be treated as fully manageable from the dashboard. Do not launch with the expectation that all CMS requirements are complete.
+
+Project repository/demo URLs and per-certificate verification URLs were not present in the supplied resume, so none are fabricated. The LinkedIn URL was matched to a public profile; confirm it is yours before publishing.

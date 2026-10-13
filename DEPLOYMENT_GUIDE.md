@@ -38,3 +38,7 @@ For GitHub Pages, configure the correct base path if deploying below a repositor
 ## Remaining manual work
 
 The current implementation includes a Supabase REST/Auth adapter and a basic blog draft/publish UI. The public listing reads published posts, but individual article pages, full rich-text WYSIWYG editing, image uploads, and dedicated CRUD/reordering forms for profile/projects/certifications/experience/education/settings are not complete. Do not describe those as implemented until they are built and verified. The current portfolio sections for resume content remain bundled in source data.
+
+## Implementation status and verification notes
+
+The public article route `/blog/:slug` reads only published posts permitted by the Supabase RLS policy. The admin dashboard supports Supabase Auth login/logout and blog-post CRUD, but dedicated CRUD/reordering forms for profile, projects, certifications, experience, education and site settings, as well as image upload/media library and a full WYSIWYG editor, remain incomplete. The project has not been successfully built in this environment because package installation did not complete; run `npm install`, `npm run build`, and `npm run lint` in your development environment before deployment.

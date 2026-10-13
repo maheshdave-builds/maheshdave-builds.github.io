@@ -1,12 +1,12 @@
 export const skillsSection = { title: 'Certifications', description: 'Credentials listed in my resume. Verification URLs and issue dates were not provided.' }
 export const skills = [
- { name: 'Adobe Certified Expert – Adobe Commerce Business Practitioner' },
- { name: 'Adobe Certified Professional – Adobe Commerce Business Practitioner' },
- { name: 'Adobe Certified Professional – Adobe Commerce Developer' },
- { name: 'Adobe Commerce as a Cloud Service Foundations' },
- { name: 'Adobe Commerce Foundations' },
- { name: 'Adobe Commerce Optimizer Foundations' },
- { name: 'Adobe Experience Manager Sites Optimizer Foundations' }
+ { name: 'Adobe Certified Expert – Adobe Commerce Business Practitioner', verificationUrl: 'https://certification.adobe.com/credential/verify/92b40b16-0f0d-45c5-aa0c-a68d58e19555' },
+ { name: 'Adobe Certified Professional – Adobe Commerce Business Practitioner', verificationUrl: 'https://certification.adobe.com/completion/verify/3311dc33-d610-4589-87b0-b41b29f40273' },
+ { name: 'Adobe Certified Professional – Adobe Commerce Developer', verificationUrl: 'https://certification.adobe.com/credential/verify/03ca53f9-db0a-4f90-9c10-7d17dd1c21f7' },
+ { name: 'Adobe Commerce as a Cloud Service Foundations', verificationUrl: 'https://certification.adobe.com/completion/verify/774dd85f-9753-420b-947b-c9d9b9d06eab' },
+ { name: 'Adobe Commerce Foundations', verificationUrl: 'https://certification.adobe.com/completion/verify/319de8a4-3641-4cf6-a475-61484f4fe690' },
+ { name: 'Adobe Commerce Optimizer Foundations', verificationUrl: 'https://certification.adobe.com/completion/verify/bd28dc63-6cf4-4fda-9789-24aa137350e1' },
+ { name: 'Adobe Experience Manager Sites Optimizer Foundations', verificationUrl: 'https://certification.adobe.com/completion/verify/30478c12-c877-4c08-b72b-401e8bb7e4a6' }
 ]
 export const techStackSection = { title: 'Technical toolkit', description: 'Core platforms and tools across commerce, integrations, frontend, data, cloud, and quality.' }
 export const techStack = [

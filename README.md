@@ -35,3 +35,11 @@ npm run build
 npm run lint
 npm run preview
 ```
+
+## Portfolio refresh notes
+
+- The Vite entry point now mounts the React portfolio application (including the responsive navigation, light/dark theme, resume download, animated project cards, certifications, and blog listing).
+- The supplied resume PDF is available at `/Mahesh_Dave_Resume_2026.pdf`.
+- Existing project links and Adobe credential-verification URLs were recovered from the original HTML included in the uploaded archive. Project/demo links are shown only where they were present in that source.
+- Supabase is optional for the public portfolio; configure `.env.local` using `.env.example` to enable the blog and admin login.
+- Review `ADMIN_GUIDE.md` and `DEPLOYMENT_GUIDE.md` for setup and current CMS limitations before deployment.

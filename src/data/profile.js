@@ -1,7 +1,7 @@
 export const profile = {
   name: 'Mahesh Sanjaybhai Dave',
   shortName: 'Mahesh Dave',
-  title: 'Adobe Commerce Team Lead · Certified Expert',
+  title: 'Adobe Commerce Team Lead · Certified Expert & Developer',
   intro: 'I architect and scale Adobe Commerce experiences across B2B and B2C—bringing together composable commerce, thoughtful integrations, performance engineering, and AI-assisted delivery.',
   location: 'Ahmedabad, Gujarat, India',
   profileImage: '/md_pic.jpeg',
@@ -21,8 +21,7 @@ export const profile = {
   ],
   cta: { primary: 'Explore projects', secondary: 'Contact me' },
   socials: [
-    { name: 'LinkedIn', href: 'https://www.linkedin.com/', icon: 'Linkedin', note: 'Profile URL was not embedded in the supplied resume.' },
-    { name: 'GitHub', href: 'https://github.com/', icon: 'Github', note: 'Profile URL was not embedded in the supplied resume.' },
+    { name: 'LinkedIn', href: 'https://in.linkedin.com/in/mahesh-dave-808732154', icon: 'Linkedin' },
     { name: 'Email', href: 'mailto:davemahesh119@gmail.com', icon: 'Mail' }
   ],
   footerNote: 'Building dependable commerce experiences with clarity and care.'
