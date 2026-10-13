@@ -1,0 +1,63 @@
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes floatMotion {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+.hero-gradient {
+  background: linear-gradient(120deg, #0f172a, #1e293b, #1e1b4b, #312e81, #0f172a);
+  background-size: 240% 240%;
+  animation: gradientShift 16s ease infinite;
+}
+
+.animated-gradient-text {
+  background: linear-gradient(90deg, #67e8f9, #60a5fa, #a78bfa, #f472b6, #67e8f9);
+  background-size: 220% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: gradientShift 8s linear infinite;
+}
+
+.gradient-button {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(140deg, rgba(56, 189, 248, 0.85), rgba(99, 102, 241, 0.85), rgba(236, 72, 153, 0.85)) padding-box,
+    linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(236, 72, 153, 0.4)) border-box;
+  background-size: 220% 220%;
+  animation: gradientShift 6s ease infinite;
+}
+
+.floating-shape {
+  animation: floatMotion 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
