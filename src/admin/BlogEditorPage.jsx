@@ -16,7 +16,7 @@ import {
 import { Link } from '../lib/RouterLink'
 import { useRouter } from '../lib/routerCore'
 import { useAdminContent } from '../contexts/hooks'
-import { deleteRecord, saveRecord, uploadImage, contentSource } from '../lib/content'
+import { deleteRecord, saveRecord, uploadImage } from '../lib/content'
 import { formatDate, fromDateTimeLocal, readingTime, slugify, toDateTimeLocal, truncate } from '../lib/format'
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
 import { AdminLayout, SearchField } from './AdminLayout'
@@ -110,10 +110,6 @@ function RichText({ value, onChange }) {
 
   const insertImage = async (file) => {
     if (!file) return
-    if (contentSource !== 'supabase') {
-      window.alert('Inline image upload needs the configured Supabase storage bucket.')
-      return
-    }
     setUploading(true)
     try {
       const url = await uploadImage(file, 'articles')
@@ -305,11 +301,6 @@ export default function BlogEditorPage({ mode, recordId }) {
     const duplicate = posts.find((post) => post.slug === slug && String(post.id) !== String(form.id))
     if (duplicate) {
       setError(`Another article already uses the slug “${slug}”.`)
-      return
-    }
-
-    if (contentSource !== 'supabase') {
-      setError('Saving requires the configured Supabase backend.')
       return
     }
 

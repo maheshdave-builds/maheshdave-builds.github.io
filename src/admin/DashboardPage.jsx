@@ -110,8 +110,7 @@ export default function DashboardPage() {
             <em>editable from here.</em>
           </h2>
           <p>
-            Content is stored in your Supabase project. Drafts stay private, published work appears to every visitor, and
-            theme changes go live only when you publish them.
+            Content is saved in this browser. Published changes appear here immediately; export and redeploy the site to share them with other visitors.
           </p>
           <div className="admin-welcome-actions">
             <Link className="button button-primary" to="/admin/theme">

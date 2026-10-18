@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { AlertTriangle, Check, GripVertical, Loader2, Plus, RotateCcw, Save, Trash2 } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
-import { saveSetting, contentSource } from '../lib/content'
+import { saveSetting } from '../lib/content'
 import { DEFAULT_COPY, DEFAULT_STATS } from '../lib/seed'
 import { AdminLayout } from './AdminLayout'
 
@@ -50,11 +50,6 @@ export default function PageContentPage() {
     setBusy(true)
     setError('')
     setNotice('')
-    if (contentSource !== 'supabase') {
-      setError('Saving requires the configured Supabase backend.')
-      setBusy(false)
-      return
-    }
     try {
       await saveSetting('copy', copy)
       await saveSetting('stats', stats)

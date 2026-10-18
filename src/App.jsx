@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
 import NotFoundPage from './pages/NotFoundPage'
 import { useContent } from './contexts/hooks'
+import ThemeCursor from './components/ThemeCursor'
 
 // The admin dashboard, its rich-text editor and the theme tooling are the
 // heaviest part of the app and are only needed by the site owner, so they are
@@ -73,7 +74,7 @@ function useActiveSection() {
   return active
 }
 
-function PublicSite({ preview = false }) {
+function PublicSite() {
   const { pathname } = useRouter()
   useRouteScroll()
   const active = useActiveSection()
@@ -118,7 +119,7 @@ function PublicSite({ preview = false }) {
 function PublicRoute({ preview }) {
   return (
     <PublicThemeProvider preview={preview}>
-      <PublicSite preview={preview} />
+      <PublicSite />
     </PublicThemeProvider>
   )
 }
@@ -145,6 +146,7 @@ function Routes() {
 export default function App() {
   return (
     <RouterProvider>
+      <ThemeCursor />
       <ContentProvider>
         <AuthProvider>
           <Routes />

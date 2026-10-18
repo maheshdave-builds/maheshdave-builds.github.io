@@ -16,6 +16,7 @@ export const ADMIN_NAV = [
   { key: 'overview', path: '/admin', label: 'Overview' },
   { key: 'profile', path: '/admin/profile', label: 'Profile & about' },
   { key: 'content', path: '/admin/content', label: 'Page content' },
+  { key: 'structure', path: '/admin/structure', label: 'Page structure' },
   { key: 'projects', path: '/admin/projects', label: 'Projects', countKey: 'projects' },
   { key: 'experience', path: '/admin/experience', label: 'Experience', countKey: 'experience' },
   { key: 'certifications', path: '/admin/certifications', label: 'Certifications', countKey: 'certifications' },

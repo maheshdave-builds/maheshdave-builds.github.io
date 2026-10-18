@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, Check, Database, Loader2, LogOut, Moon, Save, ShieldCheck, Sun, KeyRound } from 'lucide-react'
+import { AlertTriangle, Check, Database, Download, Loader2, LogOut, Moon, Save, ShieldCheck, Sun, KeyRound, Upload } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
 import { useAuth } from '../contexts/hooks'
 import { useTheme } from '../contexts/hooks'
 import { useRouter } from '../lib/routerCore'
-import { saveSiteSettings, contentSource } from '../lib/content'
+import { saveSiteSettings, exportLocalContent, importLocalContent } from '../lib/content'
 import { AdminLayout } from './AdminLayout'
 
 export default function SettingsPage() {
@@ -41,11 +41,6 @@ export default function SettingsPage() {
       setBusy(false)
       return
     }
-    if (contentSource !== 'supabase') {
-      setError('Saving requires the configured Supabase backend.')
-      setBusy(false)
-      return
-    }
 
     try {
       await saveSiteSettings(draft)
@@ -75,7 +70,7 @@ export default function SettingsPage() {
       await updatePassword(password)
       setPassword('')
       setConfirm('')
-      setPasswordNotice('Password changed. Other sessions stay signed in until their tokens expire.')
+      setPasswordNotice('Password changed for this browser-local administrator.')
     } catch (updateError) {
       setPasswordError(updateError.message)
     } finally {
@@ -264,24 +259,43 @@ export default function SettingsPage() {
           <section className="admin-panel">
             <div className="editor-heading">
               <div>
-                <p className="eyebrow">BACKEND</p>
-                <h2>Connection</h2>
+                <p className="eyebrow">BACKUP</p>
+                <h2>Export or restore content</h2>
+              </div>
+              <Database size={16} aria-hidden="true" />
+            </div>
+            <p className="field-hint">Download a JSON backup before clearing browser data or moving to another browser. Importing replaces the current local portfolio content.</p>
+            <div className="admin-welcome-actions">
+              <button type="button" className="button button-secondary" onClick={() => { const blob = new Blob([exportLocalContent()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'mahesh-portfolio-backup.json'; anchor.click(); URL.revokeObjectURL(url) }}>
+                <Download size={15} aria-hidden="true" /> Export backup
+              </button>
+              <label className="button button-secondary" style={{ cursor: 'pointer' }}>
+                <Upload size={15} aria-hidden="true" /> Import backup
+                <input type="file" accept="application/json,.json" hidden onChange={async (event) => { const file = event.target.files?.[0]; if (!file) return; try { importLocalContent(await file.text()); setNotice('Backup imported. Reload the page to refresh all editors.'); window.location.reload() } catch (importError) { setError(importError.message || 'Backup import failed.') } finally { event.target.value = '' } }} />
+              </label>
+            </div>
+          </section>
+
+          <section className="admin-panel">
+            <div className="editor-heading">
+              <div>
+                <p className="eyebrow">STORAGE</p>
+                <h2>Browser-local mode</h2>
               </div>
               <Database size={16} aria-hidden="true" />
             </div>
             <dl className="settings-list">
               <div>
                 <dt>Source</dt>
-                <dd>{contentSource}</dd>
+                <dd>Local storage</dd>
               </div>
               <div>
-                <dt>Authorization</dt>
-                <dd>Row-level security</dd>
+                <dt>Admin access</dt>
+                <dd>Browser-only password gate</dd>
               </div>
             </dl>
             <p className="field-hint">
-              The browser holds only the public anon key. Writes are accepted solely when the signed JWT carries the
-              admin role claim, which is configured in Supabase and never in this codebase.
+              Content, theme settings, and the admin password hash stay in this browser. This is a convenience lock, not server-side security; edits do not sync to other visitors automatically.
             </p>
           </section>
         </div>

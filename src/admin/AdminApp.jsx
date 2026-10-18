@@ -5,7 +5,7 @@ import { AdminContentProvider } from '../contexts/AdminContentContext'
 import { useAdminContent } from '../contexts/hooks'
 import { AdminError, AdminLoading } from './AdminLayout'
 import { LoginPage, ForgotPasswordPage, ResetPasswordPage } from './AuthPages'
-import DashboardPage from './DashboardPage'
+const DashboardPage = lazy(() => import('./DashboardPage'))
 
 const ProfilePage = lazy(() => import('./ProfilePage'))
 const PageContentPage = lazy(() => import('./PageContentPage'))
@@ -14,6 +14,7 @@ const BlogEditorPage = lazy(() => import('./BlogEditorPage'))
 const MessagesPage = lazy(() => import('./MessagesPage'))
 const ThemeEditorPage = lazy(() => import('./ThemeEditorPage'))
 const SettingsPage = lazy(() => import('./SettingsPage'))
+const StructurePage = lazy(() => import('./StructurePage'))
 
 const COLLECTIONS = {
   projects: {
@@ -141,6 +142,7 @@ function AdminRoutes() {
     { path: '/admin', element: <DashboardPage /> },
     { path: '/admin/profile', element: <ProfilePage /> },
     { path: '/admin/content', element: <PageContentPage /> },
+    { path: '/admin/structure', element: <StructurePage /> },
     { path: '/admin/messages', element: <MessagesPage /> },
     { path: '/admin/theme', element: <ThemeEditorPage /> },
     { path: '/admin/settings', element: <SettingsPage /> },

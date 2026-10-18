@@ -18,7 +18,7 @@ import {
 import { Link } from '../lib/RouterLink'
 import { useRouter } from '../lib/routerCore'
 import { useAdminContent } from '../contexts/hooks'
-import { deleteRecord, saveRecord, uploadImage, contentSource } from '../lib/content'
+import { deleteRecord, saveRecord, uploadImage } from '../lib/content'
 import { AdminLayout, SearchField } from './AdminLayout'
 
 /* ------------------------------------------------------------ field schema */
@@ -112,11 +112,6 @@ function ImageField({ label, value, onChange, hint }) {
     }
     if (!/^image\/(jpeg|png|webp|avif|gif|svg\+xml)$/.test(file.type)) {
       setError('Use a JPG, PNG, WebP, AVIF or SVG image.')
-      return
-    }
-
-    if (contentSource !== 'supabase') {
-      setError('Image upload needs the configured Supabase storage bucket. Paste a URL instead.')
       return
     }
 
@@ -272,11 +267,6 @@ export default function CollectionPage({ config, mode, recordId }) {
     const missing = fields.filter((field) => field.required && !String(form[field.name] || '').trim())
     if (missing.length) {
       setError(`${missing.map((field) => field.label).join(', ')} ${missing.length === 1 ? 'is' : 'are'} required.`)
-      return
-    }
-
-    if (contentSource !== 'supabase') {
-      setError('Saving requires the configured Supabase backend.')
       return
     }
 

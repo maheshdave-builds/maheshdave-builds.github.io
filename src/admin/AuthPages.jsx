@@ -40,26 +40,41 @@ function AuthShell({ title, subtitle, children, footer }) {
 }
 
 export function LoginPage({ redirectTo = '/admin' }) {
-  const { signIn, configured } = useAuth()
+  const { signIn, setupAdmin, configured, adminConfigured } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   if (!configured) {
     return (
-      <AuthShell
-        title="Backend not configured"
-        subtitle="The dashboard needs a Supabase project before it can sign anyone in."
-        footer={null}
-      >
-        <div className="notice-callout notice-warning">
-          <ShieldAlert size={18} aria-hidden="true" />
-          <p>
-            Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env.local</code>, then
-            restart the dev server. Setup steps are in <code>ADMIN_GUIDE.md</code>.
-          </p>
-        </div>
+      <AuthShell title="Local admin unavailable" subtitle="The admin setup could not be initialized." footer={null}>
+        <p className="form-error">Please reload the page and try again.</p>
+      </AuthShell>
+    )
+  }
+
+  if (!adminConfigured) {
+    const createAdmin = async (event) => {
+      event.preventDefault(); setBusy(true); setError('')
+      if (password !== confirmPassword) { setError('Passwords do not match.'); setBusy(false); return }
+      try {
+        await setupAdmin(email.trim(), password)
+        window.history.replaceState(null, '', redirectTo)
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      } catch (setupError) { setError(setupError.message) } finally { setBusy(false) }
+    }
+    return (
+      <AuthShell title="Set up your admin" subtitle="Create the first administrator for this browser. Use a strong password of at least 12 characters." footer={null}>
+        <div className="notice-callout notice-warning"><ShieldAlert size={18} aria-hidden="true" /><p>This is a browser-only CMS. Your edits and login are stored in this browser; they are not protected by a server and do not automatically update the live site for other visitors.</p></div>
+        <form className="auth-form" onSubmit={createAdmin} noValidate>
+          <label>Email address<div className="input-with-icon"><Mail size={15} aria-hidden="true" /><input type="email" required autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></div></label>
+          <label>Create password<div className="input-with-icon"><Lock size={15} aria-hidden="true" /><input type="password" required minLength={12} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 12 characters" /></div></label>
+          <label>Confirm password<div className="input-with-icon"><Lock size={15} aria-hidden="true" /><input type="password" required autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Repeat password" /></div></label>
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+          <button type="submit" className="button button-primary auth-submit" disabled={busy}>{busy ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <ShieldCheck size={16} aria-hidden="true" />}{busy ? 'Creating account…' : 'Create administrator'}</button>
+        </form>
       </AuthShell>
     )
   }
@@ -84,12 +99,8 @@ export function LoginPage({ redirectTo = '/admin' }) {
   return (
     <AuthShell
       title="Sign in"
-      subtitle="Administrator access only. Accounts are created by an existing administrator."
-      footer={
-        <Link to="/admin/forgot-password">
-          <KeyRound size={13} aria-hidden="true" /> Forgot your password?
-        </Link>
-      }
+      subtitle="Administrator access only. Sign in with the administrator account already registered in this browser."
+      footer={<span>Offline admin · Password can be changed from account settings.</span>}
     >
       <form className="auth-form" onSubmit={submit} noValidate>
         <label>

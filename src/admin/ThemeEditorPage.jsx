@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
-import { saveSetting, contentSource } from '../lib/content'
+import { saveSetting } from '../lib/content'
 import {
   COLOR_KEYS,
   DEFAULT_THEME,
@@ -186,11 +186,6 @@ export default function ThemeEditorPage() {
     setBusy('draft')
     setError('')
     setNotice('')
-    if (contentSource !== 'supabase') {
-      setError('Saving requires the configured Supabase backend.')
-      setBusy('')
-      return
-    }
     try {
       await saveSetting('theme_draft', validated)
       setThemes({ draft: validated })
@@ -212,11 +207,6 @@ export default function ThemeEditorPage() {
     setBusy('publish')
     setError('')
     setNotice('')
-    if (contentSource !== 'supabase') {
-      setError('Publishing requires the configured Supabase backend.')
-      setBusy('')
-      return
-    }
     try {
       await saveSetting('theme_published', validated)
       await saveSetting('theme_draft', validated)

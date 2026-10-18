@@ -6,16 +6,7 @@ import { Link } from '../lib/RouterLink'
 import { Button } from './Button'
 import { NAV_ITEMS } from '../lib/navigation'
 
-const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'Certifications', href: '#certifications' },
-  { label: 'Toolkit', href: '#expertise' },
-  { label: 'Education', href: '#education' },
-  { label: 'Notes', href: '#blog' },
-  { label: 'Contact', href: '#contact' },
-]
+const NAV_LINKS = NAV_ITEMS
 
 export default function SiteHeader({ activeSection }) {
   const { mode, toggle } = useTheme()
@@ -48,6 +39,8 @@ export default function SiteHeader({ activeSection }) {
 
   const close = () => setOpen(false)
   const socials = profile.social_urls || {}
+  const navLinks = (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_LINKS).filter((item) => item.visible !== false)
+  const navTarget = (href) => String(href || '#home').startsWith('http') || String(href || '').startsWith('/') ? href : `/${href}`
 
   return (
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
@@ -66,17 +59,14 @@ export default function SiteHeader({ activeSection }) {
       </Link>
 
       <nav className={`main-nav ${open ? 'open' : ''}`} aria-label="Primary">
-        {NAV_LINKS.map((item) => (
-          <Link
-            key={item.href}
-            to={`/${item.href}`}
-            className={activeSection === item.href.slice(1) ? 'is-active' : ''}
-            onClick={close}
-            aria-current={activeSection === item.href.slice(1) ? 'true' : undefined}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {navLinks.map((item, index) => {
+          const href = item.href || '#home'
+          const isExternal = /^https?:\/\//i.test(href)
+          const sectionId = href.includes('#') ? href.split('#').pop() : ''
+          return isExternal ? <a key={`${item.label}-${index}`} href={href} target="_blank" rel="noreferrer" onClick={close}>{item.label}</a> : (
+            <Link key={`${item.label}-${index}`} to={navTarget(href)} className={sectionId && activeSection === sectionId ? 'is-active' : ''} onClick={close} aria-current={sectionId && activeSection === sectionId ? 'true' : undefined}>{item.label}</Link>
+          )
+        })}
         <div className="mobile-nav-footer">
           <a href={`mailto:${profile.email}`}>{profile.email}</a>
           <div className="mobile-nav-socials">
@@ -144,10 +134,12 @@ export function SiteFooter() {
         <nav className="footer-nav" aria-label="Footer">
           <div>
             <h2>Explore</h2>
-            <Link to="/#projects">Projects</Link>
-            <Link to="/#experience">Experience</Link>
-            <Link to="/#certifications">Certifications</Link>
-            <Link to="/#blog">Notes</Link>
+            {(Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_ITEMS).filter((item) => item.visible !== false).slice(0, 8).map((item, index) => {
+              const href = item.href || '#home'
+              return /^https?:\/\//i.test(href)
+                ? <a key={`${item.label}-${index}`} href={href} target="_blank" rel="noreferrer">{item.label}</a>
+                : <Link key={`${item.label}-${index}`} to={href.startsWith('/') ? href : `/${href}`}>{item.label}</Link>
+            })}
           </div>
           <div>
             <h2>Elsewhere</h2>

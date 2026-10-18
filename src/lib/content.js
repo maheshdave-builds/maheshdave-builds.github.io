@@ -1,4 +1,5 @@
-import { supabase, isConfigured } from './supabase'
+// Static/browser-only mode: deliberately no Supabase or remote backend.
+const supabase = null
 import { fallbackContent, seedSite, seedProfile, DEFAULT_COPY, DEFAULT_STATS } from './seed'
 import { DEFAULT_THEME, validateTheme } from './theme'
 import { isPostPublic, sortPosts } from './format'
@@ -11,7 +12,126 @@ import { isPostPublic, sortPosts } from './format'
 // When Supabase is not configured the site renders the bundled seed content, so
 // it remains a working static site rather than a broken one.
 
-export const contentSource = isConfigured ? 'supabase' : 'local'
+export const contentSource = 'local'
+
+// Browser-local CMS: no hosted database or third-party backend required.
+const LOCAL_CONTENT_KEY = 'mahesh-portfolio-local-cms-v1'
+const PROJECT_CATALOG_MIGRATION_KEY = 'mahesh-portfolio-project-catalog-v2'
+const LEGACY_CLIENT_CATEGORIES = {
+  'rev-a-shelf': 'Adobe Commerce Cloud',
+  'who has it?': 'Adobe Commerce Cloud',
+  'midas furniture': 'Adobe Commerce Cloud',
+  'american lighting': 'Adobe Commerce Cloud',
+  melissa: 'Adobe Commerce Cloud',
+  'rak ceramics': 'Adobe Commerce Cloud',
+  okapius: 'Adobe Commerce Cloud',
+  'tent and table': 'Adobe Commerce Enterprise',
+  'tdot performance': 'Adobe Commerce Enterprise',
+  'rp tech india': 'Adobe Commerce Enterprise',
+  'tools plus': 'Adobe Commerce Enterprise',
+  noctua: 'Magento Open Source',
+  bokacha: 'Magento Open Source',
+  'pool spot': 'Magento Open Source',
+  'deadwood knives': 'Magento Open Source',
+}
+function categoryForLegacyProject(project) {
+  const title = String(project.title || '').toLowerCase()
+  if (title.includes('odoo') || title.includes('salesforce') || title.includes('jitterbit')) return 'Integrations & APIs'
+  if (title.includes('ai-') || title.includes('sensei') || title.includes('conversational commerce') || title.includes('mcp')) return 'AI & Innovation'
+  if (title.includes('community') || title.includes('stack exchange')) return 'Community & Knowledge'
+  if (title.includes('resume')) return 'Professional Resources'
+  if (title.includes('optimizer')) return 'Adobe Commerce Platform'
+  if (title.includes('hyvä') || title.includes('headless') || title.includes('configurator')) return 'Headless & Storefronts'
+  if (LEGACY_CLIENT_CATEGORIES[title]) return LEGACY_CLIENT_CATEGORIES[title]
+  return project.category || 'Adobe Commerce Platform'
+}
+function migrateLegacyProjectCategories(projects) {
+  if (!Array.isArray(projects)) return []
+  const migrated = []
+  for (const project of projects) {
+    const title = String(project.title || '').trim()
+    const links = Array.isArray(project.clientLinks) ? project.clientLinks : []
+    // The old build bundled all client sites into one card. Expand it to one
+    // card per client so no client disappears behind the old grouped entry.
+    if (links.length && /enterprise commerce implementations/i.test(title)) {
+      for (const [index, client] of links.entries()) {
+        const clientTitle = String(client.name || '').trim()
+        if (!clientTitle) continue
+        const category = LEGACY_CLIENT_CATEGORIES[clientTitle.toLowerCase()] || 'Adobe Commerce Cloud'
+        migrated.push({
+          id: `legacy-client-${clientTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+          title: clientTitle,
+          category,
+          description: `${category} implementation listed in the 2026 resume.`,
+          techStack: [category, 'Magento 2'],
+          url: client.url || '',
+          linkLabel: client.url ? 'Visit project' : 'Project reference',
+          clientLinks: [],
+          is_published: project.is_published !== false,
+          sort_order: Number(project.sort_order || 0) + index,
+        })
+      }
+      continue
+    }
+    migrated.push({
+      ...project,
+      category: categoryForLegacyProject(project),
+      clientLinks: links,
+    })
+  }
+  return migrated
+}
+function mergeNewSeedProjects(projects) {
+  const next = [...projects]
+  const keys = new Set(next.map((project) => String(project.title || '').trim().toLowerCase()))
+  for (const seed of fallbackContent.projects) {
+    const key = String(seed.title || '').trim().toLowerCase()
+    if (!keys.has(key)) {
+      next.push({ ...seed })
+      keys.add(key)
+    }
+  }
+  return next
+}
+function readLocalContent() {
+  try {
+    const raw = localStorage.getItem(LOCAL_CONTENT_KEY)
+    const saved = JSON.parse(raw || 'null')
+    if (saved && typeof saved === 'object') {
+      let projects = migrateLegacyProjectCategories(saved.projects || fallbackContent.projects)
+      // One-time additive migration: preserve admin-created content and edits,
+      // while restoring every missing resume-derived project from the new catalog.
+      if (localStorage.getItem(PROJECT_CATALOG_MIGRATION_KEY) !== 'done') {
+        projects = mergeNewSeedProjects(projects)
+        try {
+          localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify({ ...saved, projects }))
+          localStorage.setItem(PROJECT_CATALOG_MIGRATION_KEY, 'done')
+        } catch { /* keep the in-memory migration; retry next visit if storage is full */ }
+      }
+      return { ...fallbackContent, ...saved, projects, site: { ...fallbackContent.site, ...(saved.site || {}) }, theme: saved.theme || DEFAULT_THEME, themeDraft: saved.themeDraft || saved.theme || DEFAULT_THEME, themePublished: saved.themePublished || saved.theme || DEFAULT_THEME }
+    }
+  } catch { /* use bundled defaults when storage is unavailable or invalid */ }
+  return { ...fallbackContent, theme: DEFAULT_THEME, themeDraft: DEFAULT_THEME, themePublished: DEFAULT_THEME, settingsRows: [] }
+}
+export function getInitialAdminContent() {
+  return readLocalContent()
+}
+
+function writeLocalContent(next) {
+  try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(next)) }
+  catch { throw new Error('Browser storage is full. Use smaller images or export your content backup before continuing.') }
+  window.dispatchEvent(new CustomEvent('portfolio-local-content-updated'))
+  return next
+}
+function updateLocalContent(updater) { return writeLocalContent(updater(readLocalContent())) }
+export function exportLocalContent() { return JSON.stringify(readLocalContent(), null, 2) }
+export function importLocalContent(json) {
+  let parsed
+  try { parsed = JSON.parse(json) } catch { throw new Error('This backup is not valid JSON.') }
+  if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.projects) || !parsed.profile) throw new Error('This file does not look like a portfolio backup.')
+  writeLocalContent({ ...fallbackContent, ...parsed, theme: parsed.theme || DEFAULT_THEME })
+  return readLocalContent()
+}
 
 /* ------------------------------------------------------------- normalizers */
 
@@ -143,7 +263,7 @@ export function themeFromSettings(rows = []) {
 /* -------------------------------------------------------------- public read */
 
 export async function fetchPublicContent() {
-  if (!supabase) return fallbackContent
+  if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
   const nowIso = new Date().toISOString()
   const [profileResult, projects, certifications, experience, education, posts, settings] = await Promise.allSettled([
@@ -186,6 +306,7 @@ export async function fetchPublicContent() {
  * a client that skipped the list query.
  */
 export async function fetchPostBySlug(slug) {
+  if (!supabase) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (supabase) {
     const { data, error } = await supabase
       .from('blog_posts')
@@ -207,7 +328,7 @@ export async function fetchPostBySlug(slug) {
 const ADMIN_TABLES = ['profile', 'projects', 'certifications', 'experience', 'education', 'blog_posts', 'site_settings']
 
 export async function fetchAdminContent() {
-  if (!supabase) return { ...fallbackContent, themeDraft: DEFAULT_THEME, themePublished: DEFAULT_THEME }
+  if (!supabase) return readLocalContent()
 
   const [profileResult, projects, certifications, experience, education, posts, settings] = await Promise.allSettled([
     supabase.from('profile').select('*').limit(1).maybeSingle(),
@@ -326,7 +447,13 @@ export function toDbRow(collection, record) {
 }
 
 export async function saveRecord(collection, record) {
-  if (!supabase) throw new Error('Supabase is not configured.')
+  if (!supabase) {
+    if (!['projects', 'certifications', 'experience', 'education', 'posts'].includes(collection)) throw new Error(`Unknown collection: ${collection}`)
+    const current = readLocalContent(); const rows = asArray(current[collection]); const saved = { ...record, id: record.id && !String(record.id).startsWith('seed-') ? record.id : `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, updated_at: new Date().toISOString() }
+    if (collection === 'posts' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
+    updateLocalContent((state) => ({ ...state, [collection]: record.id && !String(record.id).startsWith('seed-') ? rows.map((row) => row.id === record.id ? saved : row) : [...rows.filter((row) => row.id !== record.id), saved] }))
+    return saved
+  }
   const table = tableFor[collection]
   if (!table) throw new Error(`Unknown collection: ${collection}`)
   const row = toDbRow(collection, record)
@@ -355,7 +482,8 @@ export async function saveRecord(collection, record) {
 }
 
 export async function deleteRecord(collection, id) {
-  if (!supabase) throw new Error('Supabase is not configured.')
+  if (!supabase) { updateLocalContent((state) => ({ ...state, [collection]: asArray(state[collection]).filter((row) => row.id !== id) })); return }
+
   if (!id || String(id).startsWith('seed-')) {
     throw new Error('Bundled sample content cannot be deleted from the database; hide it instead.')
   }
@@ -364,7 +492,7 @@ export async function deleteRecord(collection, id) {
 }
 
 export async function saveProfile(profile) {
-  if (!supabase) throw new Error('Supabase is not configured.')
+  if (!supabase) { updateLocalContent((state) => ({ ...state, profile: { ...state.profile, ...profile } })); return }
   const row = {
     name: profile.name,
     title: profile.title || '',
@@ -390,7 +518,7 @@ export async function saveProfile(profile) {
 
 /** Upsert one key of `site_settings`. Used for copy, stats, branding and theme. */
 export async function saveSetting(key, value) {
-  if (!supabase) throw new Error('Supabase is not configured.')
+  if (!supabase) { updateLocalContent((state) => { const next = { ...state }; if (key === 'theme_draft') next.themeDraft = value; else if (key === 'theme_published') { next.themePublished = value; next.theme = value } else if (key === 'copy') next.site = { ...next.site, copy: value }; else if (key === 'stats') next.site = { ...next.site, stats: value }; else if (key === 'tech_stack') next.site = { ...next.site, techStack: value }; else if (key === 'site_structure') next.site = { ...next.site, ...value }; else if (key === 'site_title') next.site = { ...next.site, siteTitle: value.title || next.site.siteTitle, siteDescription: value.description || next.site.siteDescription }; else if (key === 'branding') next.site = { ...next.site, siteLogo: value.logo || '', contactEmail: value.contact_email || next.site.contactEmail, showClientProjects: value.show_client_projects !== false }; next.settingsRows = [...asArray(next.settingsRows).filter((row) => row.key !== key), { key, value }]; return next }); return }
   const { error } = await supabase
     .from('site_settings')
     .upsert({ key, value, updated_at: new Date().toISOString() })
@@ -398,6 +526,7 @@ export async function saveSetting(key, value) {
 }
 
 export async function saveSiteSettings(site) {
+  if (!supabase) { updateLocalContent((state) => ({ ...state, site: { ...state.site, ...site } })); return }
   await saveSetting('site_title', { title: site.siteTitle, description: site.siteDescription })
   await saveSetting('branding', {
     logo: site.siteLogo || '',
@@ -410,7 +539,40 @@ export async function saveSiteSettings(site) {
 }
 
 export async function uploadImage(file, folder = 'uploads') {
-  if (!supabase) throw new Error('Supabase is not configured; image upload requires storage.')
+  if (!file || !String(file.type || '').startsWith('image/')) throw new Error('Choose a valid image file.')
+  if (!supabase) {
+    // Store a compressed portrait in browser storage rather than the original
+    // camera image. This prevents a multi-megabyte data URL from slowing every
+    // admin visit and avoids exhausting the browser's localStorage quota.
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.onerror = () => reject(new Error('Could not read this image.'))
+      reader.readAsDataURL(file)
+    })
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => {
+        const maxWidth = 1000
+        const maxHeight = 1400
+        const scale = Math.min(1, maxWidth / image.naturalWidth, maxHeight / image.naturalHeight)
+        const width = Math.max(1, Math.round(image.naturalWidth * scale))
+        const height = Math.max(1, Math.round(image.naturalHeight * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const context = canvas.getContext('2d')
+        if (!context) { resolve(dataUrl); return }
+        context.fillStyle = '#ffffff'
+        context.fillRect(0, 0, width, height)
+        context.drawImage(image, 0, 0, width, height)
+        try { resolve(canvas.toDataURL('image/jpeg', 0.8)) }
+        catch { resolve(dataUrl) }
+      }
+      image.onerror = () => reject(new Error('This image could not be opened. Please choose a JPG, PNG, or WebP image.'))
+      image.src = dataUrl
+    })
+  }
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
   const { data, error } = await supabase.storage.upload('portfolio-media', path, file)
@@ -453,8 +615,12 @@ export async function submitContactMessage({ name, email, message, website }) {
   }
 
   if (!supabase) {
-    // Static mode has no inbox. Point the visitor at email rather than pretending.
-    throw new Error(`The form is not connected yet. Please email ${seedSite.contactEmail} directly.`)
+    const key = 'mahesh-portfolio-local-messages-v1'
+    const rows = JSON.parse(localStorage.getItem(key) || '[]')
+    rows.unshift({ id: `message-${Date.now()}`, ...trimmed, created_at: new Date().toISOString(), is_read: false })
+    localStorage.setItem(key, JSON.stringify(rows))
+    localStorage.setItem(CONTACT_LIMIT_KEY, String(Date.now()))
+    return { ok: true }
   }
 
   const { error } = await supabase.from('contact_messages').insert({
@@ -480,7 +646,7 @@ export async function submitContactMessage({ name, email, message, website }) {
 }
 
 export async function fetchContactMessages() {
-  if (!supabase) throw new Error('Supabase is not configured.')
+  if (!supabase) { try { return JSON.parse(localStorage.getItem('mahesh-portfolio-local-messages-v1') || '[]') } catch { return [] } }
   const { data, error } = await supabase
     .from('contact_messages')
     .select('*')
@@ -491,13 +657,13 @@ export async function fetchContactMessages() {
 }
 
 export async function markMessageRead(id, read = true) {
-  if (!supabase) throw new Error('Supabase is not configured.')
+  if (!supabase) { const key = 'mahesh-portfolio-local-messages-v1'; const rows = await fetchContactMessages(); localStorage.setItem(key, JSON.stringify(rows.map((row) => row.id === id ? { ...row, is_read: read } : row))); return }
   const { error } = await supabase.from('contact_messages').update({ is_read: read }).eq('id', id)
   if (error) throw new Error(error.message)
 }
 
 export async function deleteMessage(id) {
-  if (!supabase) throw new Error('Supabase is not configured.')
+  if (!supabase) { const key = 'mahesh-portfolio-local-messages-v1'; const rows = await fetchContactMessages(); localStorage.setItem(key, JSON.stringify(rows.filter((row) => row.id !== id))); return }
   const { error } = await supabase.from('contact_messages').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }

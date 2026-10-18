@@ -14,6 +14,7 @@ import {
   Palette,
   Search,
   Settings2,
+  PanelsTopLeft,
   ShieldCheck,
   UserRound,
   X,
@@ -29,6 +30,7 @@ const NAV_ICONS = {
   overview: LayoutDashboard,
   profile: UserRound,
   content: FileText,
+  structure: PanelsTopLeft,
   projects: FolderKanban,
   experience: BriefcaseBusiness,
   certifications: ShieldCheck,
@@ -84,7 +86,7 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
           </span>
           <div>
             <strong>{user?.email || 'Administrator'}</strong>
-            <small>Full access · RLS enforced</small>
+            <small>Local browser CMS</small>
           </div>
           <span className="local-indicator" aria-hidden="true" title="Signed in" />
         </div>
@@ -145,7 +147,7 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
 
         <footer className="admin-footer">
           <span>Portfolio Studio</span>
-          <span>Access is enforced by row-level security, not by hiding this page.</span>
+          <span>Changes are stored in this browser. Export a backup before clearing site data.</span>
         </footer>
       </div>
     </div>

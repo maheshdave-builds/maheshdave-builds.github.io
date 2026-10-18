@@ -36,65 +36,112 @@ const socials = {
   stackexchange: 'https://magento.stackexchange.com/users/70881/mahesh-dave',
 }
 
-// Projects without clientLinks become standalone cards; the one project that
-// carries clientLinks provides the client logo row.
-const standaloneProjects = projectItems.filter((project) => !project.clientLinks)
-const clientProject = projectItems.find((project) => project.clientLinks)
+// Project cards are split by the product/edition stated in the resume. Client
+// names and URLs come from the existing project list; descriptions stay factual.
+const commerceClients = [
+  { title: 'Rev-A-Shelf', category: 'Adobe Commerce Cloud', url: 'https://rev-a-shelf.com/' },
+  { title: 'Who Has It?', category: 'Adobe Commerce Cloud', url: 'https://whohasit.co/' },
+  { title: 'Midas Furniture', category: 'Adobe Commerce Cloud', url: 'https://midasfurniture.com/' },
+  { title: 'American Lighting', category: 'Adobe Commerce Cloud', url: 'https://ace.americanlighting.com/' },
+  { title: 'Melissa', category: 'Adobe Commerce Cloud', url: 'https://melissa.com.sg/' },
+  { title: 'RAK Ceramics', category: 'Adobe Commerce Cloud', url: 'https://onlineshop.rakceramics.com/' },
+  { title: 'Okapius — Hyvä Storefront', category: 'Adobe Commerce Cloud', url: '' },
+  { title: 'Tent and Table', category: 'Adobe Commerce Enterprise', url: 'https://tentandtable.net/' },
+  { title: 'TDot Performance', category: 'Adobe Commerce Enterprise', url: 'https://www.tdotperformance.ca/' },
+  { title: 'RP Tech India', category: 'Adobe Commerce Enterprise', url: 'https://rptechindia.com/' },
+  { title: 'Tools Plus', category: 'Adobe Commerce Enterprise', url: 'https://www.toolsplus.com/' },
+  { title: 'Noctua', category: 'Magento Open Source', url: 'https://noctua.at/' },
+  { title: 'Bokacha', category: 'Magento Open Source', url: 'https://www.bokacha.com/' },
+  { title: 'Pool Spot', category: 'Magento Open Source', url: 'https://www.poolspot.com.au/' },
+  { title: 'Deadwood Knives', category: 'Magento Open Source', url: 'https://deadwoodknives.com/' },
+]
 
+const standaloneProjects = projectItems.filter((project) => !project.clientLinks && !/odoo connector|salesforce integration/i.test(project.title))
 const innovationProjects = [
   {
-    title: 'AI-Assisted Engineering Workflow',
-    category: 'AI & innovation',
-    description:
-      'Introduced AI pair-programming and LLM-assisted code-review workflows with a curated internal prompt library and review checklists to improve delivery consistency.',
-    techStack: ['AI-assisted development', 'LLM workflows', 'Code review'],
+    title: 'AI-Assisted Engineering Workflow', category: 'AI & Innovation',
+    description: 'Introduced AI pair-programming and LLM-assisted code-review workflows with a curated internal prompt library and review checklists to improve delivery consistency.',
+    techStack: ['GitHub Copilot', 'LLM workflows', 'Code review'],
   },
   {
-    title: 'AI-Driven Catalog Enrichment',
-    category: 'AI & innovation',
-    description:
-      'Built LLM-powered tooling to help generate product descriptions, SEO metadata, and image alt text for large product catalogs.',
+    title: 'AI-Driven Catalog Enrichment', category: 'AI & Innovation',
+    description: 'Built LLM-powered tooling to help generate product descriptions, SEO metadata, and image alt text for large product catalogs.',
     techStack: ['LLM APIs', 'Catalog enrichment', 'SEO'],
   },
   {
-    title: 'Adobe Sensei & Live Search',
-    category: 'AI & innovation',
-    description:
-      'Implemented AI-powered product recommendations and Live Search capabilities to support product discovery and on-site conversion.',
+    title: 'Adobe Sensei & Live Search', category: 'AI & Innovation',
+    description: 'Worked with AI-powered product recommendations and Live Search capabilities to support product discovery.',
     techStack: ['Adobe Sensei', 'Live Search', 'Product discovery'],
   },
   {
-    title: 'Conversational Commerce',
-    category: 'AI & innovation',
-    description:
-      'Integrated LLM-backed support experiences with commerce order and catalog APIs for automated order-status and FAQ assistance.',
+    title: 'Conversational Commerce', category: 'AI & Innovation',
+    description: 'Explored LLM-backed support experiences connected to commerce order and catalog APIs for order-status and FAQ assistance.',
     techStack: ['LLM integration', 'Commerce APIs', 'Customer support'],
   },
   {
-    title: 'MCP & Developer Tooling',
-    category: 'AI & innovation',
-    description:
-      'Explored Model Context Protocol servers connecting AI assistants with Adobe Commerce environments, developer workflows, and logs.',
+    title: 'MCP & Developer Tooling', category: 'AI & Innovation',
+    description: 'Explored Model Context Protocol servers connecting AI assistants with Adobe Commerce environments, developer workflows, and logs.',
     techStack: ['MCP', 'Developer tooling', 'AI assistants'],
   },
+]
+
+const integrationProjects = [
   {
-    title: 'Okapius — Hyvä Storefront',
-    category: 'Client implementation',
-    description:
-      'Listed in the resume under Adobe Commerce Cloud Edition and Hyvä storefront work. A public URL was not provided.',
-    techStack: ['Adobe Commerce Cloud', 'Hyvä', 'Magento 2'],
+    title: 'Adobe App Builder — Odoo Connector', category: 'Integrations & APIs',
+    description: 'Real-time Adobe Commerce and Odoo ERP integration using event-driven flows with Adobe I/O Events. Published on Adobe Exchange with monitoring and logging.',
+    techStack: ['Adobe App Builder', 'Odoo ERP', 'Adobe I/O Events'],
+    url: 'https://exchange.adobe.com/apps/ec/abt7pvp37o/odoo-connector-for-adobe-commerce',
+    linkLabel: 'View on Adobe Exchange',
+  },
+  {
+    title: 'Adobe Commerce — Salesforce Integration', category: 'Integrations & APIs',
+    description: 'Bi-directional synchronization of customer, order, and product data using Jitterbit; the resume reports a 99% improvement in data accuracy and elimination of manual entry.',
+    techStack: ['Adobe Commerce', 'Salesforce', 'Jitterbit'],
+  },
+  {
+    title: 'Magento–Odoo Connector', category: 'Integrations & APIs',
+    description: 'Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.',
+    techStack: ['Magento', 'Odoo ERP', 'Product sync', 'Inventory sync'],
   },
 ]
 
 export const seedProjects = [
-  ...standaloneProjects.map((project, index) => ({
-    id: `seed-project-${index}`,
-    title: project.title,
-    category: 'Featured project',
-    description: project.description,
-    techStack: project.techStack,
-    url: project.url || '',
-    linkLabel: project.linkLabel || 'View project',
+  ...standaloneProjects.map((project, index) => {
+    const title = project.title.toLowerCase()
+    let category = 'Headless & Storefronts'
+    if (title.includes('salesforce')) category = 'Integrations & APIs'
+    if (title.includes('odoo')) category = 'Integrations & APIs'
+    if (title.includes('optimizer')) category = 'Adobe Commerce Platform'
+    return {
+      id: `seed-project-${index}`,
+      title: project.title,
+      category,
+      description: project.description,
+      techStack: project.techStack,
+      url: project.url || '',
+      linkLabel: project.linkLabel || 'View project',
+      clientLinks: [],
+      is_published: true,
+    }
+  }),
+  ...integrationProjects.map((project, index) => ({
+    id: `seed-integration-${index}`,
+    ...project,
+    clientLinks: [],
+    is_published: true,
+  })),
+  ...commerceClients.map((client, index) => ({
+    id: `seed-client-${index}`,
+    ...client,
+    description: client.category === 'Adobe Commerce Cloud'
+      ? 'Adobe Commerce Cloud implementation listed in the 2026 resume.'
+      : client.category === 'Adobe Commerce Enterprise'
+        ? 'Adobe Commerce Enterprise implementation listed in the 2026 resume.'
+        : 'Magento 2 Open Source implementation listed in the 2026 resume.',
+    techStack: client.category === 'Magento Open Source'
+      ? ['Magento 2 Open Source', 'Adobe Commerce']
+      : [client.category, 'Magento 2'],
+    linkLabel: client.url ? 'Visit project' : 'Project reference',
     clientLinks: [],
     is_published: true,
   })),
@@ -102,27 +149,33 @@ export const seedProjects = [
     id: `seed-innovation-${index}`,
     ...project,
     url: '',
-    linkLabel: 'View project',
+    linkLabel: 'Project details',
     clientLinks: [],
     is_published: true,
   })),
-  ...(clientProject
-    ? [
-        {
-          id: 'seed-clients',
-          title: clientProject.title,
-          category: 'Client implementations',
-          description: clientProject.description,
-          techStack: clientProject.techStack,
-          url: '',
-          linkLabel: 'View project',
-          clientLinks: clientProject.clientLinks,
-          is_published: true,
-        },
-      ]
-    : []),
+  {
+    id: 'seed-community',
+    title: 'Magento Community & Knowledge Sharing',
+    category: 'Community & Knowledge',
+    description: 'Community participation and technical knowledge sharing through the Magento Stack Exchange profile.',
+    techStack: ['Magento', 'Technical Q&A', 'Knowledge sharing'],
+    url: socials.stackexchange,
+    linkLabel: 'View community profile',
+    clientLinks: [],
+    is_published: true,
+  },
+  {
+    id: 'seed-resume-2026',
+    title: 'Mahesh Dave — Resume 2026',
+    category: 'Professional Resources',
+    description: 'Download the 2026 resume covering Adobe Commerce experience, integrations, AI initiatives, certifications, and education.',
+    techStack: ['Resume PDF', 'Adobe Commerce', 'Engineering Leadership'],
+    url: '/Mahesh_Dave_Resume_2026.pdf',
+    linkLabel: 'View resume PDF',
+    clientLinks: [],
+    is_published: true,
+  },
 ]
-
 export const seedCertifications = certifications.map((cert, index) => ({
   id: `seed-cert-${index}`,
   name: cert.name,

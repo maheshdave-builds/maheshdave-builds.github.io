@@ -108,7 +108,67 @@ export const THEME_PRESETS = [
       dark: { bg: '#0d0d0d', surface: '#171717', surfaceSoft: '#212121', headerBg: '#0d0d0d', footerBg: '#0d0d0d', text: '#f5f5f5', muted: '#a8a8a8', line: '#333333', primary: '#fafafa', primaryDark: '#ffffff', secondary: '#9a9a9a', accent: '#cfcfcf', onPrimary: '#0d0d0d', link: '#ffffff', gradientFrom: '#1c1c1c', gradientTo: '#454545' },
     },
   },
-]
+
+  {
+    key: 'teal-harmony', label: 'Teal Harmony', description: 'Soft editorial neutrals with a muted teal identity and refined teal shadows.',
+    theme: {
+      ...META, mode: 'light', radius: 16,
+      light: { ...PALETTES.light, bg: '#f5f8f7', surface: '#ffffff', surfaceSoft: '#eaf1f0', headerBg: '#f5f8f7', footerBg: '#f5f8f7', text: '#1b302f', muted: '#617775', line: '#d9e5e3', primary: '#628f8c', primaryDark: '#426f6c', secondary: '#98b7b3', accent: '#c49a70', onPrimary: '#ffffff', link: '#426f6c', gradientFrom: '#345f5c', gradientTo: '#83aaa6' },
+      dark: { ...PALETTES.dark, bg: '#101c1c', surface: '#182827', surfaceSoft: '#213735', headerBg: '#101c1c', footerBg: '#101c1c', text: '#eef6f4', muted: '#b1c5c2', line: '#304946', primary: '#98c2bd', primaryDark: '#b7d8d4', secondary: '#628f8c', accent: '#dfb38a', onPrimary: '#10201f', link: '#a8d0cb', gradientFrom: '#1d3937', gradientTo: '#426f6c' },
+    },
+  },
+  {
+    key: 'ocean-blue', label: 'Ocean Blue', description: 'Clear blue accents, crisp surfaces and a calm dark mode.',
+    theme: {
+      ...META, mode: 'light', radius: 14,
+      light: { ...PALETTES.light, bg: '#f4f8fc', surface: '#ffffff', surfaceSoft: '#e9f1f8', headerBg: '#f4f8fc', footerBg: '#f4f8fc', text: '#182b3c', muted: '#61778a', line: '#d9e5ef', primary: '#276b9b', primaryDark: '#1c5078', secondary: '#6c9fbd', accent: '#d49b58', onPrimary: '#ffffff', link: '#215e8a', gradientFrom: '#173c5b', gradientTo: '#3984b4' },
+      dark: { ...PALETTES.dark, bg: '#101923', surface: '#182634', surfaceSoft: '#213546', headerBg: '#101923', footerBg: '#101923', text: '#eff6fb', muted: '#b0c0ce', line: '#304658', primary: '#82c2e8', primaryDark: '#b0dcf4', secondary: '#568db1', accent: '#e0b77c', onPrimary: '#10202d', link: '#91c9eb', gradientFrom: '#142f45', gradientTo: '#2f6b91' },
+    },
+  },
+  {
+    key: 'violet-night', label: 'Violet Night', description: 'A modern violet accent for a polished, dark-first portfolio.',
+    theme: {
+      ...META, mode: 'dark', radius: 16,
+      light: { ...PALETTES.light, bg: '#f8f6fc', surface: '#ffffff', surfaceSoft: '#f0ebf8', headerBg: '#f8f6fc', footerBg: '#f8f6fc', text: '#29223a', muted: '#756b88', line: '#e5def0', primary: '#7654a6', primaryDark: '#5b3b88', secondary: '#a18ac4', accent: '#c49a70', onPrimary: '#ffffff', link: '#694795', gradientFrom: '#49316d', gradientTo: '#8967b8' },
+      dark: { ...PALETTES.dark, bg: '#171321', surface: '#211b30', surfaceSoft: '#2b2340', headerBg: '#171321', footerBg: '#171321', text: '#f5f0fc', muted: '#c0b4d1', line: '#403451', primary: '#c2a7f0', primaryDark: '#d9c8fa', secondary: '#9273c0', accent: '#e1bb91', onPrimary: '#21152f', link: '#d0baf4', gradientFrom: '#302046', gradientTo: '#604487' },
+    },
+  },
+  {
+    key: 'rose-stone', label: 'Rose & Stone', description: 'Warm neutral backgrounds paired with restrained rose accents.',
+    theme: {
+      ...META, mode: 'light', radius: 18,
+      light: { ...PALETTES.light, bg: '#faf6f5', surface: '#ffffff', surfaceSoft: '#f4eae8', headerBg: '#faf6f5', footerBg: '#faf6f5', text: '#302321', muted: '#7c6966', line: '#eadbd8', primary: '#a85f66', primaryDark: '#85464d', secondary: '#c18c90', accent: '#c49a70', onPrimary: '#ffffff', link: '#944e56', gradientFrom: '#63343a', gradientTo: '#b06b72' },
+      dark: { ...PALETTES.dark, bg: '#1c1517', surface: '#291e21', surfaceSoft: '#35262a', headerBg: '#1c1517', footerBg: '#1c1517', text: '#f8eeee', muted: '#cbb8bb', line: '#493338', primary: '#dfa0a6', primaryDark: '#f0bdc1', secondary: '#a66d74', accent: '#e1bd91', onPrimary: '#281619', link: '#e7adb2', gradientFrom: '#43252b', gradientTo: '#774047' },
+    },
+  },
+  {
+    key: 'forest-moss', label: 'Forest & Moss', description: 'Deep botanical greens with a subtle moss and brass palette.',
+    theme: {
+      ...META, mode: 'light', radius: 12,
+      light: { ...PALETTES.light, bg: '#f5f7f1', surface: '#ffffff', surfaceSoft: '#eaf0e2', headerBg: '#f5f7f1', footerBg: '#f5f7f1', text: '#202b20', muted: '#687666', line: '#dce5d6', primary: '#4f744b', primaryDark: '#365534', secondary: '#8ba17d', accent: '#b99757', onPrimary: '#ffffff', link: '#41633d', gradientFrom: '#263f25', gradientTo: '#63845a' },
+      dark: { ...PALETTES.dark, bg: '#141b13', surface: '#1d281b', surfaceSoft: '#293725', headerBg: '#141b13', footerBg: '#141b13', text: '#f0f5ed', muted: '#b6c4b0', line: '#3a4935', primary: '#a7c69a', primaryDark: '#c5dcb9', secondary: '#78966b', accent: '#d6b879', onPrimary: '#172115', link: '#b5d3a8', gradientFrom: '#21351f', gradientTo: '#45663d' },
+    },
+  },
+
+  {
+    key: 'carbon-lime', label: 'Carbon & Lime', description: 'Modern charcoal surfaces with a restrained lime accent.',
+    theme: { ...META, mode: 'dark', radius: 14,
+      light: { ...PALETTES.light, bg: '#f6f7f3', surface: '#ffffff', surfaceSoft: '#edf0e7', headerBg: '#f6f7f3', footerBg: '#f6f7f3', text: '#20251c', muted: '#697064', line: '#dfe4d7', primary: '#536b2f', primaryDark: '#3e5123', secondary: '#9dbb62', accent: '#c58d4b', onPrimary: '#ffffff', link: '#4d642c', gradientFrom: '#29351b', gradientTo: '#718b3e' },
+      dark: { ...PALETTES.dark, bg: '#11140f', surface: '#1a2016', surfaceSoft: '#242c1e', headerBg: '#11140f', footerBg: '#11140f', text: '#f2f5eb', muted: '#b3bda8', line: '#35402b', primary: '#c3e47b', primaryDark: '#d8f59b', secondary: '#8cae4e', accent: '#e0b77b', onPrimary: '#18200e', link: '#c9e88c', gradientFrom: '#1c2a14', gradientTo: '#435b28' } }
+  },
+  {
+    key: 'blueprint', label: 'Blueprint Blue', description: 'Confident product-engineering blues with clean, cool neutrals.',
+    theme: { ...META, mode: 'light', radius: 16,
+      light: { ...PALETTES.light, bg: '#f3f7fb', surface: '#ffffff', surfaceSoft: '#e7eff7', headerBg: '#f3f7fb', footerBg: '#f3f7fb', text: '#17283b', muted: '#5e7288', line: '#d8e4ef', primary: '#2867a6', primaryDark: '#1c4d80', secondary: '#7aa9d4', accent: '#df9855', onPrimary: '#ffffff', link: '#215d97', gradientFrom: '#16395f', gradientTo: '#3f80b7' },
+      dark: { ...PALETTES.dark, bg: '#0e1722', surface: '#172434', surfaceSoft: '#202f42', headerBg: '#0e1722', footerBg: '#0e1722', text: '#f0f6fc', muted: '#aebfd0', line: '#30445a', primary: '#8dc5f5', primaryDark: '#b7dcfa', secondary: '#5f94c4', accent: '#efb778', onPrimary: '#102032', link: '#9acdf5', gradientFrom: '#142d48', gradientTo: '#2e6595' } }
+  },
+  {
+    key: 'plum-copper', label: 'Plum & Copper', description: 'Premium plum tones with copper highlights and soft editorial surfaces.',
+    theme: { ...META, mode: 'dark', radius: 18,
+      light: { ...PALETTES.light, bg: '#f8f5f8', surface: '#ffffff', surfaceSoft: '#f0e8f0', headerBg: '#f8f5f8', footerBg: '#f8f5f8', text: '#2a2030', muted: '#77677d', line: '#e5dbe8', primary: '#76507f', primaryDark: '#593a61', secondary: '#b397bd', accent: '#c18159', onPrimary: '#ffffff', link: '#694472', gradientFrom: '#412b49', gradientTo: '#8a6293' },
+      dark: { ...PALETTES.dark, bg: '#17111a', surface: '#241b28', surfaceSoft: '#302437', headerBg: '#17111a', footerBg: '#17111a', text: '#f7f0f8', muted: '#c4b5c9', line: '#433348', primary: '#d1a9d9', primaryDark: '#e4c7e9', secondary: '#a27ba9', accent: '#e1a078', onPrimary: '#25162a', link: '#d8b7df', gradientFrom: '#30203a', gradientTo: '#65436e' } }
+  }
+] 
 
 /* ------------------------------------------------------------------ colour */
 
@@ -286,8 +346,8 @@ export function toCssVariables(theme, mode) {
     '--link': palette.link,
     '--grad-a': palette.gradientFrom,
     '--grad-b': palette.gradientTo,
-    '--shadow': `0 16px 48px rgba(12,18,14,${shadowAlpha.toFixed(3)})`,
-    '--shadow-sm': `0 6px 20px rgba(12,18,14,${(shadowAlpha * 0.55).toFixed(3)})`,
+    '--shadow': `0 16px 48px rgb(98 143 140 / ${(Math.min(0.7, shadowAlpha + 0.12)).toFixed(3)})`,
+    '--shadow-sm': `0 6px 20px rgb(98 143 140 / ${(Math.min(0.42, shadowAlpha * 0.55 + 0.06)).toFixed(3)})`,
     '--radius': radius,
     '--radius-sm': `${Math.max(0, theme.radius - 6)}px`,
     '--radius-lg': `${theme.radius + 6}px`,

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Check, ImagePlus, Loader2, Save } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, Check, ImagePlus, Loader2, Save, X, Eye } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
-import { saveProfile, uploadImage, contentSource } from '../lib/content'
+import { saveProfile, uploadImage } from '../lib/content'
 import { AdminLayout } from './AdminLayout'
 
 function Field({ label, value, onChange, type = 'text', wide, rows, hint, placeholder }) {
@@ -25,10 +25,19 @@ export default function ProfilePage() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [photoOpen, setPhotoOpen] = useState(false)
+  const portraitInputRef = useRef(null)
 
   useEffect(() => {
     setDraft(profile)
   }, [profile])
+
+  useEffect(() => {
+    if (!photoOpen) return undefined
+    const onKeyDown = (event) => { if (event.key === 'Escape') setPhotoOpen(false) }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [photoOpen])
 
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(profile), [draft, profile])
 
@@ -57,10 +66,6 @@ export default function ProfilePage() {
     }
     if (draft.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(draft.email)) {
       setError('The email address does not look valid.')
-      return
-    }
-    if (contentSource !== 'supabase') {
-      setError('Saving requires the configured Supabase backend.')
       return
     }
 
@@ -183,44 +188,63 @@ export default function ProfilePage() {
           </div>
 
           <div className="portrait-preview">
-            {draft.profileImage ? <img src={draft.profileImage} alt="Current portrait" /> : <span>No image</span>}
+            {draft.profileImage ? (
+              <img src={draft.profileImage} alt="Profile photo preview" onError={(event) => { event.currentTarget.style.display = 'none' }} />
+            ) : <span>No photo selected</span>}
           </div>
 
-          <label className="field-block">
-            Image URL
-            <input
-              type="url"
-              value={draft.profileImage || ''}
-              onChange={(event) => set('profileImage', event.target.value)}
-              placeholder="/profile.jpg"
-            />
-          </label>
-
-          <button
-            type="button"
-            className="subtle-button"
-            onClick={() => document.getElementById('portrait-input')?.click()}
-            disabled={uploading}
-          >
-            {uploading ? <Loader2 size={14} className="spin" aria-hidden="true" /> : <ImagePlus size={14} aria-hidden="true" />}
-            {uploading ? 'Uploading…' : 'Upload portrait'}
-          </button>
+          <div className="portrait-actions">
+            <button
+              type="button"
+              className="button button-primary button-sm"
+              onClick={() => portraitInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <ImagePlus size={15} aria-hidden="true" />}
+              {uploading ? 'Preparing photo…' : 'Choose / upload photo'}
+            </button>
+            {draft.profileImage ? (
+              <button type="button" className="button button-secondary button-sm" onClick={() => setPhotoOpen(true)}>
+                <Eye size={15} aria-hidden="true" /> View photo
+              </button>
+            ) : null}
+          </div>
           <input
+            ref={portraitInputRef}
             id="portrait-input"
+            className="portrait-file-input"
             type="file"
-            accept="image/*"
-            hidden
+            accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
             onChange={(event) => {
               uploadPortrait(event.target.files?.[0])
               event.target.value = ''
             }}
           />
+
+          <label className="field-block portrait-url-field">
+            Photo URL (optional)
+            <input
+              type="url"
+              value={draft.profileImage || ''}
+              onChange={(event) => set('profileImage', event.target.value)}
+              placeholder="/profile.jpg or image URL"
+            />
+          </label>
           <p className="field-hint">
-            A portrait roughly 3:4 works best. Images are stored in the <code>portfolio-media</code> bucket and served
-            from the CDN.
+            Choose an image from your device or paste an image URL. The preview shows the full portrait without cropping.
+            In local mode, the selected photo is compressed before being saved in this browser.
           </p>
         </aside>
       </form>
+      {photoOpen && draft.profileImage ? (
+        <div className="photo-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPhotoOpen(false) }}>
+          <section className="photo-modal" role="dialog" aria-modal="true" aria-label="Profile photo preview">
+            <div className="photo-modal-header"><div><p className="eyebrow">PROFILE PHOTO</p><h2>Full image preview</h2></div><button type="button" className="icon-button" aria-label="Close photo preview" onClick={() => setPhotoOpen(false)}><X size={18} /></button></div>
+            <div className="photo-modal-image"><img src={draft.profileImage} alt="Full profile portrait" /></div>
+            <div className="photo-modal-footer"><span>Preview · Original proportions preserved</span><button type="button" className="button button-primary button-sm" onClick={() => setPhotoOpen(false)}>Done</button></div>
+          </section>
+        </div>
+      ) : null}
     </AdminLayout>
   )
 }

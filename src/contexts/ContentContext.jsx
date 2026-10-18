@@ -20,8 +20,12 @@ export function ContentProvider({ children }) {
   const [nonce, setNonce] = useState(0)
 
   useEffect(() => {
-    if (contentSource !== 'supabase') return undefined
     let active = true
+    const loadLocal = async () => {
+      try { const next = await fetchPublicContent(); if (active) { setContent(next); setStatus('local'); setError('') } }
+      catch (loadError) { if (active) setError(loadError?.message || 'Content could not be loaded.') }
+    }
+    if (contentSource !== 'supabase') { loadLocal(); const onUpdate = () => loadLocal(); window.addEventListener('portfolio-local-content-updated', onUpdate); return () => { active = false; window.removeEventListener('portfolio-local-content-updated', onUpdate) } }
 
     ;(async () => {
       try {

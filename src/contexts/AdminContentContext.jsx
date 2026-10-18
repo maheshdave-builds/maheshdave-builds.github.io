@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { fetchAdminContent, contentSource } from '../lib/content'
+import { fetchAdminContent, getInitialAdminContent, contentSource } from '../lib/content'
 import { fallbackContent } from '../lib/seed'
 import { DEFAULT_THEME } from '../lib/theme'
 import { AdminContentContext } from './contexts'
@@ -13,7 +13,7 @@ import { AdminContentContext } from './contexts'
  * from triggering a synchronous cascading render.
  */
 export function AdminContentProvider({ children }) {
-  const [state, setState] = useState({
+  const [state, setState] = useState(() => contentSource === 'local' ? getInitialAdminContent() : ({
     profile: fallbackContent.profile,
     profileRow: null,
     projects: fallbackContent.projects,
@@ -25,11 +25,12 @@ export function AdminContentProvider({ children }) {
     settingsRows: [],
     themePublished: DEFAULT_THEME,
     themeDraft: DEFAULT_THEME,
-  })
-  const [status, setStatus] = useState('loading')
+  }))
+  const [status, setStatus] = useState(contentSource === 'local' ? 'ready' : 'loading')
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (contentSource === 'local') return undefined
     let active = true
 
     ;(async () => {
