@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /preview
+
+Sitemap: https://maheshdave-builds.github.io/sitemap.xml

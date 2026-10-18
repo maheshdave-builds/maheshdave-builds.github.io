@@ -4,7 +4,7 @@ export const profile = {
   title: 'Adobe Commerce Team Lead · Certified Expert & Developer',
   intro: 'I architect and scale Adobe Commerce experiences across B2B and B2C—bringing together composable commerce, thoughtful integrations, performance engineering, and AI-assisted delivery.',
   location: 'Ahmedabad, Gujarat, India',
-  profileImage: '/md_pic.jpeg',
+  profileImage: '/profile.jpg',
   resumeUrl: '/Mahesh_Dave_Resume_2026.pdf',
   email: 'davemahesh119@gmail.com',
   aboutSection: { title: 'About', description: 'Commerce engineering shaped by technical depth, team leadership, and a focus on reliable delivery.' },
