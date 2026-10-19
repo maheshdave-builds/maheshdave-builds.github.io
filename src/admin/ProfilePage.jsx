@@ -3,6 +3,7 @@ import { AlertTriangle, Check, ImagePlus, Loader2, Save, X, Eye } from 'lucide-r
 import { useAdminContent } from '../contexts/hooks'
 import { saveProfile, uploadImage } from '../lib/content'
 import { AdminLayout } from './AdminLayout'
+import ImageCropDialog from './ImageCropDialog'
 
 function Field({ label, value, onChange, type = 'text', wide, rows, hint, placeholder }) {
   return (
@@ -26,6 +27,7 @@ export default function ProfilePage() {
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
+  const [cropFile, setCropFile] = useState(null)
   const portraitInputRef = useRef(null)
 
   useEffect(() => {
@@ -216,7 +218,8 @@ export default function ProfilePage() {
             type="file"
             accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
             onChange={(event) => {
-              uploadPortrait(event.target.files?.[0])
+              const file = event.target.files?.[0]
+              if (file) setCropFile(file)
               event.target.value = ''
             }}
           />
@@ -231,11 +234,12 @@ export default function ProfilePage() {
             />
           </label>
           <p className="field-hint">
-            Choose an image from your device or paste an image URL. The preview shows the full portrait without cropping.
+            Choose an image to open the crop editor, adjust zoom and position, then apply the crop before saving.
             In local mode, the selected photo is compressed before being saved in this browser.
           </p>
         </aside>
       </form>
+      <ImageCropDialog file={cropFile} title="Crop profile photo" onCancel={() => setCropFile(null)} onApply={async (cropped) => { await uploadPortrait(cropped); setCropFile(null) }} />
       {photoOpen && draft.profileImage ? (
         <div className="photo-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPhotoOpen(false) }}>
           <section className="photo-modal" role="dialog" aria-modal="true" aria-label="Profile photo preview">

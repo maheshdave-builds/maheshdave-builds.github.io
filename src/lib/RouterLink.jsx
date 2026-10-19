@@ -33,7 +33,10 @@ export function Link({ to, replace = false, scroll = true, children, onClick, ..
     if (to.startsWith('http') || to.startsWith('mailto:')) return
     event.preventDefault()
     navigate(to, { replace })
-    if (scroll) window.scrollTo({ top: 0, behavior: 'auto' })
+    // Route-level scroll handling resolves hash targets after the destination renders.
+    // Do not immediately scroll to the top for links such as /#contact.
+    const hasHashTarget = Boolean(new URL(to, window.location.origin).hash)
+    if (scroll && !hasHashTarget) window.scrollTo({ top: 0, behavior: 'auto' })
   }
 
   return (

@@ -5,7 +5,7 @@ import { ContentProvider } from './contexts/ContentContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { PublicThemeProvider } from './components/PublicThemeProvider'
 import { ThemeProvider } from './contexts/ThemeContext'
-import SiteHeader, { SiteFooter } from './components/SiteChrome'
+import SiteHeader, { SiteFooter, SiteFavicon } from './components/SiteChrome'
 import { NAV_ITEMS } from './lib/navigation'
 import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
@@ -148,6 +148,7 @@ export default function App() {
     <RouterProvider>
       <ThemeCursor />
       <ContentProvider>
+        <SiteFavicon />
         <AuthProvider>
           <Routes />
         </AuthProvider>

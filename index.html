@@ -2,6 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Restore deep links redirected by GitHub Pages' 404.html (e.g. /admin).
+      (function () {
+        var search = window.location.search;
+        if (search && search.indexOf('?/') === 1) {
+          var restored = search.slice(2);
+          if (restored && restored.charAt(0) !== '/') restored = '/' + restored;
+          window.history.replaceState(null, '', restored || '/');
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f8f5" />
     <meta name="description" content="Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering." />

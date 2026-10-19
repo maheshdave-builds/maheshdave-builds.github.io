@@ -4,8 +4,9 @@ import { useAdminContent } from '../contexts/hooks'
 import { useAuth } from '../contexts/hooks'
 import { useTheme } from '../contexts/hooks'
 import { useRouter } from '../lib/routerCore'
-import { saveSiteSettings, exportLocalContent, importLocalContent } from '../lib/content'
+import { saveSiteSettings, exportLocalContent, importLocalContent, uploadImage } from '../lib/content'
 import { AdminLayout } from './AdminLayout'
+import ImageCropDialog from './ImageCropDialog'
 
 export default function SettingsPage() {
   const { site, setSite } = useAdminContent()
@@ -17,6 +18,7 @@ export default function SettingsPage() {
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
+  const [logoCropFile, setLogoCropFile] = useState(null)
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -29,6 +31,22 @@ export default function SettingsPage() {
   }, [site])
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(site)
+
+  const handleLogoUpload = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setError('Choose an image file for the logo.'); return }
+    if (file.size > 10 * 1024 * 1024) { setError('Please use a logo smaller than 10 MB.'); return }
+    setLogoCropFile(file)
+    event.target.value = ''
+  }
+
+  const applyLogoCrop = async (croppedFile) => {
+    setBusy(true); setError('')
+    try { const logo = await uploadImage(croppedFile, 'branding'); setDraft(current => ({ ...current, siteLogo: logo })) }
+    catch (uploadError) { setError(uploadError.message || 'The cropped logo could not be saved.') }
+    finally { setBusy(false); setLogoCropFile(null) }
+  }
 
   const save = async (event) => {
     event.preventDefault()
@@ -126,6 +144,26 @@ export default function SettingsPage() {
             </label>
 
             <label className="wide-field">
+              Website / brand name
+              <input
+                value={draft.brandName || ''}
+                onChange={(event) => setDraft({ ...draft, brandName: event.target.value })}
+                placeholder="Mahesh Dave"
+              />
+              <small className="field-hint">Displayed in the website header. Leave empty to use your profile name.</small>
+            </label>
+
+            <label className="wide-field">
+              Header subtitle
+              <input
+                value={draft.brandTagline || ''}
+                onChange={(event) => setDraft({ ...draft, brandTagline: event.target.value })}
+                placeholder="Adobe Commerce"
+              />
+              <small className="field-hint">Short text displayed below the brand name.</small>
+            </label>
+
+            <label className="wide-field">
               Site description
               <textarea
                 rows={3}
@@ -150,11 +188,45 @@ export default function SettingsPage() {
               Logo URL
               <input
                 type="url"
-                value={draft.siteLogo || ''}
+                value={String(draft.siteLogo || '').startsWith('data:') ? '' : (draft.siteLogo || '')}
                 onChange={(event) => setDraft({ ...draft, siteLogo: event.target.value })}
-                placeholder="Leave empty to use the monogram"
+                placeholder="Paste a logo image URL (optional)"
               />
-              <small className="field-hint">Upload images in a project entry, or paste a URL from the media bucket.</small>
+              <input type="file" accept="image/*" onChange={handleLogoUpload} aria-label="Upload website logo" />
+              <small className="field-hint">Upload an image to crop it before applying, or paste a public image URL. Save settings to publish the logo and synchronize the favicon.</small>
+              {draft.siteLogo ? <img src={draft.siteLogo} alt="Website logo preview" style={{ width: 72, height: 72, objectFit: 'contain', border: '1px solid var(--line)', borderRadius: 12, padding: 6 }} onError={event => { event.currentTarget.style.opacity = '.35' }} /> : null}
+            </label>
+
+            <label>Brand style
+              <select value={draft.brandStyle || 'classic'} onChange={event => setDraft({ ...draft, brandStyle: event.target.value })}><option value="classic">Classic wordmark</option><option value="editorial">Editorial serif</option><option value="minimal">Minimal uppercase</option><option value="badge">Monogram badge</option></select>
+              <small className="field-hint">Choose the website name and logo treatment used in the header and footer.</small>
+            </label>
+            <label>Footer note
+              <textarea rows={3} value={draft.footerText || ''} onChange={event => setDraft({ ...draft, footerText: event.target.value })} placeholder="Building dependable commerce experiences with clarity and care."/>
+              <small className="field-hint">Shown in the footer under your name and brand.</small>
+            </label>
+            <div className="wide-field footer-links-editor">
+              <strong>Footer links</strong>
+              <small className="field-hint">Add links, edit labels and URLs, reorder with arrows, or hide links from the public footer.</small>
+              {(Array.isArray(draft.footerLinks) ? draft.footerLinks : []).map((link, index) => <div className="footer-link-row" key={link.id || index}>
+                <input aria-label={`Footer link ${index + 1} label`} value={link.label || ''} placeholder="Link label" onChange={event => setDraft(current => ({ ...current, footerLinks: current.footerLinks.map((item, i) => i === index ? { ...item, label: event.target.value } : item) }))}/>
+                <input aria-label={`Footer link ${index + 1} URL`} value={link.href || ''} placeholder="https:// or /section" onChange={event => setDraft(current => ({ ...current, footerLinks: current.footerLinks.map((item, i) => i === index ? { ...item, href: event.target.value } : item) }))}/>
+                <label className="footer-link-visible"><input type="checkbox" checked={link.visible !== false} onChange={event => setDraft(current => ({ ...current, footerLinks: current.footerLinks.map((item, i) => i === index ? { ...item, visible: event.target.checked } : item) }))}/> Show</label>
+                <div className="footer-link-actions"><button type="button" className="button button-secondary button-sm" disabled={index === 0} onClick={() => setDraft(current => { const links = [...(current.footerLinks || [])]; [links[index-1], links[index]] = [links[index], links[index-1]]; return { ...current, footerLinks: links } })}>↑</button><button type="button" className="button button-secondary button-sm" disabled={index === draft.footerLinks.length-1} onClick={() => setDraft(current => { const links = [...(current.footerLinks || [])]; [links[index+1], links[index]] = [links[index], links[index+1]]; return { ...current, footerLinks: links } })}>↓</button><button type="button" className="button button-secondary button-sm" onClick={() => setDraft(current => ({ ...current, footerLinks: current.footerLinks.filter((_, i) => i !== index) }))}>×</button></div>
+              </div>)}
+              <button type="button" className="button button-secondary button-sm" onClick={() => setDraft(current => ({ ...current, footerLinks: [...(current.footerLinks || []), { id: `footer-${Date.now()}`, label: '', href: '', visible: true }] }))}>+ Add footer link</button>
+            </div>
+            <label className="wide-field">
+              Slider auto-advance (seconds)
+              <input
+                type="number"
+                min="0"
+                max="60"
+                step="1"
+                value={draft.sliderIntervalSeconds ?? 5}
+                onChange={(event) => setDraft({ ...draft, sliderIntervalSeconds: Math.min(60, Math.max(0, Number(event.target.value) || 0)) })}
+              />
+              <small className="field-hint">Default is 5 seconds. Set to 0 to disable automatic sliding.</small>
             </label>
           </div>
 
@@ -171,7 +243,9 @@ export default function SettingsPage() {
           </label>
         </form>
 
-        <div className="settings-side">
+        <ImageCropDialog file={logoCropFile} title="Crop website logo" onCancel={() => setLogoCropFile(null)} onApply={applyLogoCrop} />
+
+      <div className="settings-side">
           <section className="admin-panel">
             <div className="editor-heading">
               <div>

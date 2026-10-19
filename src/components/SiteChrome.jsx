@@ -44,7 +44,7 @@ export default function SiteHeader({ activeSection }) {
 
   return (
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
-      <Link className="brand" to="/#home" onClick={close}>
+      <Link className={`brand brand-style-${site.brandStyle || 'classic'}`} to="/#home" onClick={close}>
         {site?.siteLogo ? (
           <img className="brand-image" src={site.siteLogo} alt="" width="44" height="44" />
         ) : (
@@ -53,8 +53,8 @@ export default function SiteHeader({ activeSection }) {
           </span>
         )}
         <span className="brand-text">
-          {profile.shortName || profile.name}
-          <small>{profile.title?.split('·')[0]?.trim() || 'Adobe Commerce'}</small>
+          {site.brandName || profile.shortName || profile.name}
+          <small>{site.brandTagline || profile.title?.split('·')[0]?.trim() || 'Adobe Commerce'}</small>
         </span>
       </Link>
 
@@ -110,38 +110,73 @@ export default function SiteHeader({ activeSection }) {
   )
 }
 
+
+
+export function SiteFavicon() {
+  const { site } = useContent()
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const logo = String(site?.siteLogo || '').trim()
+    const href = logo || `${import.meta.env.BASE_URL}favicon.svg`
+    const mimeMatch = href.match(/^data:(image\/[a-zA-Z0-9.+-]+);/)
+    const extension = href.split(/[?#]/)[0].match(/\.([a-zA-Z0-9]+)$/)?.[1]?.toLowerCase()
+    const mime = mimeMatch?.[1] || ({ png: 'image/png', svg: 'image/svg+xml', webp: 'image/webp', ico: 'image/x-icon', gif: 'image/gif' }[extension] || 'image/jpeg')
+    document.querySelectorAll('link[rel~="icon"], link[rel="shortcut icon"]').forEach((node) => node.remove())
+    const icon = document.createElement('link')
+    icon.rel = 'icon'
+    icon.type = mime
+    // A version parameter helps bypass stale favicon caches when a logo URL is reused.
+    if (logo && !/^data:/i.test(href) && !/^blob:/i.test(href)) {
+      try { const url = new URL(href, window.location.href); if (!url.search) url.searchParams.set('favicon_v', String(site?.updatedAt || Date.now())); icon.href = url.href }
+      catch { icon.href = href }
+    } else icon.href = href
+    icon.setAttribute('sizes', 'any')
+    document.head.appendChild(icon)
+    let touch = document.querySelector('link[rel="apple-touch-icon"]')
+    if (!touch) { touch = document.createElement('link'); touch.rel = 'apple-touch-icon'; document.head.appendChild(touch) }
+    touch.href = href
+  }, [site?.siteLogo, site?.updatedAt])
+  return null
+}
+
 export function SiteFooter() {
   const { profile, site } = useContent()
   const socials = profile.social_urls || {}
   const year = new Date().getFullYear()
 
+
+
   return (
     <footer className="site-footer">
+      <div className="footer-orb footer-orb-one" aria-hidden="true" />
+      <div className="footer-orb footer-orb-two" aria-hidden="true" />
       <div className="site-footer-inner">
         <div className="footer-brand">
-          <Link className="brand" to="/#home">
-            <span className="brand-mark" aria-hidden="true">
-              MD
-            </span>
+          <Link className={`brand brand-style-${site.brandStyle || 'classic'}`} to="/#home">
+            {site?.siteLogo ? (
+              <img className="brand-image" src={site.siteLogo} alt="" width="48" height="48" />
+            ) : (
+              <span className="brand-mark" aria-hidden="true">MD</span>
+            )}
             <span className="brand-text">
-              {profile.shortName || profile.name}
-              <small>Adobe Commerce engineering</small>
+              {site.brandName || profile.shortName || profile.name}
+              <small>{site.brandTagline || profile.title?.split('·')[0]?.trim() || 'Adobe Commerce'}</small>
             </span>
           </Link>
-          <p>{profile.footerNote || 'Building dependable commerce experiences with clarity and care.'}</p>
+          <p>{site.footerText || profile.footerNote || 'Building dependable commerce experiences with clarity and care.'}</p>
         </div>
 
         <nav className="footer-nav" aria-label="Footer">
-          <div>
+          <div className="footer-link-group">
             <h2>Explore</h2>
-            {(Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_ITEMS).filter((item) => item.visible !== false).slice(0, 8).map((item, index) => {
+            {(Array.isArray(site.footerLinks) && site.footerLinks.length ? site.footerLinks : (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_ITEMS)).filter((item) => item.visible !== false && item.label && item.href).map((item, index) => {
               const href = item.href || '#home'
               return /^https?:\/\//i.test(href)
                 ? <a key={`${item.label}-${index}`} href={href} target="_blank" rel="noreferrer">{item.label}</a>
                 : <Link key={`${item.label}-${index}`} to={href.startsWith('/') ? href : `/${href}`}>{item.label}</Link>
             })}
           </div>
-          <div>
+          <div className="footer-link-group">
             <h2>Elsewhere</h2>
             {socials.linkedin ? (
               <a href={socials.linkedin} target="_blank" rel="noreferrer">
@@ -167,7 +202,7 @@ export function SiteFooter() {
 
       <div className="site-footer-meta">
         <p>
-          © {year} {profile.name}. All rights reserved.
+          © {year} Mahesh Dave. All rights reserved.
         </p>
         <div>
           <a href={`mailto:${site?.contactEmail || profile.email}`}>

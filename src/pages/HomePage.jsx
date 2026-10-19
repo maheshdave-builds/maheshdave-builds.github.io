@@ -124,7 +124,7 @@ function About({ profile, copy, stats }) {
   return (
     <section id="about" className="section-wrap about-section" aria-labelledby="about-title">
       <SectionHeading
-        eyebrow="01 — THE APPROACH"
+        eyebrow="THE APPROACH"
         id="about-title"
         title={copy.aboutTitle}
         description={copy.aboutDescription}
@@ -230,12 +230,12 @@ function ProjectCard({ project, index }) {
   )
 }
 
-function Projects({ projects, copy }) {
+function Projects({ projects, copy, sliderIntervalSeconds }) {
   return (
     <section id="projects" className="section-wrap projects-section" aria-labelledby="projects-title">
-      <SectionHeading eyebrow="03 — PROJECTS & CLIENTS" id="projects-title" title={copy.projectsTitle} description={copy.projectsDescription} />
+      <SectionHeading eyebrow="PROJECTS & CLIENTS" id="projects-title" title={copy.projectsTitle} description={copy.projectsDescription} />
       {projects.length ? (
-        <CinematicSlider label="Selected projects" items={projects} getTitle={(project) => project.title} getImage={(project) => project.image || project.clientLogo} renderDetails={(project, index, primary) => primary ? <><p className="cinema-summary">{project.description}</p><div className="cinema-tags">{(project.techStack || []).slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>{project.url ? <a className="cinema-link" href={project.url} target="_blank" rel="noreferrer">View project <ArrowUpRight size={15}/></a> : null}</> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Selected projects" items={projects} getTitle={(project) => project.title} getImage={(project) => project.image || project.clientLogo} renderDetails={(project, index, primary) => primary ? <><p className="cinema-summary">{project.description}</p><div className="cinema-tags">{(project.techStack || []).slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>{project.url ? <a className="cinema-link" href={project.url} target="_blank" rel="noreferrer">View project <ArrowUpRight size={15}/></a> : null}</> : null} />
       ) : <div className="empty-state"><Layers3 size={22} aria-hidden="true" /><p>No projects have been added yet. Add projects from the admin dashboard.</p></div>}
     </section>
   )
@@ -247,7 +247,7 @@ function Experience({ items, copy }) {
   return (
     <section id="experience" className="section-wrap experience-section" aria-labelledby="experience-title">
       <SectionHeading
-        eyebrow="02 — CAREER"
+        eyebrow="CAREER"
         id="experience-title"
         title={copy.experienceTitle}
         description={copy.experienceDescription}
@@ -257,14 +257,17 @@ function Experience({ items, copy }) {
         <div className="career-journey">
           <div className="career-journey-line" aria-hidden="true"><span /></div>
           {items.map((item, index) => (
-            <Reveal as="article" className={`career-milestone career-milestone-${index % 2 ? 'right' : 'left'}`} key={item.id || `${item.company}-${item.role}`} delay={Math.min(index * 100, 400)}>
-              <div className="career-marker" aria-hidden="true"><span /></div>
-              <div className="career-date">{item.duration || 'Career experience'}</div>
-              <div className="career-content">
-                <p className="career-company">{item.company}</p>
-                <h3>{item.role}</h3>
+            <Reveal as="article" className="career-milestone" key={item.id || `${item.company}-${item.role}`} delay={Math.min(index * 55, 220)} y={10}>
+              <div className="career-marker" aria-hidden="true"><BriefcaseBusiness size={15} /></div>
+              <div className="career-entry">
+                <div className="career-entry-heading">
+                  <div className="career-entry-role">
+                    <h3>{item.role}</h3>
+                    <p className="career-company">{item.company}</p>
+                  </div>
+                  <span className="career-date">{item.duration || 'Career experience'}</span>
+                </div>
                 {item.description ? <p className="career-description">{item.description}</p> : null}
-                <span className="career-index" aria-hidden="true">CAREER MILESTONE</span>
               </div>
             </Reveal>
           ))}
@@ -278,17 +281,17 @@ function Experience({ items, copy }) {
 
 /* ---------------------------------------------------------- certifications */
 
-function Certifications({ items, copy }) {
+function Certifications({ items, copy, sliderIntervalSeconds }) {
   return (
     <section id="certifications" className="section-wrap certifications-section" aria-labelledby="certifications-title">
       <SectionHeading
-        eyebrow="04 — CREDENTIALS"
+        eyebrow="CREDENTIALS"
         id="certifications-title"
         title={copy.certificationsTitle}
         description={copy.certificationsDescription}
       />
 
-      <CinematicSlider label="Certifications" items={items} getTitle={(cert) => cert.name} getImage={(cert) => cert.image} renderDetails={(cert, index, primary) => primary ? <><p className="cinema-summary">{cert.issuer || 'Adobe'}{cert.year ? ` · ${cert.year}` : ''}</p>{cert.verificationUrl ? <a className="cinema-link" href={cert.verificationUrl} target="_blank" rel="noreferrer">Verify credential <ArrowUpRight size={15}/></a> : null}</> : null} />
+      <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Certifications" items={items} getTitle={(cert) => cert.name} getImage={(cert) => cert.image} renderDetails={(cert, index, primary) => primary ? <><p className="cinema-summary">{cert.issuer || 'Adobe'}{cert.year ? ` · ${cert.year}` : ''}</p>{cert.verificationUrl ? <a className="cinema-link" href={cert.verificationUrl} target="_blank" rel="noreferrer">Verify credential <ArrowUpRight size={15}/></a> : null}</> : null} />
     </section>
   )
 }
@@ -299,7 +302,7 @@ function Education({ items, copy }) {
   return (
     <section id="education" className="section-wrap education-section" aria-labelledby="education-title">
       <SectionHeading
-        eyebrow="05 — EDUCATION"
+        eyebrow="EDUCATION"
         id="education-title"
         title={copy.educationTitle}
         description={copy.educationDescription}
@@ -328,7 +331,7 @@ function Toolkit({ groups, copy }) {
   return (
     <section id="expertise" className="section-wrap stack-section" aria-labelledby="toolkit-title">
       <SectionHeading
-        eyebrow="06 — TOOLKIT"
+        eyebrow="TOOLKIT"
         id="toolkit-title"
         title={copy.toolkitTitle}
         description={copy.toolkitDescription}
@@ -352,15 +355,15 @@ function Toolkit({ groups, copy }) {
 
 /* -------------------------------------------------------------------- blog */
 
-function Blog({ posts, copy }) {
+function Blog({ posts, copy, sliderIntervalSeconds }) {
   const published = posts.filter((post) => isPostPublic(post))
 
   return (
     <section id="blog" className="section-wrap blog-section" aria-labelledby="blog-title">
-      <SectionHeading eyebrow="07 — NOTES & IDEAS" id="blog-title" title={copy.blogTitle} description={copy.blogDescription} />
+      <SectionHeading eyebrow="NOTES & IDEAS" id="blog-title" title={copy.blogTitle} description={copy.blogDescription} />
 
       {published.length ? (
-        <CinematicSlider label="Articles & notes" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles & notes" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
       ) : (
         <div className="blog-empty-state">
           <BookOpen size={22} aria-hidden="true" />
@@ -381,7 +384,7 @@ function Contact({ profile, copy, site }) {
     <section id="contact" className="section-wrap contact-section" aria-labelledby="contact-title">
       <div className="contact-panel">
         <div>
-          <p className="eyebrow">08 — START A CONVERSATION</p>
+          <p className="eyebrow">START A CONVERSATION</p>
           <h2 id="contact-title">{copy.contactTitle}</h2>
           <p className="contact-copy">{copy.contactDescription}</p>
         </div>
@@ -444,12 +447,12 @@ export default function HomePage({ onSection }) {
   const builtInSections = {
     home: <Hero profile={profile} copy={copy} stats={site.stats} onSection={onSection} />,
     about: <About profile={profile} copy={copy} stats={site.stats} />,
-    projects: <Projects projects={projects} copy={copy} />,
+    projects: <Projects projects={projects} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     experience: <Experience items={experience} copy={copy} />,
-    certifications: <Certifications items={certifications} copy={copy} />,
+    certifications: <Certifications items={certifications} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     education: <Education items={education} copy={copy} />,
     expertise: <Toolkit groups={site.techStack} copy={copy} />,
-    blog: <Blog posts={posts} copy={copy} />,
+    blog: <Blog posts={posts} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     contact: <Contact profile={profile} copy={copy} site={site} />,
   }
   const customSections = site.customSections || []

@@ -15,7 +15,7 @@ export default function Reveal({
   delay = 0,
   y = 18,
   className = '',
-  once = true,
+  once = false,
   ...rest
 }) {
   const ref = useRef(null)
@@ -31,10 +31,8 @@ export default function Reveal({
     // Anything already above the fold is shown immediately, avoiding a flash of
     // hidden content when the observer's first callback is delayed.
     const rect = node.getBoundingClientRect()
-    if (rect.top < window.innerHeight * 0.9) {
-      node.dataset.revealState = 'shown'
-      return undefined
-    }
+    if (rect.top < window.innerHeight * 0.9) node.dataset.revealState = 'shown'
+    else node.dataset.revealState = 'hidden'
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -50,7 +48,6 @@ export default function Reveal({
       { rootMargin: '0px 0px -8% 0px', threshold: REVEAL_THRESHOLD },
     )
 
-    node.dataset.revealState = 'hidden'
     observer.observe(node)
     return () => observer.disconnect()
   }, [once])

@@ -170,6 +170,25 @@ export const THEME_PRESETS = [
   }
 ] 
 
+// Additional curated presets inherit the full semantic token set from existing themes,
+// then override the full light/dark palette so every semantic color stays defined.
+const EXTRA_PRESETS = [
+  ['soft-lilac','Soft Lilac','#f8f6fc','#ffffff','#f0ebfa','#2b2440','#746b89','#ded7ef','#7956b5','#5d3f91','#b7a1dc','#c79b75','#ffffff','#69469f','#4b316f','#9270c4','#21172f','#f2eefb','#ffffff','#241b35','#c6b7df','#403451','#c7a8f4','#dfcdfb','#9d83c7','#e4bc98','#24172f','#d3b8fa','#332344','#654a86'],
+  ['slate-professional','Slate Professional','#f4f6f8','#ffffff','#e9edf2','#202a36','#657181','#d9e0e7','#465a70','#344457','#91a5ba','#c69a63','#ffffff','#3c5065','#233345','#72879d','#f1f5f8','#111923','#1a2532','#202e3d','#a9b8c8','#344354','#9ab8d8','#c4d8ed','#7896b7','#d7b17c','#14202d','#a8c5e5','#1c2a3a','#39516b'],
+  ['sandstone','Sandstone Minimal','#faf8f3','#ffffff','#f1ece2','#302b23','#786f62','#e6dfd2','#80654a','#5e4937','#bba38a','#b18a4c','#ffffff','#6e563f','#4b392a','#a88a68','#f4efe6','#191714','#25211b','#302a22','#bcb1a1','#494136','#d6c19b','#ead9b8','#9c8260','#d7ad68','#211b14','#d9c39a','#30271d','#604c32'],
+  ['coral-modern','Coral Modern','#fff7f4','#ffffff','#ffebe5','#332321','#806b68','#f0d8d1','#c85f52','#a8473d','#e69b8e','#d7a34a','#ffffff','#ad4c43','#7e332e','#e58a7d','#fff0ed','#1b1314','#281b1c','#382426','#c7b2b3','#493133','#f1a59a','#ffd0c8','#c86f65','#e6bd72','#2c1718','#f3b4ab','#3e2325','#87413a'],
+  ['arctic-mint','Arctic Mint','#f2f9f7','#ffffff','#e4f2ee','#183630','#5d7972','#d2e6df','#24796c','#185b51','#83b9ad','#c5a16a','#ffffff','#1e6b60','#164d45','#6ba69a','#0e1b1a','#152724','#1d3430','#28423d','#a8c2ba','#35524c','#8fd1c3','#b8e8dd','#609b8f','#d8bb82','#142b27','#a4e1d5','#203d37','#37675c'],
+  ['berry-cream','Berry Cream','#fbf5f8','#ffffff','#f4e8ef','#352332','#806b7c','#ead7e3','#9d4775','#773457','#c78bad','#c8a15e','#ffffff','#883c66','#622a49','#b8759d','#1b121a','#281a25','#362331','#453040','#c9b5c4','#4a3547','#e0a6ca','#f0c9e0','#b17b9d','#e0bd7c','#2c1827','#e9b7d7','#402c3b','#754965'],
+]
+for (const [key,label,bg,surface,soft,text,muted,line,primary,primaryDark,secondary,accent,onPrimary,link,gradientFrom,gradientTo,darkBg,darkSurface,darkSoft,darkText,darkMuted,darkLine,darkPrimary,darkPrimaryDark,darkSecondary,darkAccent,darkOnPrimary,darkLink,darkGradientFrom,darkGradientTo] of EXTRA_PRESETS) {
+  const base = THEME_PRESETS[0].theme
+  THEME_PRESETS.push({ key, label, description: 'Curated accessible light and dark palette with coordinated semantic colors.', theme: {
+    ...base, mode: 'light', radius: 14,
+    light: { ...base.light, bg, surface, surfaceSoft: soft, headerBg: bg, footerBg: bg, text, muted, line, primary, primaryDark, secondary, accent, onPrimary, link, gradientFrom, gradientTo },
+    dark: { ...base.dark, bg: darkBg, surface: darkSurface, surfaceSoft: darkSoft, headerBg: darkBg, footerBg: darkBg, text: darkText, muted: darkMuted, line: darkLine, primary: darkPrimary, primaryDark: darkPrimaryDark, secondary: darkSecondary, accent: darkAccent, onPrimary: darkOnPrimary, link: darkLink, gradientFrom: darkGradientFrom, gradientTo: darkGradientTo },
+  } })
+}
+
 /* ------------------------------------------------------------------ colour */
 
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i
