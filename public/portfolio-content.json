@@ -5,7 +5,7 @@
     "title": "Adobe Commerce Team Lead · Certified Expert & Developer",
     "intro": "I architect and scale Adobe Commerce experiences across B2B and B2C—bringing together composable commerce, thoughtful integrations, performance engineering, and AI-assisted delivery.",
     "location": "Ahmedabad, Gujarat, India",
-    "profileImage": "/profile.jpg",
+    "profileImage": "/uploads/profile/1792693734233-m2n4ez.jpg",
     "resumeUrl": "/Mahesh_Dave_Resume_2026.pdf",
     "email": "davemahesh119@gmail.com",
     "aboutSection": {
@@ -606,25 +606,7 @@
       "is_published": true
     }
   ],
-  "posts": [
-    {
-      "id": "local-1792693688303-8zt7e5",
-      "title": "How to Remove a Fastly VCL Snippet Using CLI",
-      "slug": "how-to-remove-a-fastly-vcl-snippet-using-cli",
-      "category": "Engineering notes",
-      "excerpt": "",
-      "content": "<h1>How to Remove a Fastly VCL Snippet Using CLI</h1>",
-      "cover_image_url": "",
-      "status": "published",
-      "published_at": "2026-10-22T18:28:08.303Z",
-      "author": "Mahesh Dave",
-      "tags": [],
-      "seo_title": "",
-      "seo_description": "",
-      "canonical_url": "",
-      "updated_at": "2026-10-22T18:28:08.303Z"
-    }
-  ],
+  "posts": [],
   "site": {
     "siteTitle": "Mahesh Dave · Adobe Commerce Engineering",
     "siteDescription": "Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
