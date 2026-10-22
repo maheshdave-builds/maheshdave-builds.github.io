@@ -1,6 +1,6 @@
 // Use the shared Supabase database when deployment environment variables are configured.
 import { supabase as remoteSupabase, isConfigured } from './supabase'
-import { gatewayRequest, githubGatewayConfigured } from './githubGateway'
+import { gatewayRequest, githubGatewayConfigured, uploadGitHubMedia } from './githubGateway'
 const useGithubGateway = githubGatewayConfigured()
 const supabase = !useGithubGateway && isConfigured ? remoteSupabase : null
 import { fallbackContent, seedSite, seedProfile, DEFAULT_COPY, DEFAULT_STATS } from './seed'
@@ -125,7 +125,7 @@ function writeLocalContent(next) {
   try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(next)) }
   catch { throw new Error('Browser storage is full. Use smaller images or export your content backup before continuing.') }
   if (useGithubGateway) {
-    sharedWritePromise = gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) })
+    sharedWritePromise = sharedWritePromise.catch(() => undefined).then(() => gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) }))
       .catch((error) => { console.error('Could not save portfolio content to GitHub:', error); throw error })
   }
   window.dispatchEvent(new CustomEvent('portfolio-local-content-updated'))
@@ -569,6 +569,7 @@ export async function saveSiteSettings(site) {
 
 export async function uploadImage(file, folder = 'uploads') {
   if (!file || !String(file.type || '').startsWith('image/')) throw new Error('Choose a valid image file.')
+  if (useGithubGateway) return uploadGitHubMedia(file, folder)
   if (!supabase) {
     // Store a compressed portrait in browser storage rather than the original
     // camera image. This prevents a multi-megabyte data URL from slowing every

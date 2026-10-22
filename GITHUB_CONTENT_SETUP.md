@@ -1,34 +1,46 @@
-# GitHub-backed portfolio content (no Supabase required)
+# GitHub-backed portfolio publishing
 
-The app can use a single JSON file in your GitHub repository as the shared source of truth. The Cloudflare Worker keeps your GitHub token server-side; never put a GitHub write token in frontend code.
+This build uses `maheshdave-builds/maheshdave-builds.github.io`, branch `main`, as the shared source of truth. The public site reads `public/portfolio-content.json`; the admin commits content and uploaded media into the same repository.
 
-## One-time setup
+## URLs
 
-1. Back up the current content from the browser where your latest edits exist. Browser-local edits do not automatically migrate to GitHub.
-2. Create `public/portfolio-content.json` in the repository using that exported content as the initial JSON document. If you do not have an export, use the site's bundled content as a starting point.
-3. Deploy `cloudflare-worker/index.js` as a Cloudflare Worker.
-4. Set Worker variables:
-   - `GITHUB_OWNER`: GitHub username or organization
-   - `GITHUB_REPO`: repository name
-   - `GITHUB_BRANCH`: deployment branch (usually `main`)
-   - `CONTENT_PATH`: `public/portfolio-content.json`
-   - `ALLOWED_ORIGIN`: exact production origin, no trailing slash
-5. Set Worker secrets:
-   - `GITHUB_TOKEN`: fine-grained token scoped to this repository with Contents read/write only
-   - `ADMIN_PASSWORD`: long, unique administrator password
-6. In GitHub repository Settings → Secrets and variables → Actions → Variables, add `VITE_GITHUB_CONTENT_API_URL` with the deployed Worker URL, e.g. `https://your-worker.your-subdomain.workers.dev`.
-7. Deploy the site again using GitHub Actions. Open `/mdadmin/login` and sign in using the Worker `ADMIN_PASSWORD`. No Supabase Auth account is required when the gateway URL is configured.
+- Public site: https://maheshdave-builds.github.io/
+- Admin login: https://maheshdave-builds.github.io/mdadmin/login
+- Admin dashboard: https://maheshdave-builds.github.io/mdadmin
+- Published content JSON: https://maheshdave-builds.github.io/portfolio-content.json
 
-## How it works
+If the repository is connected to a custom domain, use that domain with the same paths instead.
 
-- Public pages fetch the shared JSON document from the Worker with no-cache headers.
-- Admin content saves write the updated document through the Worker, which commits it to GitHub.
-- The Worker validates admin passwords and holds the GitHub token. Neither secret belongs in a `VITE_` variable or the repository.
-- Without `VITE_GITHUB_CONTENT_API_URL`, the app falls back to browser storage; those edits are not shared across browsers.
+## One-time repository setup
 
-## Limitations and care
+1. Ensure this project is in the `main` branch of `maheshdave-builds/maheshdave-builds.github.io` and `public/portfolio-content.json` exists.
+2. In GitHub, open **Settings → Pages** and select **GitHub Actions** as the build/deployment source.
+3. Ensure Actions are enabled and the workflow `.github/workflows/deploy.yml` can run. The workflow builds the Vite app and deploys `dist/` to Pages after each push to `main`.
+4. Open **Settings → Actions → General → Workflow permissions** and allow workflows to run. The provided Pages workflow requests the standard Pages deployment permissions.
 
-- Existing local edits must be exported/imported into the GitHub JSON file once; browser localStorage cannot be read from another device.
-- Large base64 image uploads may exceed the Worker document size limit. Prefer repository image assets or durable image URLs.
-- Each save creates a Git commit. If two editors save simultaneously, a conflict may occur; refresh and retry.
-- This replaces Supabase for portfolio content and admin login, but contact form messages remain browser-local in local mode unless a separate shared message service is implemented.
+## Sign in to the admin
+
+1. Create a **fine-grained personal access token** in GitHub Settings → Developer settings → Personal access tokens.
+2. Restrict it to **Only select repositories** → `maheshdave-builds/maheshdave-builds.github.io`.
+3. Grant **Contents: Read and write**. Metadata read access is automatic. The token must belong to an account with write access to this repository.
+4. Open `/mdadmin/login` and paste the token into the GitHub token field. The token is kept in this browser's `sessionStorage` only; signing out clears it. Use an expiry date and do not share the token or enter it on any other site.
+
+> Security note: this is a browser-side GitHub integration. A token entered in the admin is available to the site's JavaScript for the duration of that browser session. Use a narrowly scoped, short-lived token and sign out after publishing. For a stronger security boundary, replace direct browser writes with a server-side Worker that stores the token as a secret.
+
+## Publishing and media
+
+- Admin content writes update `public/portfolio-content.json` through the GitHub Contents API and create a commit on `main`.
+- Image uploads are committed under `public/uploads/<category>/`; content stores a public path such as `/uploads/profile/...`. Uploaded images therefore deploy with the site and are shared by all visitors/devices.
+- GitHub Pages rebuilds/deploys after each content or media commit. It can take a short time for the new version to appear. Refresh after the deployment workflow completes.
+- The save logic re-reads the current file SHA immediately before writing and retries once for a SHA conflict, which addresses the “does not match” publish error when the file changes between read and write.
+- Image uploads are limited to 8 MB each. Use optimized images for faster publishing.
+
+## Troubleshooting
+
+- **401 / invalid token:** create a new token and verify it has not expired or been revoked.
+- **403 / permission denied:** confirm the token is restricted to the correct repository and has Contents read/write; confirm your GitHub account has write access.
+- **Branch protection / ruleset error:** allow authorized commits to `main` or use a server-side publishing workflow that opens a pull request.
+- **Changes not live yet:** check the repository's Actions tab for the latest Pages deployment. A successful GitHub API commit does not mean the Pages deployment has already finished.
+- **Admin login does not load:** make sure GitHub Pages is enabled and the deployed site URL is correct. The application routes the admin at `/mdadmin/login`.
+
+No GitHub token is hard-coded in the build or committed in this repository.
