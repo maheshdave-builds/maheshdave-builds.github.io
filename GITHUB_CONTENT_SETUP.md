@@ -44,3 +44,7 @@ If the repository is connected to a custom domain, use that domain with the same
 - **Admin login does not load:** make sure GitHub Pages is enabled and the deployed site URL is correct. The application routes the admin at `/mdadmin/login`.
 
 No GitHub token is hard-coded in the build or committed in this repository.
+
+
+## Published articles visibility fix
+The public article filter accepts explicitly published GitHub CMS articles even when `published_at` is missing or malformed. If `published_at` is present and valid but in the future, the article remains scheduled and will appear after that time.

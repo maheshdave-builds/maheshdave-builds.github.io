@@ -94,6 +94,7 @@ function sanitizeNode(node, doc) {
 
   for (const attr of Array.from(node.attributes)) {
     const name = attr.name.toLowerCase()
+    const value = attr.value
     if (name.startsWith('on') || name === 'srcdoc') continue
     if (name === 'style') {
       if (tag !== 'span') continue
@@ -104,7 +105,6 @@ function sanitizeNode(node, doc) {
     }
     if (!allowed.has(name) && !common.has(name)) continue
 
-    const value = attr.value
     if (name === 'href' && !isSafeUrl(value)) continue
     if (name === 'src' && !isSafeUrl(value, { image: true })) continue
     if (name === 'target') {

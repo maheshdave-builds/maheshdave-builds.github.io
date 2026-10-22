@@ -7,6 +7,8 @@ const CONTENT_PATH = 'public/portfolio-content.json'
 const SESSION_KEY = 'portfolio-github-admin-session'
 const API = 'https://api.github.com'
 const RAW_CONTENT_URL = '/portfolio-content.json'
+const LOCAL_DEV = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+const LOCAL_DEV_KEY = 'portfolio-content-local-preview'
 
 export function githubGatewayConfigured() { return true }
 export function getGatewayPassword() { try { return sessionStorage.getItem(SESSION_KEY) || '' } catch { return '' } }
@@ -25,6 +27,9 @@ function headers(token = getGatewayPassword()) {
   return { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
 }
 async function readPublicContent() {
+  if (LOCAL_DEV) {
+    try { const draft = localStorage.getItem(LOCAL_DEV_KEY); if (draft) return JSON.parse(draft) } catch {}
+  }
   const response = await fetch(`${RAW_CONTENT_URL}?v=${Date.now()}`, { cache: 'no-store' })
   if (!response.ok) throw new Error(`Could not load published portfolio content (${response.status}).`)
   return response.json()
@@ -44,6 +49,11 @@ function encodeBase64(bytes) {
 }
 
 export async function uploadGitHubMedia(file, folder = 'uploads') {
+  if (LOCAL_DEV) {
+    if (!file || !String(file.type || '').startsWith('image/')) throw new Error('Choose a valid image file.')
+    if (file.size > 2 * 1024 * 1024) throw new Error('For local preview, use an image smaller than 2 MB.')
+    return await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(file) })
+  }
   const token = getGatewayPassword()
   if (!token) throw new Error('Your GitHub session expired. Sign in again before uploading media.')
   if (!file || !String(file.type || '').startsWith('image/')) throw new Error('Choose a valid image file.')
@@ -62,6 +72,13 @@ export async function uploadGitHubMedia(file, folder = 'uploads') {
 }
 
 export async function gatewayRequest(path = '', options = {}) {
+  if (LOCAL_DEV && options.method === 'PUT') {
+    let payload
+    try { payload = JSON.parse(options.body || '{}') } catch { throw new Error('Portfolio content is not valid JSON.') }
+    localStorage.setItem(LOCAL_DEV_KEY, JSON.stringify(payload))
+    window.dispatchEvent(new Event('portfolio-local-content-updated'))
+    return { ok: true, localPreview: true, updated_at: new Date().toISOString() }
+  }
   if (options.method === 'GET' || !options.method) return readPublicContent()
   if (options.method !== 'PUT') throw new Error('Unsupported GitHub content operation.')
   const token = getGatewayPassword()

@@ -40,10 +40,17 @@ export function fromDateTimeLocal(value) {
 
 /** Posts visible to the public: published, with a publish time that has passed. */
 export function isPostPublic(post, now = Date.now()) {
-  if (!post || post.status !== 'published') return false
-  if (!post.published_at) return false
+  if (!post) return false
+  // GitHub-backed CMS records may be saved as published before a publish
+  // timestamp is populated. Do not hide an explicitly published article just
+  // because published_at is absent; when a timestamp exists, still respect it.
+  const status = String(post.status || '').trim().toLowerCase()
+  if (status !== 'published') return false
+  if (!post.published_at) return true
   const published = new Date(post.published_at).getTime()
-  return Number.isFinite(published) && published <= now
+  // Treat malformed legacy timestamps as published rather than making a
+  // successfully published article disappear from the public site.
+  return !Number.isFinite(published) || published <= now
 }
 
 export function sortPosts(posts = []) {

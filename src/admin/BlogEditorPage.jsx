@@ -183,6 +183,18 @@ function RichText({ value, onChange }) {
         data-placeholder="Write the article…"
         onInput={sync}
         onBlur={sync}
+        onPaste={(event) => {
+          const clipboard = event.clipboardData
+          const html = clipboard?.getData('text/html')
+          const plain = clipboard?.getData('text/plain') || ''
+          // Pasting raw HTML source (rather than rich text copied from a page)
+          // should render the markup in the editor instead of displaying tags.
+          if (!html && /<\/?[a-z][^>]*>/i.test(plain)) {
+            event.preventDefault()
+            document.execCommand('insertHTML', false, sanitizeHtml(plain))
+            sync()
+          }
+        }}
       />
     </div>
   )

@@ -60,7 +60,18 @@ export function useRouteScroll() {
       const id = decodeURIComponent(hash.slice(1))
       const frame = requestAnimationFrame(() => {
         const target = document.getElementById(id)
-        if (target) target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+        if (target) {
+          const header = document.querySelector('header')
+          const headerHeight = header ? header.getBoundingClientRect().height : 0
+          const rect = target.getBoundingClientRect()
+          const available = Math.max(0, window.innerHeight - headerHeight)
+          // Center short sections in the usable viewport; for long sections align
+          // their top just below the fixed header so the first content is visible.
+          const desiredTop = rect.height < available * 0.82
+            ? window.scrollY + rect.top - headerHeight - Math.max(0, (available - rect.height) / 2)
+            : window.scrollY + rect.top - headerHeight - 16
+          window.scrollTo({ top: Math.max(0, desiredTop), behavior: reduce ? 'auto' : 'smooth' })
+        }
       })
       return () => cancelAnimationFrame(frame)
     }

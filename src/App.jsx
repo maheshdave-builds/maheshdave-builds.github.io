@@ -9,6 +9,7 @@ import SiteHeader, { SiteFooter, SiteFavicon } from './components/SiteChrome'
 import { NAV_ITEMS } from './lib/navigation'
 import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
+import ArticlesPage from './pages/ArticlesPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { useContent } from './contexts/hooks'
 import ThemeCursor from './components/ThemeCursor'
@@ -85,6 +86,10 @@ function PublicSite() {
   }
 
   const articleMatch = matchRoute('/blog/:slug', pathname)
+
+  if (pathname === '/articles') {
+    return <><SiteHeader activeSection="blog" /><ArticlesPage /><SiteFooter /></>
+  }
 
   if (articleMatch) {
     return (
