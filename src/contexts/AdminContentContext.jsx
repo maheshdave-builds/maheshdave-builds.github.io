@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { fetchAdminContent, getInitialAdminContent, contentSource } from '../lib/content'
+import { fetchAdminContent, getInitialAdminContent, fetchPublishedContentForAdmin, hasLocalAdminDraft, contentSource } from '../lib/content'
 import { fallbackContent } from '../lib/seed'
 import { DEFAULT_THEME } from '../lib/theme'
 import { AdminContentContext } from './contexts'
@@ -30,7 +30,12 @@ export function AdminContentProvider({ children }) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (contentSource === 'local') return undefined
+    if (contentSource === 'local') {
+      if (hasLocalAdminDraft()) return undefined
+      let active = true
+      fetchPublishedContentForAdmin().then((next) => { if (active) setState(next) }).catch((loadError) => { if (active) setError(loadError) })
+      return () => { active = false }
+    }
     let active = true
 
     ;(async () => {

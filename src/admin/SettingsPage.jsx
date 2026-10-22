@@ -4,7 +4,7 @@ import { useAdminContent } from '../contexts/hooks'
 import { useAuth } from '../contexts/hooks'
 import { useTheme } from '../contexts/hooks'
 import { useRouter } from '../lib/routerCore'
-import { saveSiteSettings, exportLocalContent, importLocalContent, uploadImage } from '../lib/content'
+import { saveSiteSettings, exportLocalContent, importLocalContent, uploadImage, publishLocalContentToGitHub } from '../lib/content'
 import { AdminLayout } from './AdminLayout'
 import ImageCropDialog from './ImageCropDialog'
 
@@ -19,6 +19,10 @@ export default function SettingsPage() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [logoCropFile, setLogoCropFile] = useState(null)
+  const [githubToken, setGithubToken] = useState('')
+  const [publishBusy, setPublishBusy] = useState(false)
+  const [publishNotice, setPublishNotice] = useState('')
+  const [publishError, setPublishError] = useState('')
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -338,7 +342,24 @@ export default function SettingsPage() {
               </div>
               <Database size={16} aria-hidden="true" />
             </div>
-            <p className="field-hint">Download a JSON backup before clearing browser data or moving to another browser. Importing replaces the current local portfolio content.</p>
+            <p className="field-hint">Publish your current browser draft to the shared GitHub content file. After GitHub Pages redeploys, all devices and visitors will see the published version.</p>
+            <div className="admin-panel" style={{ margin: '14px 0', padding: '14px' }}>
+              <label htmlFor="github-publish-token">GitHub fine-grained personal access token</label>
+              <input id="github-publish-token" type="password" autoComplete="off" value={githubToken} onChange={(event) => setGithubToken(event.target.value)} placeholder="github_pat_…" />
+              <small className="field-hint">Create a fine-grained token limited to <strong>maheshdave-builds/maheshdave-builds.github.io</strong> with <strong>Contents: Read and write</strong>. It is used only for this publish action and is not saved in browser storage or included in the website source. Anyone with access to the token can modify your repository; do not share it.</small>
+              {publishNotice ? <p className="form-notice" role="status">{publishNotice}</p> : null}
+              {publishError ? <p className="form-error" role="alert">{publishError}</p> : null}
+              <button type="button" className="button button-primary" disabled={publishBusy || !githubToken.trim()} onClick={async () => {
+                setPublishBusy(true); setPublishNotice(''); setPublishError('')
+                try {
+                  await publishLocalContentToGitHub(githubToken)
+                  setGithubToken('')
+                  setPublishNotice('Published to GitHub. GitHub Actions will rebuild the site; allow a few minutes for every device to receive the update.')
+                } catch (error) { setPublishError(error.message || 'Publishing failed.') }
+                finally { setPublishBusy(false) }
+              }}>{publishBusy ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <Check size={15} aria-hidden="true" />}{publishBusy ? 'Publishing to GitHub…' : 'Publish changes to all devices'}</button>
+            </div>
+            <p className="field-hint">You can still export a backup or import a previous JSON backup below.</p>
             <div className="admin-welcome-actions">
               <button type="button" className="button button-secondary" onClick={() => { const blob = new Blob([exportLocalContent()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'mahesh-portfolio-backup.json'; anchor.click(); URL.revokeObjectURL(url) }}>
                 <Download size={15} aria-hidden="true" /> Export backup
@@ -361,7 +382,7 @@ export default function SettingsPage() {
             <dl className="settings-list">
               <div>
                 <dt>Source</dt>
-                <dd>Local storage</dd>
+                <dd>Browser draft + GitHub published JSON</dd>
               </div>
               <div>
                 <dt>Admin access</dt>
@@ -369,7 +390,7 @@ export default function SettingsPage() {
               </div>
             </dl>
             <p className="field-hint">
-              Content, theme settings, and the admin password hash stay in this browser. This is a convenience lock, not server-side security; edits do not sync to other visitors automatically.
+              Unpublished edits remain in this browser. Use “Publish changes to all devices” to commit the content JSON to GitHub. The admin password screen is a convenience lock, not server-side security.
             </p>
           </section>
         </div>
