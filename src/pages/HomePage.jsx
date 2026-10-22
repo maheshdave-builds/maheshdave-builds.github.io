@@ -360,15 +360,15 @@ function Blog({ posts, copy, sliderIntervalSeconds }) {
 
   return (
     <section id="blog" className="section-wrap blog-section" aria-labelledby="blog-title">
-      <SectionHeading eyebrow="NOTES & IDEAS" id="blog-title" title={copy.blogTitle} description={copy.blogDescription} />
+      <SectionHeading eyebrow="ARTICLES & IDEAS" id="blog-title" title={copy.blogTitle} description={copy.blogDescription} />
 
       {published.length ? (
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles & notes" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
       ) : (
         <div className="blog-empty-state">
           <BookOpen size={22} aria-hidden="true" />
           <div>
-            <h3>Notes coming soon</h3>
+            <h3>Articles coming soon</h3>
             <p>Articles appear here as soon as they are published from the admin dashboard.</p>
           </div>
         </div>

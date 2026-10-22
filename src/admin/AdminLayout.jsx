@@ -55,7 +55,7 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/admin/login', { replace: true })
+    navigate('/mdadmin/login', { replace: true })
   }
 
   return (
@@ -66,7 +66,7 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
 
       <aside className={`admin-sidebar ${navOpen ? 'admin-sidebar-open' : ''}`}>
         <div className="admin-brand-row">
-          <Link className="brand admin-brand" to="/admin">
+          <Link className="brand admin-brand" to="/mdadmin">
             <span className="brand-mark" aria-hidden="true">
               MD
             </span>
@@ -96,7 +96,7 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
           {ADMIN_NAV.map((item) => {
             const Icon = NAV_ICONS[item.key] || LayoutDashboard
             const count = item.countKey ? counts?.[item.countKey] : null
-            const active = item.path === '/admin' ? pathname === '/admin' : pathname.startsWith(item.path)
+            const active = item.path === '/mdadmin' ? pathname === '/mdadmin' : pathname.startsWith(item.path)
             return (
               <Link
                 key={item.key}

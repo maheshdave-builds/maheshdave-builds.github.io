@@ -39,45 +39,16 @@ function AuthShell({ title, subtitle, children, footer }) {
   )
 }
 
-export function LoginPage({ redirectTo = '/admin' }) {
-  const { signIn, setupAdmin, configured, adminConfigured } = useAuth()
+export function LoginPage({ redirectTo = '/mdadmin' }) {
+  const { signIn, configured } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
 
-  if (!configured) {
-    return (
-      <AuthShell title="Local admin unavailable" subtitle="The admin setup could not be initialized." footer={null}>
-        <p className="form-error">Please reload the page and try again.</p>
-      </AuthShell>
-    )
-  }
-
-  if (!adminConfigured) {
-    const createAdmin = async (event) => {
-      event.preventDefault(); setBusy(true); setError('')
-      if (password !== confirmPassword) { setError('Passwords do not match.'); setBusy(false); return }
-      try {
-        await setupAdmin(email.trim(), password)
-        window.history.replaceState(null, '', redirectTo)
-        window.dispatchEvent(new PopStateEvent('popstate'))
-      } catch (setupError) { setError(setupError.message) } finally { setBusy(false) }
-    }
-    return (
-      <AuthShell title="Set up your admin" subtitle="Create the first administrator for this browser. Use a strong password of at least 12 characters." footer={null}>
-        <div className="notice-callout notice-warning"><ShieldAlert size={18} aria-hidden="true" /><p>This is a browser-only CMS. Your edits and login are stored in this browser; they are not protected by a server and do not automatically update the live site for other visitors.</p></div>
-        <form className="auth-form" onSubmit={createAdmin} noValidate>
-          <label>Email address<div className="input-with-icon"><Mail size={15} aria-hidden="true" /><input type="email" required autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></div></label>
-          <label>Create password<div className="input-with-icon"><Lock size={15} aria-hidden="true" /><input type="password" required minLength={12} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 12 characters" /></div></label>
-          <label>Confirm password<div className="input-with-icon"><Lock size={15} aria-hidden="true" /><input type="password" required autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Repeat password" /></div></label>
-          {error ? <p className="form-error" role="alert">{error}</p> : null}
-          <button type="submit" className="button button-primary auth-submit" disabled={busy}>{busy ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <ShieldCheck size={16} aria-hidden="true" />}{busy ? 'Creating account…' : 'Create administrator'}</button>
-        </form>
-      </AuthShell>
-    )
-  }
+  // Static-only mode skips cloud login. The editor only changes a local draft;
+  // publishing requires exporting JSON and committing it to GitHub.
+  if (!configured) return null
 
   const submit = async (event) => {
     event.preventDefault()
@@ -99,11 +70,11 @@ export function LoginPage({ redirectTo = '/admin' }) {
   return (
     <AuthShell
       title="Sign in"
-      subtitle="Administrator access only. Sign in with the administrator account already registered in this browser."
-      footer={<span>Offline admin · Password can be changed from account settings.</span>}
+      subtitle="Local draft editor. Export changes and commit them to GitHub to publish."
+      footer={<span>Static editor · Local drafts only.</span>}
     >
       <form className="auth-form" onSubmit={submit} noValidate>
-        <label>
+        {<label>
           Email address
           <div className="input-with-icon">
             <Mail size={15} aria-hidden="true" />
@@ -117,7 +88,7 @@ export function LoginPage({ redirectTo = '/admin' }) {
               placeholder="you@example.com"
             />
           </div>
-        </label>
+        </label>}
 
         <label>
           Password
@@ -175,10 +146,10 @@ export function ForgotPasswordPage() {
     <AuthShell
       title="Reset your password"
       subtitle="We'll email a recovery link to the address on your administrator account."
-      footer={<Link to="/admin/login">Return to sign in</Link>}
+      footer={<Link to="/mdadmin/login">Return to sign in</Link>}
     >
       {!configured ? (
-        <p className="form-error">Supabase is not configured, so recovery email cannot be sent.</p>
+        <p className="form-error">Password recovery is unavailable in static-only mode.</p>
       ) : sent ? (
         <div className="notice-callout" role="status">
           <Mail size={18} aria-hidden="true" />
@@ -251,7 +222,7 @@ export function ResetPasswordPage() {
       if (!session && tokenHash) await verifyRecovery(tokenHash)
       await updatePassword(password)
       setDone(true)
-      window.history.replaceState(null, '', '/admin/login')
+      window.history.replaceState(null, '', '/mdadmin/login')
     } catch (resetError) {
       setError(resetError.message)
     } finally {
@@ -262,7 +233,7 @@ export function ResetPasswordPage() {
   if (done) {
     return (
       <AuthShell title="Password updated" subtitle="You can now sign in with your new password.">
-        <Link className="button button-primary auth-submit" to="/admin/login">
+        <Link className="button button-primary auth-submit" to="/mdadmin/login">
           Go to sign in
         </Link>
       </AuthShell>
@@ -273,10 +244,10 @@ export function ResetPasswordPage() {
     <AuthShell
       title="Choose a new password"
       subtitle="Use a long, unique password. It is stored only as a hash by the authentication provider."
-      footer={<Link to="/admin/login">Cancel and return to sign in</Link>}
+      footer={<Link to="/mdadmin/login">Cancel and return to sign in</Link>}
     >
       {!configured ? (
-        <p className="form-error">Supabase is not configured.</p>
+        <p className="form-error">Password management is unavailable in static-only mode.</p>
       ) : (
         <form className="auth-form" onSubmit={submit} noValidate>
           <label>

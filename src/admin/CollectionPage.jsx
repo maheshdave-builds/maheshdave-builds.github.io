@@ -276,7 +276,7 @@ export default function CollectionPage({ config, mode, recordId }) {
       await reload()
       setNotice(editing ? 'Changes saved.' : 'Item published to the site.')
       setBaseline(JSON.stringify(form))
-      if (!editing && saved?.id) navigate(`/admin/${config.key}`, { replace: true })
+      if (!editing && saved?.id) navigate(`/mdadmin/${config.key}`, { replace: true })
     } catch (saveError) {
       setError(saveError.message || 'The item could not be saved.')
     } finally {
@@ -320,7 +320,7 @@ export default function CollectionPage({ config, mode, recordId }) {
         <div className="admin-error">
           <h2>That {config.singular} no longer exists</h2>
           <p>It may have been deleted in another tab.</p>
-          <Link className="button button-secondary" to={`/admin/${config.key}`}>
+          <Link className="button button-secondary" to={`/mdadmin/${config.key}`}>
             Back to {config.title.toLowerCase()}
           </Link>
         </div>
@@ -337,11 +337,11 @@ export default function CollectionPage({ config, mode, recordId }) {
       counts={{ [config.key]: rows.length }}
       actions={
         showEditor ? (
-          <Link className="button button-secondary button-sm" to={`/admin/${config.key}`}>
+          <Link className="button button-secondary button-sm" to={`/mdadmin/${config.key}`}>
             <ArrowLeft size={15} aria-hidden="true" /> Back to list
           </Link>
         ) : (
-          <Link className="button button-primary button-sm" to={`/admin/${config.key}/new`}>
+          <Link className="button button-primary button-sm" to={`/mdadmin/${config.key}/new`}>
             <Plus size={15} aria-hidden="true" /> New {config.singular}
           </Link>
         )
@@ -430,7 +430,7 @@ export default function CollectionPage({ config, mode, recordId }) {
                 {busy ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <Save size={15} aria-hidden="true" />}
                 {busy ? 'Saving…' : editing ? 'Save changes' : `Add ${config.singular}`}
               </button>
-              <Link className="button button-secondary" to={`/admin/${config.key}`}>
+              <Link className="button button-secondary" to={`/mdadmin/${config.key}`}>
                 Cancel
               </Link>
             </div>
@@ -483,7 +483,7 @@ export default function CollectionPage({ config, mode, recordId }) {
                     <button type="button" className="record-action" onClick={() => move(row, 1)} aria-label="Move down">
                       <ArrowDown size={14} />
                     </button>
-                    <Link className="record-action" to={`/admin/${config.key}/${row.id}`} aria-label="Edit">
+                    <Link className="record-action" to={`/mdadmin/${config.key}/${row.id}`} aria-label="Edit">
                       <Pencil size={14} />
                     </Link>
                     <button
@@ -504,7 +504,7 @@ export default function CollectionPage({ config, mode, recordId }) {
               {query ? <EyeOff size={22} aria-hidden="true" /> : <Eye size={22} aria-hidden="true" />}
               <p>{query ? 'No items match that search.' : `No ${config.title.toLowerCase()} yet.`}</p>
               {!query ? (
-                <Link className="button button-secondary button-sm" to={`/admin/${config.key}/new`}>
+                <Link className="button button-secondary button-sm" to={`/mdadmin/${config.key}/new`}>
                   <Plus size={14} aria-hidden="true" /> Add the first one
                 </Link>
               ) : null}

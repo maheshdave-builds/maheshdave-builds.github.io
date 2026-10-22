@@ -1,37 +1,22 @@
-# Mahesh Dave — Portfolio Studio
+# Mahesh Dave Portfolio — GitHub-only static mode
 
-A responsive React + Vite portfolio with a light professional theme, theme-aware scrollbar, animated custom cursor on pointer devices, modern capsule navigation, motion effects, and a browser-local admin content editor.
+This version has **no Supabase, Cloudflare Worker, external database, gateway, or hosted API dependency**. The public website reads `public/portfolio-content.json` from the GitHub repository.
 
 ## Run locally
 
-```bash
-npm install
-npm run dev
-```
+1. Install Node.js (LTS).
+2. Run `npm install`.
+3. Run `npm run dev`.
+4. Open `/mdadmin` to edit a browser-local draft.
 
-Open the local URL printed by Vite (normally `http://localhost:5173`). Admin: `http://localhost:5173/admin`.
+## Publish changes to every visitor
 
-No `.env.local`, Supabase URL, API key, or backend account is required for local editing mode.
+1. In Admin → Settings, export the portfolio JSON backup.
+2. Replace `public/portfolio-content.json` with that exported JSON.
+3. Copy any new image files into `public/` and update their paths in the JSON if needed.
+4. Commit and push the JSON and image assets to GitHub.
+5. Wait for GitHub Pages deployment to finish. Visitors on every device then see the committed content.
 
-## Build
+## Static-only limitations
 
-```bash
-npm run build
-npm run preview
-```
-
-## Admin capabilities
-
-- Profile, resume, social links, portrait upload
-- Editable homepage headlines/descriptions, about statistics, skills/toolkit groups
-- Project CRUD with project logo/thumbnail and client logos
-- Certification CRUD with badge/logo and verification URL
-- Experience and education CRUD
-- Blog editor with headings, bold/italic/underline/strike, alignment, lists, quotes, links, colors/highlights, inline images, image upload, undo/redo, and cover image
-- Site title and logo upload, favicon update, JSON backup import/export
-
-## Local storage and deployment caveats
-
-The editor stores data in the current browser's local storage. It does not publish changes to GitHub Pages or synchronize them between browsers/devices. Use the JSON export/import to back up or move content. For a public production admin panel, configure a real backend with server-side authentication and permissions; this no-backend admin route is intended for local/personal editing only.
-
-See `ADMIN_GUIDE.md` for details.
+GitHub Pages cannot securely write repository files from browser JavaScript. Admin edits remain in the current browser until exported; they do not automatically synchronize to another browser. This static admin UI is **not a security boundary** and has no server-side password protection. Do not put secrets or private data in it. Only committed repository content is shared publicly.

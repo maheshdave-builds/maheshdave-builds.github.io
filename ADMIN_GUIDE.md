@@ -1,41 +1,20 @@
-# Portfolio Studio — Local Admin Setup (No Supabase)
+# Admin guide — GitHub-only publishing (Option A)
 
-This project runs as a static Vite + React site and includes a browser-local content management dashboard. No Supabase project, database, API key, or `.env.local` file is required.
+The public portfolio uses `public/portfolio-content.json` as its shared published content source. No Supabase account, Cloudflare Worker, or external database is needed for this publishing workflow.
 
-## 1. Start the site
+## Edit and publish content
 
-```bash
-npm install
-npm run dev
-```
+1. Open `/mdadmin` on your own development/local copy and make your edits. The editor saves its working draft in that browser's local storage.
+2. In **Admin → Settings → Export or restore content**, choose **Export backup**. This downloads `mahesh-portfolio-backup.json` containing the complete editable content/settings.
+3. Copy the downloaded JSON over `public/portfolio-content.json` in your local repository. Keep the filename exactly `portfolio-content.json`.
+4. Add any new image files to the repository under `public/` and ensure the content JSON references their deployed paths. Existing image uploads saved as browser data URLs should be converted to repository image files for production use.
+5. Validate JSON syntax, run `npm run build`, then commit and push the changed JSON and media files to GitHub.
+6. Wait for GitHub Pages deployment to complete. All visitors/devices will see the published version after the deployment and browser cache refresh.
 
-Open `/admin`. On first visit, create your administrator email and password. Use a strong password of at least 12 characters. The login session is held in the current browser session. Use the admin's **Settings** area to change your password if the control is available in this build.
+## Important limitations
 
-## 2. Manage the website
-
-- **Profile & about** — edit your name, title, introduction, biography, contact details, resume link, social links and portrait.
-- **Page content** — edit supported section headings and copy.
-- **Page structure** — reorder built-in sections, hide/show sections, create custom sections, edit menu labels and destinations, add menu links, and hide/show or remove menu items.
-- **Projects** — add, edit, remove, categorize, and publish projects. The public page displays project cards in a horizontally animated slider; category tabs are not used on the homepage.
-- **Experience / Certifications / Education** — manage these records.
-- **Blog** — create, edit, draft and publish articles.
-- **Theme & branding** — change supported theme tokens, preview a draft and publish the selected theme.
-- **Site settings** — update supported site metadata and appearance preferences.
-
-Changes are saved to this browser's local storage and appear in the public site when opened in the same browser. Use the backup/export feature where available and keep a copy of your data. Images are compressed and stored as data URLs in local storage, so use optimized images to avoid filling browser storage. The profile photo editor includes a full-image modal preview.
-
-## 3. Important limitations of static/local mode
-
-A static website cannot securely provide server-backed authentication or shared CMS writes by itself. The local admin password is a convenience gate, not a security boundary: a visitor with access to the browser or source can bypass it. Content edits are not automatically shared with other browsers or visitors and do not update GitHub Pages by themselves. To publish edits for everyone without a hosted database, export the content/backup if supported, then commit the generated content to the project and redeploy; this workflow can be expanded if desired. Do not store secrets or sensitive personal data in this local CMS.
-
-Contact form submissions cannot be collected into a shared inbox without a backend. Visitors can use the displayed email address instead. Password recovery email is not available in local mode.
-
-## 4. Verify and build
-
-```bash
-npm run lint
-npm run build
-npm run preview
-```
-
-The production bundle is written to `dist/`. Deploy it using your usual static hosting workflow. GitHub Pages requires the configured base path and SPA fallback files to remain in place.
+- GitHub Pages is static hosting. It cannot securely accept writes to the Git repository from a browser-only admin panel. This option intentionally uses **export → commit → deploy** instead of automatic publishing.
+- Browser-local edits are drafts for that browser until exported and committed. Importing a backup on another browser restores a draft there; it does not publish the content by itself.
+- A password gate implemented only in frontend JavaScript is not a security boundary. Do not put GitHub tokens, deploy keys, or passwords in the frontend. For this no-third-party option, do not treat the static admin route as a secure private publishing API.
+- Contact form submissions cannot be shared/collected centrally without a server-side service. This static option cannot provide a cross-device admin inbox.
+- Before switching, export the browser that contains your latest customizations and use that JSON as the source of truth. Do not clear its local storage until you have verified the backup.

@@ -18,11 +18,12 @@ export default function StructurePage() {
   const [order, setOrder] = useState(() => [...new Set([...(structure.order || DEFAULT_ORDER), ...DEFAULT_ORDER, ...(site.customSections || []).map((section) => section.id)])])
   const [hidden, setHidden] = useState(structure.hidden || [])
   const [menu, setMenu] = useState(site.navigationLinks || NAV_ITEMS.map((item) => ({ ...item })))
+  const [menuStyle, setMenuStyle] = useState(site.menuStyle || 'underline')
   const [customSections, setCustomSections] = useState(site.customSections || [])
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
-  const dirty = useMemo(() => JSON.stringify({ order, hidden, menu, customSections }) !== JSON.stringify({ order: structure.order || DEFAULT_ORDER, hidden: structure.hidden || [], menu: site.navigationLinks || NAV_ITEMS, customSections: site.customSections || [] }), [order, hidden, menu, customSections, structure.order, structure.hidden, site.navigationLinks, site.customSections])
+  const dirty = useMemo(() => JSON.stringify({ order, hidden, menu, menuStyle, customSections }) !== JSON.stringify({ order: structure.order || DEFAULT_ORDER, hidden: structure.hidden || [], menu: site.navigationLinks || NAV_ITEMS, menuStyle: site.menuStyle || 'underline', customSections: site.customSections || [] }), [order, hidden, menu, menuStyle, customSections, structure.order, structure.hidden, site.navigationLinks, site.menuStyle, site.customSections])
 
   const move = (index, direction) => setOrder((current) => {
     const next = [...current]
@@ -39,8 +40,8 @@ export default function StructurePage() {
   const save = async () => {
     setBusy(true); setError(''); setNotice('')
     try {
-      const nextSite = { ...site, structure: { order, hidden }, navigationLinks: menu.filter((item) => item.label.trim() && item.href.trim()), customSections }
-      await saveSetting('site_structure', { structure: nextSite.structure, navigationLinks: nextSite.navigationLinks, customSections: nextSite.customSections })
+      const nextSite = { ...site, menuStyle, structure: { order, hidden }, navigationLinks: menu.filter((item) => item.label.trim() && item.href.trim()), customSections }
+      await saveSetting('site_structure', { structure: nextSite.structure, navigationLinks: nextSite.navigationLinks, customSections: nextSite.customSections, menuStyle: nextSite.menuStyle })
       setSite(nextSite)
       setNotice('Page structure and navigation saved.')
     } catch (saveError) { setError(saveError.message || 'Could not save page structure.') }
@@ -88,6 +89,15 @@ export default function StructurePage() {
 
       <section className="admin-panel structure-panel">
         <div className="editor-heading"><div><p className="eyebrow">PRIMARY NAVIGATION</p><h2>Menu items</h2><p>Change the label or destination, add a link, or remove a menu item.</p></div><button type="button" className="button button-secondary button-sm" onClick={addMenu}><Plus size={15} /> Add menu item</button></div>
+        <label className="field-block menu-style-picker">Navigation style
+          <select value={menuStyle} onChange={(event) => setMenuStyle(event.target.value)}>
+            <option value="underline">Animated underline</option>
+            <option value="pill">Floating pill</option>
+            <option value="minimal">Minimal text</option>
+            <option value="glow">Soft glow</option>
+          </select>
+          <small className="field-hint">Choose how the public header menu is presented. The current selection is saved with the site structure.</small>
+        </label>
         <div className="menu-editor-list">
           {menu.map((item, index) => <div className="menu-editor-row" key={`${index}-${item.label}`}>
             <Link2 size={16} className="grip" />

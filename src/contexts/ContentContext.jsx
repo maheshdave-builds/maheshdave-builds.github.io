@@ -15,17 +15,17 @@ import { ContentContext } from './contexts'
  */
 export function ContentProvider({ children }) {
   const [content, setContent] = useState(() => ({ ...fallbackContent, theme: DEFAULT_THEME }))
-  const [status, setStatus] = useState(contentSource === 'supabase' ? 'loading' : 'local')
+  const [status, setStatus] = useState(contentSource === 'local' ? 'local' : 'loading')
   const [error, setError] = useState('')
   const [nonce, setNonce] = useState(0)
 
   useEffect(() => {
     let active = true
     const loadLocal = async () => {
-      try { const next = await fetchPublicContent(); if (active) { setContent(next); setStatus('local'); setError('') } }
+      try { const next = await fetchPublicContent(); if (active) { setContent(next); setStatus(contentSource === 'local' ? 'local' : 'ready'); setError('') } }
       catch (loadError) { if (active) setError(loadError?.message || 'Content could not be loaded.') }
     }
-    if (contentSource !== 'supabase') { loadLocal(); const onUpdate = () => loadLocal(); window.addEventListener('portfolio-local-content-updated', onUpdate); return () => { active = false; window.removeEventListener('portfolio-local-content-updated', onUpdate) } }
+    if (contentSource === 'local' || contentSource === 'github') { loadLocal(); const onUpdate = () => loadLocal(); window.addEventListener('portfolio-local-content-updated', onUpdate); return () => { active = false; window.removeEventListener('portfolio-local-content-updated', onUpdate) } }
 
     ;(async () => {
       try {

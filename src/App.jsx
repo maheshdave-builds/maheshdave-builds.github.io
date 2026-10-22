@@ -125,11 +125,13 @@ function PublicRoute({ preview }) {
 }
 
 function Routes() {
-  const { pathname } = useRouter()
+  const { pathname, navigate } = useRouter()
   const { theme } = useContent()
+  useEffect(() => { if (pathname === '/admin' || pathname.startsWith('/admin/')) navigate(pathname.replace(/^\/admin/, '/mdadmin'), { replace: true }) }, [pathname, navigate])
   useRouteScroll()
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return <div className="boot-screen">Opening admin…</div>
 
-  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+  if (pathname === '/mdadmin' || pathname.startsWith('/mdadmin/')) {
     return (
       <ThemeProvider theme={theme}>
         <Suspense fallback={<div className="boot-screen">Loading dashboard…</div>}>

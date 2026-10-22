@@ -69,7 +69,7 @@ drop policy if exists "admin manage posts" on public.blog_posts;
 create policy "admin manage posts" on public.blog_posts for all to authenticated using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin') with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 drop policy if exists "public read site settings" on public.site_settings;
-create policy "public read site settings" on public.site_settings for select to anon, authenticated using (key in ('site_title','site_description','social_links'));
+create policy "public read site settings" on public.site_settings for select to anon, authenticated using (key in ('site_title','site_description','social_links','branding','copy','stats','tech_stack','theme_published','site_structure'));
 drop policy if exists "admin manage settings" on public.site_settings;
 create policy "admin manage settings" on public.site_settings for all to authenticated using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin') with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 

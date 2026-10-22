@@ -12,6 +12,7 @@ import {
   Send,
   Trash2,
   Undo2,
+  Palette,
 } from 'lucide-react'
 import { Link } from '../lib/RouterLink'
 import { useRouter } from '../lib/routerCore'
@@ -20,6 +21,7 @@ import { deleteRecord, saveRecord, uploadImage } from '../lib/content'
 import { formatDate, fromDateTimeLocal, readingTime, slugify, toDateTimeLocal, truncate } from '../lib/format'
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
 import { AdminLayout, SearchField } from './AdminLayout'
+import ImageCropDialog from './ImageCropDialog'
 
 function blankPost() {
   return {
@@ -45,6 +47,8 @@ const TOOLBAR = [
     ['B', 'bold', 'Bold'],
     ['I', 'italic', 'Italic'],
     ['U', 'underline', 'Underline'],
+    ['S̶', 'strikeThrough', 'Strikethrough'],
+    ['Mark', 'hiliteColor', 'Highlight', '#fff0a6'],
   ],
   [
     ['H2', 'formatBlock', 'Heading 2', 'h2'],
@@ -55,8 +59,13 @@ const TOOLBAR = [
     ['• List', 'insertUnorderedList', 'Bulleted list'],
     ['1. List', 'insertOrderedList', 'Numbered list'],
     ['Quote', 'formatBlock', 'Block quote', 'blockquote'],
+    ['Code', 'insertHTML', 'Code block', '<pre><code>Write code here</code></pre>'],
   ],
   [
+    ['Align left', 'justifyLeft', 'Align left'],
+    ['Center', 'justifyCenter', 'Center text'],
+    ['Align right', 'justifyRight', 'Align right'],
+    ['HR', 'insertHorizontalRule', 'Horizontal rule'],
     ['Link', 'createLink', 'Insert link'],
     ['Unlink', 'unlink', 'Remove link'],
   ],
@@ -76,6 +85,7 @@ function RichText({ value, onChange }) {
   const ref = useRef(null)
   const fileRef = useRef(null)
   const [uploading, setUploading] = useState(false)
+  const [textColor, setTextColor] = useState('#2563eb')
 
   useEffect(() => {
     // Only reset the DOM when the editor is mounted for a different article,
@@ -88,7 +98,12 @@ function RichText({ value, onChange }) {
 
   const exec = (command, arg) => {
     ref.current?.focus()
-    if (command === 'createLink') {
+    if (command === 'insertHTML') {
+      document.execCommand('insertHTML', false, arg)
+    } else if (command === 'foreColor' || command === 'hiliteColor') {
+      document.execCommand('styleWithCSS', false, true)
+      document.execCommand(command, false, arg)
+    } else if (command === 'createLink') {
       const url = window.prompt('Link URL (https://…)')
       if (!url) return
       if (!/^https?:\/\//i.test(url)) {
@@ -141,6 +156,7 @@ function RichText({ value, onChange }) {
             ))}
           </div>
         ))}
+        <label className="rich-color-control" title="Text color"><Palette size={13} aria-hidden="true" /><input type="color" value={textColor} onChange={(event) => { setTextColor(event.target.value); exec('foreColor', event.target.value) }} aria-label="Text color" /></label>
         <button type="button" className="toolbar-upload" onClick={() => fileRef.current?.click()} disabled={uploading}>
           {uploading ? <Loader2 size={13} className="spin" aria-hidden="true" /> : <ImagePlus size={13} aria-hidden="true" />}
           {uploading ? 'Uploading' : 'Image'}
@@ -230,6 +246,7 @@ export default function BlogEditorPage({ mode, recordId }) {
   const [error, setError] = useState('')
   const [previewOpen, setPreviewOpen] = useState(false)
   const [slugTouched, setSlugTouched] = useState(false)
+  const [coverCropFile, setCoverCropFile] = useState(null)
 
   const editing = mode === 'edit'
   const record = editing ? posts.find((post) => String(post.id) === String(recordId)) : null
@@ -323,7 +340,7 @@ export default function BlogEditorPage({ mode, recordId }) {
       setBaseline(JSON.stringify(form))
       setNotice(status === 'published' ? 'Article published.' : 'Draft saved privately.')
       if (!form.id && saved?.id) {
-        navigate(`/admin/blog/${saved.id}`, { replace: true })
+        navigate(`/mdadmin/blog/${saved.id}`, { replace: true })
       }
     } catch (saveError) {
       setError(saveError.message || 'The article could not be saved.')
@@ -339,7 +356,7 @@ export default function BlogEditorPage({ mode, recordId }) {
     try {
       await deleteRecord('posts', form.id)
       await reload()
-      navigate('/admin/blog', { replace: true })
+      navigate('/mdadmin/blog', { replace: true })
     } catch (deleteError) {
       setError(deleteError.message || 'The article could not be deleted.')
     } finally {
@@ -352,7 +369,7 @@ export default function BlogEditorPage({ mode, recordId }) {
       <AdminLayout title="Article not found" eyebrow="ARTICLES">
         <div className="admin-error">
           <h2>That article no longer exists</h2>
-          <Link className="button button-secondary" to="/admin/blog">
+          <Link className="button button-secondary" to="/mdadmin/blog">
             Back to articles
           </Link>
         </div>
@@ -367,7 +384,7 @@ export default function BlogEditorPage({ mode, recordId }) {
         eyebrow="BLOG"
         counts={{ posts: posts.length }}
         actions={
-          <Link className="button button-primary button-sm" to="/admin/blog/new">
+          <Link className="button button-primary button-sm" to="/mdadmin/blog/new">
             <FileText size={15} aria-hidden="true" /> New article
           </Link>
         }
@@ -392,7 +409,7 @@ export default function BlogEditorPage({ mode, recordId }) {
                     <span className={`record-status ${post.status}`}>{post.status === 'published' ? (scheduled ? 'scheduled' : 'live') : 'draft'}</span>
                     <div className="record-info">
                       <strong>
-                        <Link to={`/admin/blog/${post.id}`}>{post.title}</Link>
+                        <Link to={`/mdadmin/blog/${post.id}`}>{post.title}</Link>
                       </strong>
                       <small>
                         /blog/{post.slug} · {readingTime(post.content)} min read
@@ -405,7 +422,7 @@ export default function BlogEditorPage({ mode, recordId }) {
                           <Eye size={14} />
                         </Link>
                       ) : null}
-                      <Link className="record-action" to={`/admin/blog/${post.id}`} aria-label="Edit article">
+                      <Link className="record-action" to={`/mdadmin/blog/${post.id}`} aria-label="Edit article">
                         <FileText size={14} />
                       </Link>
                     </div>
@@ -418,7 +435,7 @@ export default function BlogEditorPage({ mode, recordId }) {
               <FileText size={22} aria-hidden="true" />
               <p>{query ? 'No articles match that search.' : 'No articles yet. The first one starts with a title.'}</p>
               {!query ? (
-                <Link className="button button-secondary button-sm" to="/admin/blog/new">
+                <Link className="button button-secondary button-sm" to="/mdadmin/blog/new">
                   Write the first article
                 </Link>
               ) : null}
@@ -439,7 +456,7 @@ export default function BlogEditorPage({ mode, recordId }) {
           <button type="button" className="button button-secondary button-sm" onClick={() => setPreviewOpen(true)}>
             <Eye size={15} aria-hidden="true" /> Preview
           </button>
-          <Link className="button button-secondary button-sm" to="/admin/blog">
+          <Link className="button button-secondary button-sm" to="/mdadmin/blog">
             <ArrowLeft size={15} aria-hidden="true" /> Back
           </Link>
         </>
@@ -632,12 +649,7 @@ export default function BlogEditorPage({ mode, recordId }) {
                   input.onchange = async () => {
                     const file = input.files?.[0]
                     if (!file) return
-                    try {
-                      const url = await uploadImage(file, 'articles')
-                      change('cover_image_url', url)
-                    } catch (uploadError) {
-                      setError(uploadError.message)
-                    }
+                    setCoverCropFile(file)
                   }
                   input.click()
                 }}
@@ -665,6 +677,7 @@ export default function BlogEditorPage({ mode, recordId }) {
       </div>
 
       {previewOpen ? <PreviewDialog post={form} onClose={() => setPreviewOpen(false)} /> : null}
+      <ImageCropDialog file={coverCropFile} aspectRatio="16 / 9" title="Crop article cover" onCancel={() => setCoverCropFile(null)} onApply={async (croppedFile) => { try { const url = await uploadImage(croppedFile, 'articles'); change('cover_image_url', url); setCoverCropFile(null) } catch (uploadError) { setError(uploadError.message || 'Could not upload cropped cover.') } }} />
     </AdminLayout>
   )
 }

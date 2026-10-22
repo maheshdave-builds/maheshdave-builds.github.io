@@ -39,7 +39,7 @@ export default function SiteHeader({ activeSection }) {
 
   const close = () => setOpen(false)
   const socials = profile.social_urls || {}
-  const navLinks = (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_LINKS).filter((item) => item.visible !== false)
+  const navLinks = (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_LINKS).map((item) => ['notes', 'noted'].includes(String(item.label || '').trim().toLowerCase()) && String(item.href || '').includes('#blog') ? { ...item, label: 'Articles' } : item).filter((item) => item.visible !== false)
   const navTarget = (href) => String(href || '#home').startsWith('http') || String(href || '').startsWith('/') ? href : `/${href}`
 
   return (
@@ -58,7 +58,7 @@ export default function SiteHeader({ activeSection }) {
         </span>
       </Link>
 
-      <nav className={`main-nav ${open ? 'open' : ''}`} aria-label="Primary">
+      <nav className={`main-nav nav-style-${site.menuStyle || 'underline'} ${open ? 'open' : ''}`} aria-label="Primary">
         {navLinks.map((item, index) => {
           const href = item.href || '#home'
           const isExternal = /^https?:\/\//i.test(href)
@@ -209,9 +209,6 @@ export function SiteFooter() {
             <Mail size={13} aria-hidden="true" /> {site?.contactEmail || profile.email}
           </a>
           <Link to="/#home">Back to top ↑</Link>
-          <Link to="/admin" className="footer-admin">
-            Admin
-          </Link>
         </div>
       </div>
     </footer>

@@ -90,10 +90,10 @@ export default function DashboardPage() {
       counts={counts}
       actions={
         <>
-          <Link className="button button-secondary button-sm" to="/admin/blog/new">
+          <Link className="button button-secondary button-sm" to="/mdadmin/blog/new">
             <Plus size={15} aria-hidden="true" /> New article
           </Link>
-          <Link className="button button-primary button-sm" to="/admin/projects/new">
+          <Link className="button button-primary button-sm" to="/mdadmin/projects/new">
             <Plus size={15} aria-hidden="true" /> New project
           </Link>
         </>
@@ -113,10 +113,10 @@ export default function DashboardPage() {
             Content is saved in this browser. Published changes appear here immediately; export and redeploy the site to share them with other visitors.
           </p>
           <div className="admin-welcome-actions">
-            <Link className="button button-primary" to="/admin/theme">
+            <Link className="button button-primary" to="/mdadmin/theme">
               Open theme editor
             </Link>
-            <Link className="button button-secondary" to="/admin/content">
+            <Link className="button button-secondary" to="/mdadmin/content">
               Edit page copy
             </Link>
           </div>
@@ -132,15 +132,15 @@ export default function DashboardPage() {
       </section>
 
       <div className="admin-stat-grid">
-        <StatCard label="Published articles" value={stats.published} hint="Visible on the public site" icon={BookOpen} to="/admin/blog" />
-        <StatCard label="Drafts" value={stats.drafts} hint="Private until published" icon={FileText} to="/admin/blog" />
-        <StatCard label="Projects" value={projects.length} hint="Portfolio case cards" icon={FolderKanban} to="/admin/projects" />
+        <StatCard label="Published articles" value={stats.published} hint="Visible on the public site" icon={BookOpen} to="/mdadmin/blog" />
+        <StatCard label="Drafts" value={stats.drafts} hint="Private until published" icon={FileText} to="/mdadmin/blog" />
+        <StatCard label="Projects" value={projects.length} hint="Portfolio case cards" icon={FolderKanban} to="/mdadmin/projects" />
         <StatCard
           label="Unread messages"
           value={messages.status === 'ready' ? stats.unread : '—'}
           hint={messages.status === 'error' ? 'Inbox unavailable' : 'Contact form submissions'}
           icon={Inbox}
-          to="/admin/messages"
+          to="/mdadmin/messages"
         />
       </div>
 
@@ -151,7 +151,7 @@ export default function DashboardPage() {
               <p className="eyebrow">RECENT ACTIVITY</p>
               <h2>Recently updated</h2>
             </div>
-            <Link className="subtle-button" to="/admin/blog">
+            <Link className="subtle-button" to="/mdadmin/blog">
               All articles <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
           </div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                       {live ? <CheckCircle2 size={14} /> : post.status === 'published' ? <Clock size={14} /> : <Circle size={14} />}
                     </span>
                     <div>
-                      <Link to={`/admin/blog/${post.id}`}>{post.title}</Link>
+                      <Link to={`/mdadmin/blog/${post.id}`}>{post.title}</Link>
                       <small>
                         {live
                           ? `Published ${formatDate(post.published_at)}`
@@ -185,7 +185,7 @@ export default function DashboardPage() {
             <div className="records-empty">
               <BookOpen size={22} aria-hidden="true" />
               <p>No articles yet. Your first one starts with a title.</p>
-              <Link className="button button-secondary button-sm" to="/admin/blog/new">
+              <Link className="button button-secondary button-sm" to="/mdadmin/blog/new">
                 Write an article
               </Link>
             </div>
@@ -198,7 +198,7 @@ export default function DashboardPage() {
               <p className="eyebrow">INBOX</p>
               <h2>Latest messages</h2>
             </div>
-            <Link className="subtle-button" to="/admin/messages">
+            <Link className="subtle-button" to="/mdadmin/messages">
               <Eye size={14} aria-hidden="true" /> Open
             </Link>
           </div>
@@ -237,16 +237,16 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="admin-quick-grid">
-            <Link to="/admin/profile">
+            <Link to="/mdadmin/profile">
               <FileText size={16} aria-hidden="true" /> Edit profile <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
-            <Link to="/admin/experience/new">
+            <Link to="/mdadmin/experience/new">
               <Plus size={16} aria-hidden="true" /> Add experience <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
-            <Link to="/admin/certifications/new">
+            <Link to="/mdadmin/certifications/new">
               <Plus size={16} aria-hidden="true" /> Add certification <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
-            <Link to="/admin/theme">
+            <Link to="/mdadmin/theme">
               <Sparkles size={16} aria-hidden="true" /> Customise theme <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
           </div>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
               <p className="eyebrow">PUBLISHED THEME</p>
               <h2>Live appearance</h2>
             </div>
-            <Link className="subtle-button" to="/admin/theme">
+            <Link className="subtle-button" to="/mdadmin/theme">
               Edit
             </Link>
           </div>

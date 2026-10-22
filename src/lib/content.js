@@ -1,16 +1,13 @@
-// Static/browser-only mode: deliberately no Supabase or remote backend.
+// Fully static GitHub Pages mode: no database, gateway, or hosted API.
+// Edits are local drafts until exported and committed to the repository.
 const supabase = null
+const useGithubGateway = false
 import { fallbackContent, seedSite, seedProfile, DEFAULT_COPY, DEFAULT_STATS } from './seed'
 import { DEFAULT_THEME, validateTheme } from './theme'
 import { isPostPublic, sortPosts } from './format'
 
-// Data access for the portfolio. Every public read is subject to RLS: the anon
-// role only ever sees published rows and a whitelist of site_settings keys, so
-// drafts and contact submissions cannot be fetched from the browser even if a
-// request is crafted by hand.
-//
-// When Supabase is not configured the site renders the bundled seed content, so
-// it remains a working static site rather than a broken one.
+// Static data access for the portfolio. Public content is loaded from the
+// repository JSON file; admin edits are browser-local until exported and committed.
 
 export const contentSource = 'local'
 
@@ -117,13 +114,26 @@ export function getInitialAdminContent() {
   return readLocalContent()
 }
 
+let sharedWritePromise = Promise.resolve()
 function writeLocalContent(next) {
   try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(next)) }
   catch { throw new Error('Browser storage is full. Use smaller images or export your content backup before continuing.') }
+  if (useGithubGateway) {
+    sharedWritePromise = gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) })
+      .catch((error) => { console.error('Could not save portfolio content to GitHub:', error); throw error })
+  }
   window.dispatchEvent(new CustomEvent('portfolio-local-content-updated'))
   return next
 }
+async function flushSharedContent() { if (useGithubGateway) await sharedWritePromise }
 function updateLocalContent(updater) { return writeLocalContent(updater(readLocalContent())) }
+async function readSharedContent() {
+  try { return await gatewayRequest('', { method: 'GET', cache: 'no-store' }) }
+  catch (error) {
+    if (/not initialized|404|content file/i.test(error.message)) return readLocalContent()
+    throw error
+  }
+}
 export function exportLocalContent() { return JSON.stringify(readLocalContent(), null, 2) }
 export function importLocalContent(json) {
   let parsed
@@ -251,6 +261,10 @@ export function mergeSiteSettings(rows = []) {
     copy,
     stats,
     techStack: techStackValue,
+    structure: map.site_structure?.structure || {},
+    navigationLinks: map.site_structure?.navigationLinks || undefined,
+    customSections: map.site_structure?.customSections || [],
+    menuStyle: map.site_structure?.menuStyle || 'underline',
   }
 }
 
@@ -263,7 +277,20 @@ export function themeFromSettings(rows = []) {
 /* -------------------------------------------------------------- public read */
 
 export async function fetchPublicContent() {
-  if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
+  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
+  if (!supabase) {
+    // Public visitors use the versioned JSON file committed to the repository.
+    // The admin's local draft is only used in the editor's browser; publishing
+    // across devices requires exporting this JSON and committing it to GitHub.
+    let published = null
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL || '/'}portfolio-content.json`, { cache: 'no-store' })
+      if (response.ok) published = await response.json()
+    } catch { /* keep bundled content available offline */ }
+    const hasLocalDraft = (() => { try { return Boolean(localStorage.getItem(LOCAL_CONTENT_KEY)) } catch { return false } })()
+    const local = hasLocalDraft ? readLocalContent() : (published && typeof published === 'object' ? { ...fallbackContent, ...published } : readLocalContent())
+    return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME }
+  }
 
   const nowIso = new Date().toISOString()
   const [profileResult, projects, certifications, experience, education, posts, settings] = await Promise.allSettled([
@@ -281,7 +308,7 @@ export async function fetchPublicContent() {
     supabase
       .from('site_settings')
       .select('key,value')
-      .in('key', ['site_title', 'branding', 'copy', 'stats', 'tech_stack', 'theme_published']),
+      .in('key', ['site_title', 'branding', 'copy', 'stats', 'tech_stack', 'theme_published', 'site_structure']),
   ])
 
   const settled = (result, fallback) => (result.status === 'fulfilled' && !result.value.error ? result.value.data : fallback)
@@ -306,6 +333,7 @@ export async function fetchPublicContent() {
  * a client that skipped the list query.
  */
 export async function fetchPostBySlug(slug) {
+  if (useGithubGateway) return asArray((await readSharedContent()).posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (!supabase) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (supabase) {
     const { data, error } = await supabase
@@ -328,6 +356,12 @@ export async function fetchPostBySlug(slug) {
 const ADMIN_TABLES = ['profile', 'projects', 'certifications', 'experience', 'education', 'blog_posts', 'site_settings']
 
 export async function fetchAdminContent() {
+  if (useGithubGateway) {
+    const shared = await readSharedContent()
+    const merged = { ...readLocalContent(), ...shared }
+    try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(merged)) } catch { /* shared GitHub content remains authoritative */ }
+    return merged
+  }
   if (!supabase) return readLocalContent()
 
   const [profileResult, projects, certifications, experience, education, posts, settings] = await Promise.allSettled([
@@ -452,6 +486,7 @@ export async function saveRecord(collection, record) {
     const current = readLocalContent(); const rows = asArray(current[collection]); const saved = { ...record, id: record.id && !String(record.id).startsWith('seed-') ? record.id : `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, updated_at: new Date().toISOString() }
     if (collection === 'posts' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
     updateLocalContent((state) => ({ ...state, [collection]: record.id && !String(record.id).startsWith('seed-') ? rows.map((row) => row.id === record.id ? saved : row) : [...rows.filter((row) => row.id !== record.id), saved] }))
+    await flushSharedContent()
     return saved
   }
   const table = tableFor[collection]
@@ -482,7 +517,7 @@ export async function saveRecord(collection, record) {
 }
 
 export async function deleteRecord(collection, id) {
-  if (!supabase) { updateLocalContent((state) => ({ ...state, [collection]: asArray(state[collection]).filter((row) => row.id !== id) })); return }
+  if (!supabase) { updateLocalContent((state) => ({ ...state, [collection]: asArray(state[collection]).filter((row) => row.id !== id) })); await flushSharedContent(); return }
 
   if (!id || String(id).startsWith('seed-')) {
     throw new Error('Bundled sample content cannot be deleted from the database; hide it instead.')
@@ -492,7 +527,7 @@ export async function deleteRecord(collection, id) {
 }
 
 export async function saveProfile(profile) {
-  if (!supabase) { updateLocalContent((state) => ({ ...state, profile: { ...state.profile, ...profile } })); return }
+  if (!supabase) { updateLocalContent((state) => ({ ...state, profile: { ...state.profile, ...profile } })); await flushSharedContent(); return }
   const row = {
     name: profile.name,
     title: profile.title || '',
@@ -518,7 +553,7 @@ export async function saveProfile(profile) {
 
 /** Upsert one key of `site_settings`. Used for copy, stats, branding and theme. */
 export async function saveSetting(key, value) {
-  if (!supabase) { updateLocalContent((state) => { const next = { ...state }; if (key === 'theme_draft') next.themeDraft = value; else if (key === 'theme_published') { next.themePublished = value; next.theme = value } else if (key === 'copy') next.site = { ...next.site, copy: value }; else if (key === 'stats') next.site = { ...next.site, stats: value }; else if (key === 'tech_stack') next.site = { ...next.site, techStack: value }; else if (key === 'site_structure') next.site = { ...next.site, ...value }; else if (key === 'site_title') next.site = { ...next.site, siteTitle: value.title || next.site.siteTitle, siteDescription: value.description || next.site.siteDescription }; else if (key === 'branding') next.site = { ...next.site, siteLogo: value.logo || '', contactEmail: value.contact_email || next.site.contactEmail, showClientProjects: value.show_client_projects !== false }; next.settingsRows = [...asArray(next.settingsRows).filter((row) => row.key !== key), { key, value }]; return next }); return }
+  if (!supabase) { updateLocalContent((state) => { const next = { ...state }; if (key === 'theme_draft') next.themeDraft = value; else if (key === 'theme_published') { next.themePublished = value; next.theme = value } else if (key === 'copy') next.site = { ...next.site, copy: value }; else if (key === 'stats') next.site = { ...next.site, stats: value }; else if (key === 'tech_stack') next.site = { ...next.site, techStack: value }; else if (key === 'site_structure') next.site = { ...next.site, ...value }; else if (key === 'site_title') next.site = { ...next.site, siteTitle: value.title || next.site.siteTitle, siteDescription: value.description || next.site.siteDescription }; else if (key === 'branding') next.site = { ...next.site, siteLogo: value.logo || '', contactEmail: value.contact_email || next.site.contactEmail, showClientProjects: value.show_client_projects !== false }; next.settingsRows = [...asArray(next.settingsRows).filter((row) => row.key !== key), { key, value }]; return next }); await flushSharedContent(); return }
   const { error } = await supabase
     .from('site_settings')
     .upsert({ key, value, updated_at: new Date().toISOString() })
@@ -526,7 +561,7 @@ export async function saveSetting(key, value) {
 }
 
 export async function saveSiteSettings(site) {
-  if (!supabase) { updateLocalContent((state) => ({ ...state, site: { ...state.site, ...site } })); return }
+  if (!supabase) { updateLocalContent((state) => ({ ...state, site: { ...state.site, ...site } })); await flushSharedContent(); return }
   await saveSetting('site_title', { title: site.siteTitle, description: site.siteDescription })
   await saveSetting('branding', {
     logo: site.siteLogo || '',

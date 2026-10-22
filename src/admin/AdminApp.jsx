@@ -57,7 +57,7 @@ function ProtectedAdmin() {
     if (!auth.configured) return
     if (!auth.session) {
       const next = encodeURIComponent(pathname)
-      navigate(`/admin/login?next=${next}`, { replace: true })
+      navigate(`/mdadmin/login?next=${next}`, { replace: true })
     }
   }, [auth.loading, auth.configured, auth.session, pathname, navigate])
 
@@ -80,7 +80,7 @@ function ProtectedAdmin() {
           <h2>Administrator role required</h2>
           <p>
             You are signed in as {auth.user?.email}, but this account does not carry the <code>admin</code> role in its
-            <code> app_metadata</code>. Ask the project owner to grant it in the Supabase dashboard.
+            <code> app_metadata</code>. This static editor does not use remote accounts.
           </p>
         </div>
       </div>
@@ -114,7 +114,7 @@ function AdminRoutes() {
     )
   }
 
-  const collectionMatch = pathname.match(/^\/admin\/(projects|experience|certifications|education)(?:\/(new|[^/]+))?$/)
+  const collectionMatch = pathname.match(/^\/mdadmin\/(projects|experience|certifications|education)(?:\/(new|[^/]+))?$/)
 
   if (collectionMatch) {
     const config = COLLECTIONS[collectionMatch[1]]
@@ -127,7 +127,7 @@ function AdminRoutes() {
     )
   }
 
-  const blogMatch = pathname.match(/^\/admin\/blog(?:\/(new|[^/]+))?$/)
+  const blogMatch = pathname.match(/^\/mdadmin\/blog(?:\/(new|[^/]+))?$/)
   if (blogMatch) {
     const rawId = blogMatch[1]
     const mode = !rawId ? 'list' : rawId === 'new' ? 'new' : 'edit'
@@ -139,13 +139,13 @@ function AdminRoutes() {
   }
 
   const routes = [
-    { path: '/admin', element: <DashboardPage /> },
-    { path: '/admin/profile', element: <ProfilePage /> },
-    { path: '/admin/content', element: <PageContentPage /> },
-    { path: '/admin/structure', element: <StructurePage /> },
-    { path: '/admin/messages', element: <MessagesPage /> },
-    { path: '/admin/theme', element: <ThemeEditorPage /> },
-    { path: '/admin/settings', element: <SettingsPage /> },
+    { path: '/mdadmin', element: <DashboardPage /> },
+    { path: '/mdadmin/profile', element: <ProfilePage /> },
+    { path: '/mdadmin/content', element: <PageContentPage /> },
+    { path: '/mdadmin/structure', element: <StructurePage /> },
+    { path: '/mdadmin/messages', element: <MessagesPage /> },
+    { path: '/mdadmin/theme', element: <ThemeEditorPage /> },
+    { path: '/mdadmin/settings', element: <SettingsPage /> },
   ]
 
   for (const route of routes) {
@@ -159,7 +159,7 @@ function AdminRoutes() {
       <div className="admin-error">
         <h2>Page not found</h2>
         <p>That dashboard route does not exist.</p>
-        <a className="button button-secondary" href="/admin">
+        <a className="button button-secondary" href="/mdadmin">
           Back to overview
         </a>
       </div>
@@ -171,9 +171,9 @@ export default function AdminApp() {
   const { pathname } = useRouter()
   const auth = useAuth()
 
-  if (pathname === '/admin/login') return <LoginPage />
-  if (pathname === '/admin/forgot-password') return <ForgotPasswordPage />
-  if (pathname === '/admin/reset-password') {
+  if (pathname === '/mdadmin/login') return <LoginPage />
+  if (pathname === '/mdadmin/forgot-password') return <ForgotPasswordPage />
+  if (pathname === '/mdadmin/reset-password') {
     // A recovery link signs the user in, so the reset form must be reachable
     // without the normal admin gate.
     return <ResetPasswordPage />

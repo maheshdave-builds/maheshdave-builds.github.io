@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowUpRight, BookOpen, Share2 } from 'lucide-react'
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
@@ -46,9 +46,32 @@ export default function ArticlePage({ slug }) {
   const { posts, site } = useContent()
   const { post, loading } = useArticle(slug)
   const [copied, setCopied] = useState(false)
+  const bodyRef = useRef(null)
 
   const html = useMemo(() => (post ? sanitizeHtml(post.content) : ''), [post])
   const visible = post && isPostPublic(post) ? post : null
+
+  useEffect(() => {
+    const root = bodyRef.current
+    if (!root) return undefined
+    root.querySelectorAll('pre, blockquote').forEach((block) => {
+      if (block.querySelector('.article-copy-control')) return
+      const button = document.createElement('button')
+      button.type = 'button'; button.className = 'article-copy-control'; button.setAttribute('aria-label', block.tagName === 'PRE' ? 'Copy code' : 'Copy quote'); button.title = button.getAttribute('aria-label')
+      button.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>'
+      button.addEventListener('click', async () => {
+        const text = block.innerText || block.textContent || ''
+        try { await navigator.clipboard.writeText(text); button.classList.add('is-copied'); button.title = 'Copied'; button.setAttribute('aria-label', 'Copied'); button.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' }
+        catch { button.title = 'Copy unavailable'; }
+      })
+      block.style.position = 'relative'; block.appendChild(button)
+    })
+    root.querySelectorAll('a[href]').forEach((link) => {
+      if (link.querySelector('.article-external-icon') || !/^https?:/i.test(link.href)) return
+      const icon = document.createElement('span'); icon.className = 'article-external-icon'; icon.setAttribute('aria-hidden', 'true'); icon.innerHTML = ' ↗'; link.appendChild(icon)
+    })
+    return undefined
+  }, [html, visible?.slug])
 
   const related = useMemo(() => {
     if (!visible) return []
@@ -164,7 +187,7 @@ export default function ArticlePage({ slug }) {
           />
         ) : null}
 
-        <div className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
+        <div ref={bodyRef} className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
 
         {visible.tags?.length ? (
           <div className="article-tags" aria-label="Tags">

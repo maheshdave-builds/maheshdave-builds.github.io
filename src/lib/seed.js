@@ -224,7 +224,7 @@ export const DEFAULT_COPY = {
   toolkitTitle: 'A practical, modern toolkit.',
   toolkitDescription:
     'Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.',
-  blogTitle: 'Lessons from the work.',
+  blogTitle: 'Articles from the work.',
   blogDescription:
     'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
   contactTitle: 'Good work starts with a conversation.',

@@ -1,3 +1,3 @@
-Mahesh Dave Portfolio
-
-See README.md for the current setup. This version uses a browser-local admin editor and requires no environment variables or API keys.
+Mahesh Dave Portfolio — GitHub-only static mode.
+No Supabase, Cloudflare Worker, database, gateway, or other hosted backend is required.
+See README.md for local editing and publishing steps.

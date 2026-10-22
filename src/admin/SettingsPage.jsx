@@ -98,7 +98,7 @@ export default function SettingsPage() {
 
   const signOutNow = async () => {
     await signOut()
-    navigate('/admin/login', { replace: true })
+    navigate('/mdadmin/login', { replace: true })
   }
 
   return (

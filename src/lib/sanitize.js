@@ -28,6 +28,7 @@ const DROP_WITH_CONTENT = new Set([
 const ALLOWED_ATTRS = {
   '*': new Set(['class', 'title']),
   a: new Set(['href', 'rel', 'target', 'class', 'title']),
+  span: new Set(['style']),
   img: new Set(['src', 'alt', 'width', 'height', 'class', 'title']),
   td: new Set(['colspan', 'rowspan']),
   th: new Set(['colspan', 'rowspan', 'scope']),
@@ -93,7 +94,14 @@ function sanitizeNode(node, doc) {
 
   for (const attr of Array.from(node.attributes)) {
     const name = attr.name.toLowerCase()
-    if (name.startsWith('on') || name === 'style' || name === 'srcdoc') continue
+    if (name.startsWith('on') || name === 'srcdoc') continue
+    if (name === 'style') {
+      if (tag !== 'span') continue
+      const colorStyle = value.match(/^\s*color\s*:\s*(#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|hsla?\([0-9.,%\s]+\))\s*;?\s*$/i)
+      const backgroundStyle = value.match(/^\s*background-color\s*:\s*(#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|hsla?\([0-9.,%\s]+\))\s*;?\s*$/i)
+      if (colorStyle || backgroundStyle) element.setAttribute('style', (colorStyle || backgroundStyle)[0].trim())
+      continue
+    }
     if (!allowed.has(name) && !common.has(name)) continue
 
     const value = attr.value

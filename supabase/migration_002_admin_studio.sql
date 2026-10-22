@@ -73,7 +73,8 @@ create policy "public read site settings" on public.site_settings
     'copy',
     'stats',
     'tech_stack',
-    'theme_published'
+    'theme_published',
+    'site_structure'
   ));
 
 drop policy if exists "admin manage settings" on public.site_settings;
