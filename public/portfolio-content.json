@@ -915,6 +915,93 @@
           "label": "Faster PR turnaround after AI workflow adoption"
         }
       ]
+    },
+    {
+      "key": "tech_stack",
+      "value": [
+        {
+          "category": "Commerce",
+          "items": [
+            "Adobe Commerce Cloud",
+            "Adobe Commerce Enterprise",
+            "Magento 2",
+            "Magento 1",
+            "Hyvä",
+            "Adobe Commerce Optimizer",
+            "Adobe App Builder"
+          ]
+        },
+        {
+          "category": "Backend & APIs",
+          "items": [
+            "PHP 8.x",
+            "Magento Framework",
+            "Laravel",
+            "Node.js",
+            "GraphQL",
+            "REST",
+            "SOAP",
+            "Webhooks",
+            "OAuth 2.0"
+          ]
+        },
+        {
+          "category": "Integration & AI",
+          "items": [
+            "Odoo ERP",
+            "Salesforce CRM",
+            "Jitterbit",
+            "Adobe I/O Events",
+            "LLM APIs",
+            "MCP",
+            "Adobe Sensei",
+            "Live Search"
+          ]
+        },
+        {
+          "category": "Frontend",
+          "items": [
+            "JavaScript",
+            "React",
+            "Alpine.js",
+            "Tailwind CSS",
+            "Knockout.js",
+            "RequireJS",
+            "jQuery",
+            "HTML5",
+            "CSS3",
+            "LESS"
+          ]
+        },
+        {
+          "category": "Data & infrastructure",
+          "items": [
+            "MySQL",
+            "MariaDB",
+            "Elasticsearch",
+            "OpenSearch",
+            "Redis",
+            "Docker",
+            "Azure",
+            "Jenkins",
+            "GitLab CI",
+            "RabbitMQ",
+            "Varnish"
+          ]
+        },
+        {
+          "category": "Quality & delivery",
+          "items": [
+            "SonarQube",
+            "PHP_CodeSniffer",
+            "Magento Coding Standards",
+            "PHPUnit",
+            "New Relic",
+            "Core Web Vitals",
+            "Agile/Scrum"
+          ]
+        }
+      ]
     }
   ]
 }
