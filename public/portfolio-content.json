@@ -894,6 +894,27 @@
         "contactTitle": "Good work starts with a conversation.",
         "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
       }
+    },
+    {
+      "key": "stats",
+      "value": [
+        {
+          "value": "9+",
+          "label": "Years in commerce engineering"
+        },
+        {
+          "value": "8+",
+          "label": "People led across delivery teams"
+        },
+        {
+          "value": "99%",
+          "label": "Data accuracy improvement reported on Salesforce integration"
+        },
+        {
+          "value": "35%",
+          "label": "Faster PR turnaround after AI workflow adoption"
+        }
+      ]
     }
   ]
 }
