@@ -1,22 +1,48 @@
-# Mahesh Dave Portfolio — GitHub-only static mode
+# Mahesh Dave — Portfolio Studio
 
-This version has **no Supabase, Cloudflare Worker, external database, gateway, or hosted API dependency**. The public website reads `public/portfolio-content.json` from the GitHub repository.
+A responsive React + Vite portfolio with a theme-aware scrollbar, animated navigation, motion effects, article publishing and a private administrator dashboard.
 
 ## Run locally
 
-1. Install Node.js (LTS).
-2. Run `npm install`.
-3. Run `npm run dev`.
-4. Open `/mdadmin` to edit a browser-local draft.
+```bash
+npm ci
+npm run dev
+```
 
-## Publish changes to every visitor
+Open the local URL printed by Vite. Admin path: `/mdadmin`.
 
-1. In Admin → Settings, export the portfolio JSON backup.
-2. Replace `public/portfolio-content.json` with that exported JSON.
-3. Copy any new image files into `public/` and update their paths in the JSON if needed.
-4. Commit and push the JSON and image assets to GitHub.
-5. Wait for GitHub Pages deployment to finish. Visitors on every device then see the committed content.
+## Shared admin setup
 
-## Static-only limitations
+To make edits visible on every browser/device, configure the Supabase URL and public anon key as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the deployment environment. Apply `supabase/schema.sql` and `supabase/migration_002_admin_studio.sql`, then create an administrator in Supabase Auth and grant the `admin` app-metadata role through a trusted admin process. Self-registration is disabled. Never place a service-role key in frontend code.
 
-GitHub Pages cannot securely write repository files from browser JavaScript. Admin edits remain in the current browser until exported; they do not automatically synchronize to another browser. This static admin UI is **not a security boundary** and has no server-side password protection. Do not put secrets or private data in it. Only committed repository content is shared publicly.
+The GitHub Actions workflow builds and deploys the site. `VITE_*` values are embedded at build time, so changing variables requires a new deployment. See `ADMIN_GUIDE.md` and `DEPLOYMENT_GUIDE.md` for setup and migration notes.
+
+## Features
+
+- Profile, resume, social links, portrait and project content management
+- Page structure editing, custom sections and multiple header navigation styles
+- Projects, experience, certifications and education management
+- Articles editor with formatting, color/highlight, code blocks, image uploads and crop controls
+- Public copy buttons for code/quote blocks and external-link indicators
+- Theme and site branding controls
+
+Existing edits stored in a previous browser's local storage do not automatically migrate to Supabase. Export or recover that content from the original browser before switching to the shared backend.
+
+
+## Admin without Supabase Auth
+
+The admin login supports the GitHub content gateway. Configure `VITE_GITHUB_CONTENT_API_URL` as a GitHub Actions repository variable and set `ADMIN_PASSWORD` as a Cloudflare Worker secret. See `GITHUB_CONTENT_SETUP.md`. When the gateway URL is configured, the content adapter reads and writes the shared GitHub JSON document; local storage is only a fallback before the gateway is configured.
+
+
+## GitHub-backed CMS (no Supabase Auth)
+
+See [`GITHUB_CONTENT_SETUP.md`](./GITHUB_CONTENT_SETUP.md). Configure `VITE_GITHUB_CONTENT_API_URL` in GitHub Actions and set the GitHub token and admin password as Cloudflare Worker secrets. With the gateway configured, admin content saves are written to the repository JSON file and read by public pages on all devices.
+
+
+## GitHub-only publishing (no external backend)
+
+The public site reads `public/portfolio-content.json` as its shared content source. To edit content, open `/mdadmin/login` and enter a GitHub fine-grained personal access token scoped to this repository with **Contents: Read and write** permission. The token is kept in `sessionStorage` for the current browser session only and is not bundled into the public website. Saves commit the JSON file to the `main` branch; the GitHub Pages workflow builds and deploys it.
+
+Create the token under GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. Select repository `maheshdave-builds/maheshdave-builds.github.io`, set Contents to Read and write, and no other permissions. Do not share the token or commit it to the repository.
+
+This is a browser-based publishing model: a repository-scoped token is visible to the signed-in browser session while in use. For stronger security, use a server-side gateway instead.

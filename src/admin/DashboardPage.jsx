@@ -110,7 +110,7 @@ export default function DashboardPage() {
             <em>editable from here.</em>
           </h2>
           <p>
-            Content is saved in this browser. Published changes appear here immediately; export and redeploy the site to share them with other visitors.
+            Changes are saved to the shared portfolio JSON in your GitHub repository. Once the commit is deployed, all visitors and devices see the same published content.
           </p>
           <div className="admin-welcome-actions">
             <Link className="button button-primary" to="/mdadmin/theme">

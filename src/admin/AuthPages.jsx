@@ -46,9 +46,13 @@ export function LoginPage({ redirectTo = '/mdadmin' }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  // Static-only mode skips cloud login. The editor only changes a local draft;
-  // publishing requires exporting JSON and committing it to GitHub.
-  if (!configured) return null
+  if (!configured) {
+    return (
+      <AuthShell title="Admin gateway not configured" subtitle="Sign in with a repository-scoped GitHub token to publish changes for every visitor." footer={null}>
+        <div className="notice-callout notice-warning"><ShieldAlert size={18} aria-hidden="true" /><p>No backend service is required. Create a fine-grained token for maheshdave-builds/maheshdave-builds.github.io with Contents: Read and write. Enter that token below; it stays in this browser session and is not included in the website build.</p></div>
+      </AuthShell>
+    )
+  }
 
   const submit = async (event) => {
     event.preventDefault()
@@ -70,28 +74,14 @@ export function LoginPage({ redirectTo = '/mdadmin' }) {
   return (
     <AuthShell
       title="Sign in"
-      subtitle="Local draft editor. Export changes and commit them to GitHub to publish."
-      footer={<span>Static editor · Local drafts only.</span>}
+      subtitle="Use a fine-grained GitHub token to publish changes for all devices."
+      footer={<span>Token permissions: Contents · Read and write · This browser session only.</span>}
     >
       <form className="auth-form" onSubmit={submit} noValidate>
-        {<label>
-          Email address
-          <div className="input-with-icon">
-            <Mail size={15} aria-hidden="true" />
-            <input
-              type="email"
-              name="email"
-              autoComplete="username"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@example.com"
-            />
-          </div>
-        </label>}
+
 
         <label>
-          Password
+          GitHub fine-grained token
           <div className="input-with-icon">
             <Lock size={15} aria-hidden="true" />
             <input
@@ -101,7 +91,7 @@ export function LoginPage({ redirectTo = '/mdadmin' }) {
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••••••"
+              placeholder="github_pat_…"
             />
           </div>
         </label>
@@ -149,7 +139,7 @@ export function ForgotPasswordPage() {
       footer={<Link to="/mdadmin/login">Return to sign in</Link>}
     >
       {!configured ? (
-        <p className="form-error">Password recovery is unavailable in static-only mode.</p>
+        <p className="form-error">Supabase is not configured, so recovery email cannot be sent.</p>
       ) : sent ? (
         <div className="notice-callout" role="status">
           <Mail size={18} aria-hidden="true" />
@@ -247,7 +237,7 @@ export function ResetPasswordPage() {
       footer={<Link to="/mdadmin/login">Cancel and return to sign in</Link>}
     >
       {!configured ? (
-        <p className="form-error">Password management is unavailable in static-only mode.</p>
+        <p className="form-error">Supabase is not configured.</p>
       ) : (
         <form className="auth-form" onSubmit={submit} noValidate>
           <label>

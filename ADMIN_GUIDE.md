@@ -1,20 +1,37 @@
-# Admin guide — GitHub-only publishing (Option A)
+# Portfolio Studio — Shared Admin Guide
 
-The public portfolio uses `public/portfolio-content.json` as its shared published content source. No Supabase account, Cloudflare Worker, or external database is needed for this publishing workflow.
+The administrator dashboard is available at `/mdadmin`. Content must be connected to Supabase to persist across browsers and devices. A static GitHub Pages build cannot use browser `localStorage` as a shared database.
 
-## Edit and publish content
+## First-time setup
 
-1. Open `/mdadmin` on your own development/local copy and make your edits. The editor saves its working draft in that browser's local storage.
-2. In **Admin → Settings → Export or restore content**, choose **Export backup**. This downloads `mahesh-portfolio-backup.json` containing the complete editable content/settings.
-3. Copy the downloaded JSON over `public/portfolio-content.json` in your local repository. Keep the filename exactly `portfolio-content.json`.
-4. Add any new image files to the repository under `public/` and ensure the content JSON references their deployed paths. Existing image uploads saved as browser data URLs should be converted to repository image files for production use.
-5. Validate JSON syntax, run `npm run build`, then commit and push the changed JSON and media files to GitHub.
-6. Wait for GitHub Pages deployment to complete. All visitors/devices will see the published version after the deployment and browser cache refresh.
+1. Run the SQL in `supabase/schema.sql` and then `supabase/migration_002_admin_studio.sql` in the Supabase SQL editor, in the order appropriate for a new or existing project.
+2. Create the `portfolio-media` public storage bucket/policies (the schema includes these statements).
+3. In GitHub repository Settings → Secrets and variables → Actions → Variables, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+4. Push/re-run the GitHub Pages workflow so those variables are included at build time.
+5. Create the administrator in Supabase Authentication and grant `role: "admin"` in `app_metadata` through a trusted admin process. Disable public sign-ups. The public site contains no self-registration flow.
+6. Configure the production URL and `/mdadmin/reset-password` as allowed Supabase Auth redirect URLs.
 
-## Important limitations
+Never place a Supabase service-role key in frontend code or GitHub Pages build variables.
 
-- GitHub Pages is static hosting. It cannot securely accept writes to the Git repository from a browser-only admin panel. This option intentionally uses **export → commit → deploy** instead of automatic publishing.
-- Browser-local edits are drafts for that browser until exported and committed. Importing a backup on another browser restores a draft there; it does not publish the content by itself.
-- A password gate implemented only in frontend JavaScript is not a security boundary. Do not put GitHub tokens, deploy keys, or passwords in the frontend. For this no-third-party option, do not treat the static admin route as a secure private publishing API.
-- Contact form submissions cannot be shared/collected centrally without a server-side service. This static option cannot provide a cross-device admin inbox.
-- Before switching, export the browser that contains your latest customizations and use that JSON as the source of truth. Do not clear its local storage until you have verified the backup.
+## Dashboard features
+
+- **Profile & about** — profile, biography, contact and social links.
+- **Page content** — section headings and copy.
+- **Page structure** — reorder/hide sections, add custom sections, manage menu links, and choose an animated header navigation style.
+- **Projects / Experience / Certifications / Education** — manage portfolio records.
+- **Articles** — write and publish articles, insert images, code blocks, links, quotes, color/highlight formatting, and crop cover images.
+- **Theme & branding** — customize the visual theme.
+- **Site settings** — site metadata and appearance preferences.
+
+## Existing browser-only edits
+
+Edits made before the shared database is configured remain in that browser's local storage and do not automatically migrate. Export a backup from the old browser before moving content. Do not assume that changing the URL or uploading source code transfers browser-local data into Supabase.
+
+## Verify
+
+```bash
+npm ci
+npm run lint
+npm run build
+npm run preview
+```

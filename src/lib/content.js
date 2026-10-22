@@ -1,15 +1,21 @@
-// Fully static GitHub Pages mode: no database, gateway, or hosted API.
-// Edits are local drafts until exported and committed to the repository.
-const supabase = null
-const useGithubGateway = false
+// Use the shared Supabase database when deployment environment variables are configured.
+import { supabase as remoteSupabase, isConfigured } from './supabase'
+import { gatewayRequest, githubGatewayConfigured } from './githubGateway'
+const useGithubGateway = githubGatewayConfigured()
+const supabase = !useGithubGateway && isConfigured ? remoteSupabase : null
 import { fallbackContent, seedSite, seedProfile, DEFAULT_COPY, DEFAULT_STATS } from './seed'
 import { DEFAULT_THEME, validateTheme } from './theme'
 import { isPostPublic, sortPosts } from './format'
 
-// Static data access for the portfolio. Public content is loaded from the
-// repository JSON file; admin edits are browser-local until exported and committed.
+// Data access for the portfolio. Every public read is subject to RLS: the anon
+// role only ever sees published rows and a whitelist of site_settings keys, so
+// drafts and contact submissions cannot be fetched from the browser even if a
+// request is crafted by hand.
+//
+// When Supabase is not configured the site renders the bundled seed content, so
+// it remains a working static site rather than a broken one.
 
-export const contentSource = 'local'
+export const contentSource = useGithubGateway ? 'github' : isConfigured ? 'supabase' : 'local'
 
 // Browser-local CMS: no hosted database or third-party backend required.
 const LOCAL_CONTENT_KEY = 'mahesh-portfolio-local-cms-v1'
@@ -114,17 +120,6 @@ export function getInitialAdminContent() {
   return readLocalContent()
 }
 
-export function hasLocalAdminDraft() {
-  try { return Boolean(localStorage.getItem(LOCAL_CONTENT_KEY)) } catch { return false }
-}
-
-export async function fetchPublishedContentForAdmin() {
-  const response = await fetch(`${import.meta.env.BASE_URL || '/'}portfolio-content.json`, { cache: 'no-store' })
-  if (!response.ok) throw new Error(`Could not load published portfolio content (HTTP ${response.status}).`)
-  const published = await response.json()
-  return { ...fallbackContent, ...published, theme: published.theme || DEFAULT_THEME, themeDraft: published.themeDraft || published.theme || DEFAULT_THEME, themePublished: published.themePublished || published.theme || DEFAULT_THEME }
-}
-
 let sharedWritePromise = Promise.resolve()
 function writeLocalContent(next) {
   try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(next)) }
@@ -146,47 +141,6 @@ async function readSharedContent() {
   }
 }
 export function exportLocalContent() { return JSON.stringify(readLocalContent(), null, 2) }
-
-/** Publish the current browser draft into the repository JSON file. The token is
- * supplied by the user at runtime and is never written to localStorage or source. */
-export async function publishLocalContentToGitHub(token) {
-  const accessToken = String(token || '').trim()
-  if (!accessToken) throw new Error('Enter a GitHub fine-grained token with Contents: Read and write access to this repository.')
-  const owner = 'maheshdave-builds'
-  const repo = 'maheshdave-builds.github.io'
-  const branch = 'main'
-  const path = 'public/portfolio-content.json'
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`
-  const headers = {
-    Accept: 'application/vnd.github+json',
-    Authorization: `Bearer ${accessToken}`,
-    'X-GitHub-Api-Version': '2022-11-28',
-    'Content-Type': 'application/json',
-  }
-  const currentResponse = await fetch(`${apiUrl}?ref=${branch}`, { headers, cache: 'no-store' })
-  if (!currentResponse.ok) {
-    const detail = await currentResponse.json().catch(() => ({}))
-    if (currentResponse.status === 401 || currentResponse.status === 403) throw new Error('GitHub rejected the token. Check that it has Contents: Read and write access to this repository.')
-    throw new Error(detail.message || `Could not read the published content file (HTTP ${currentResponse.status}).`)
-  }
-  const current = await currentResponse.json()
-  const content = exportLocalContent()
-  const bytes = new TextEncoder().encode(content)
-  let binary = ''
-  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
-  const response = await fetch(apiUrl, {
-    method: 'PUT', headers,
-    body: JSON.stringify({
-      message: 'Publish portfolio content from admin editor',
-      content: btoa(binary),
-      sha: current.sha,
-      branch,
-    }),
-  })
-  const result = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(result.message || `GitHub could not publish the content (HTTP ${response.status}).`)
-  return result
-}
 export function importLocalContent(json) {
   let parsed
   try { parsed = JSON.parse(json) } catch { throw new Error('This backup is not valid JSON.') }
@@ -330,20 +284,7 @@ export function themeFromSettings(rows = []) {
 
 export async function fetchPublicContent() {
   if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
-  if (!supabase) {
-    // Public visitors use the versioned JSON file committed to the repository.
-    // The admin's local draft is only used in the editor's browser; publishing
-    // across devices requires exporting this JSON and committing it to GitHub.
-    let published = null
-    try {
-      const response = await fetch(`${import.meta.env.BASE_URL || '/'}portfolio-content.json`, { cache: 'no-store' })
-      if (response.ok) published = await response.json()
-    } catch { /* keep bundled content available offline */ }
-    // The public site must always use the shared, committed JSON file. Never
-    // let one visitor's browser-local admin draft override published content.
-    const shared = published && typeof published === 'object' ? { ...fallbackContent, ...published } : fallbackContent
-    return { ...shared, projects: asArray(shared.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience).filter((x) => x.is_published !== false), education: asArray(shared.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME }
-  }
+  if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
   const nowIso = new Date().toISOString()
   const [profileResult, projects, certifications, experience, education, posts, settings] = await Promise.allSettled([

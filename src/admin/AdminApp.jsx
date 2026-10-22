@@ -80,7 +80,7 @@ function ProtectedAdmin() {
           <h2>Administrator role required</h2>
           <p>
             You are signed in as {auth.user?.email}, but this account does not carry the <code>admin</code> role in its
-            <code> app_metadata</code>. This static editor does not use remote accounts.
+            <code> app_metadata</code>. Ask the project owner to grant it in the Supabase dashboard.
           </p>
         </div>
       </div>
