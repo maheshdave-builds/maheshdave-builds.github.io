@@ -2,17 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Redirecting…</title>
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Opening page…</title>
     <script>
-      // GitHub Pages serves this file for unknown paths. Rewrite the requested
-      // path into a query string so index.html can restore it and let the
-      // client router resolve /blog/:slug and /mdadmin/* on a hard refresh.
+      // GitHub Pages has no configurable SPA rewrites. Send unknown routes
+      // back to index.html while preserving the original path, query and hash.
       (function () {
-        var path = window.location.pathname + window.location.search + window.location.hash;
-        window.location.replace('/?/' + path.replace(/^\/+/, ''));
+        var original = window.location.pathname + window.location.search + window.location.hash;
+        window.location.replace('/?/' + encodeURIComponent(original));
       })();
     </script>
-    <meta name="robots" content="noindex" />
   </head>
-  <body></body>
+  <body><p>Opening page…</p></body>
 </html>
