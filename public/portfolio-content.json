@@ -1,11 +1,11 @@
 {
   "profile": {
-    "name": "Mahesh Dave",
+    "name": "Mahesh Sanjaybhai Dave",
     "shortName": "Mahesh Dave",
     "title": "Adobe Commerce Team Lead · Certified Expert & Developer",
     "intro": "I architect and scale Adobe Commerce experiences across B2B and B2C—bringing together composable commerce, thoughtful integrations, performance engineering, and AI-assisted delivery.",
     "location": "Ahmedabad, Gujarat, India",
-    "profileImage": "/uploads/profile/1792695537039-bsxvu9.jpg",
+    "profileImage": "/profile.jpg",
     "resumeUrl": "/Mahesh_Dave_Resume_2026.pdf",
     "email": "davemahesh119@gmail.com",
     "aboutSection": {
@@ -612,7 +612,7 @@
     "siteDescription": "Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
     "siteLogo": "",
     "copy": {
-      "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
+      "heroEyebrow": "ADOBE COMMERCE ·  LEADERSHIP",
       "heroHeadline": "Engineering commerce that works harder.",
       "aboutTitle": "Technical depth. People-first delivery.",
       "aboutDescription": "Connecting architecture, engineering execution, and team growth to build commerce platforms that last.",
@@ -871,5 +871,29 @@
       "gradientTo": "#3f6147"
     }
   },
-  "settingsRows": []
+  "settingsRows": [
+    {
+      "key": "copy",
+      "value": {
+        "heroEyebrow": "ADOBE COMMERCE ·  LEADERSHIP",
+        "heroHeadline": "Engineering commerce that works harder.",
+        "aboutTitle": "Technical depth. People-first delivery.",
+        "aboutDescription": "Connecting architecture, engineering execution, and team growth to build commerce platforms that last.",
+        "experienceTitle": "Experience built in production.",
+        "experienceDescription": "A progression from hands-on Magento development to technical leadership and solution architecture.",
+        "projectsTitle": "Commerce work with real-world impact.",
+        "projectsDescription": "Selected commerce implementations, integrations, and client storefronts.",
+        "certificationsTitle": "Credentials that back the craft.",
+        "certificationsDescription": "Adobe credentials and product foundations, with verification links where available.",
+        "educationTitle": "The foundation behind the practice.",
+        "educationDescription": "Academic background and qualifications.",
+        "toolkitTitle": "A practical, modern toolkit.",
+        "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
+        "blogTitle": "Articles from the work.",
+        "blogDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
+        "contactTitle": "Good work starts with a conversation.",
+        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
+      }
+    }
+  ]
 }
