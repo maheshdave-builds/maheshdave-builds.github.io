@@ -1,11 +1,11 @@
 {
   "profile": {
-    "name": "Mahesh Sanjaybhai Dave",
+    "name": "Mahesh Dave",
     "shortName": "Mahesh Dave",
     "title": "Adobe Commerce Team Lead · Certified Expert & Developer",
     "intro": "I architect and scale Adobe Commerce experiences across B2B and B2C—bringing together composable commerce, thoughtful integrations, performance engineering, and AI-assisted delivery.",
     "location": "Ahmedabad, Gujarat, India",
-    "profileImage": "/profile.jpg",
+    "profileImage": "/uploads/profile/1792695537039-bsxvu9.jpg",
     "resumeUrl": "/Mahesh_Dave_Resume_2026.pdf",
     "email": "davemahesh119@gmail.com",
     "aboutSection": {
@@ -252,7 +252,7 @@
     {
       "id": "seed-client-6",
       "title": "Okapius — Hyvä Storefront",
-      "category": "Adobe Commerce Cloud",
+      "category": "Headless & Storefronts",
       "url": "",
       "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
       "techStack": [
