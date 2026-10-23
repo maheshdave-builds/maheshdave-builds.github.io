@@ -20,6 +20,7 @@ export const contentSource = useGithubGateway ? 'github' : isConfigured ? 'supab
 // Browser-local CMS: no hosted database or third-party backend required.
 const LOCAL_CONTENT_KEY = 'mahesh-portfolio-local-cms-v1'
 const PROJECT_CATALOG_MIGRATION_KEY = 'mahesh-portfolio-project-catalog-v2'
+const STAGED_CONTENT_KEY = 'mahesh-portfolio-staged-content-v1'
 const LEGACY_CLIENT_CATEGORIES = {
   'rev-a-shelf': 'Adobe Commerce Cloud',
   'who has it?': 'Adobe Commerce Cloud',
@@ -122,16 +123,31 @@ export function getInitialAdminContent() {
 
 let sharedWritePromise = Promise.resolve()
 function writeLocalContent(next) {
-  try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(next)) }
-  catch { throw new Error('Browser storage is full. Use smaller images or export your content backup before continuing.') }
-  if (useGithubGateway) {
-    sharedWritePromise = sharedWritePromise.catch(() => undefined).then(() => gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) }))
-      .catch((error) => { console.error('Could not save portfolio content to GitHub:', error); throw error })
-  }
+  try {
+    localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(next))
+    // The admin edits a local staging copy. GitHub is only updated by the
+    // explicit Publish action in the admin header.
+    localStorage.setItem(STAGED_CONTENT_KEY, JSON.stringify(next))
+  } catch { throw new Error('Browser storage is full. Use smaller images or export your content backup before continuing.') }
   window.dispatchEvent(new CustomEvent('portfolio-local-content-updated'))
+  window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
   return next
 }
-async function flushSharedContent() { if (useGithubGateway) await sharedWritePromise }
+export function hasStagedContent() {
+  try { return Boolean(localStorage.getItem(STAGED_CONTENT_KEY)) } catch { return false }
+}
+export async function publishStagedContent() {
+  let staged
+  try { staged = JSON.parse(localStorage.getItem(STAGED_CONTENT_KEY) || 'null') } catch { staged = null }
+  if (!staged) throw new Error('There are no staged changes to publish.')
+  if (useGithubGateway) {
+    await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staged) })
+  }
+  try { localStorage.removeItem(STAGED_CONTENT_KEY) } catch {}
+  window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
+  return true
+}
+async function flushSharedContent() { /* writes are staged; publish is explicit */ }
 function updateLocalContent(updater) { return writeLocalContent(updater(readLocalContent())) }
 async function readSharedContent() {
   try { return await gatewayRequest('', { method: 'GET', cache: 'no-store' }) }
@@ -280,9 +296,38 @@ export function themeFromSettings(rows = []) {
   return theme
 }
 
+
+/** Local preview is intentionally opt-in and never writes to GitHub. The preview
+ * flag is copied into sessionStorage so client-side route changes keep preview
+ * mode active after the query string disappears. */
+export function isLocalPreviewMode() {
+  if (typeof window === 'undefined') return false
+  try {
+    if (new URLSearchParams(window.location.search).get('preview') === 'local') {
+      window.sessionStorage.setItem('portfolio-local-preview', '1')
+      return true
+    }
+    return window.sessionStorage.getItem('portfolio-local-preview') === '1'
+  } catch { return new URLSearchParams(window.location.search).get('preview') === 'local' }
+}
+function getLocalPreviewContent() {
+  const local = readLocalContent()
+  return {
+    ...local,
+    projects: asArray(local.projects),
+    certifications: asArray(local.certifications),
+    experience: asArray(local.experience),
+    education: asArray(local.education),
+    // Preview deliberately includes drafts so editors can inspect them before publishing.
+    posts: sortPosts(asArray(local.posts)),
+    theme: local.themeDraft || local.theme || DEFAULT_THEME,
+  }
+}
+
 /* -------------------------------------------------------------- public read */
 
 export async function fetchPublicContent() {
+  if (isLocalPreviewMode()) return getLocalPreviewContent()
   if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
   if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
@@ -327,6 +372,7 @@ export async function fetchPublicContent() {
  * a client that skipped the list query.
  */
 export async function fetchPostBySlug(slug) {
+  if (isLocalPreviewMode()) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug) || null
   if (useGithubGateway) return asArray((await readSharedContent()).posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (!supabase) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (supabase) {
@@ -352,8 +398,32 @@ const ADMIN_TABLES = ['profile', 'projects', 'certifications', 'experience', 'ed
 export async function fetchAdminContent() {
   if (useGithubGateway) {
     const shared = await readSharedContent()
-    const merged = { ...readLocalContent(), ...shared }
-    try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(merged)) } catch { /* shared GitHub content remains authoritative */ }
+    const local = readLocalContent()
+    // Admin edits are staged in localStorage until Publish. Merge collection
+    // rows by stable ID so a reload never discards a newly-created or edited
+    // article just because the published GitHub JSON still has the old version.
+    const mergeRows = (key) => {
+      const publishedRows = asArray(shared[key])
+      const stagedRows = asArray(local[key])
+      const byId = new Map(publishedRows.map((row, index) => [String(row.id ?? `${key}-published-${index}`), row]))
+      stagedRows.forEach((row, index) => {
+        const id = String(row.id ?? `${key}-local-${index}`)
+        byId.set(id, { ...(byId.get(id) || {}), ...row })
+      })
+      return [...byId.values()]
+    }
+    const merged = {
+      ...local,
+      ...shared,
+      projects: mergeRows('projects'),
+      certifications: mergeRows('certifications'),
+      experience: mergeRows('experience'),
+      education: mergeRows('education'),
+      posts: mergeRows('posts'),
+      profile: { ...(shared.profile || {}), ...(local.profile || {}) },
+      site: { ...(shared.site || {}), ...(local.site || {}) },
+    }
+    try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(merged)) } catch { /* keep the in-memory merged state */ }
     return merged
   }
   if (!supabase) return readLocalContent()
@@ -479,7 +549,7 @@ export async function saveRecord(collection, record) {
     if (!['projects', 'certifications', 'experience', 'education', 'posts'].includes(collection)) throw new Error(`Unknown collection: ${collection}`)
     const current = readLocalContent(); const rows = asArray(current[collection]); const saved = { ...record, id: record.id && !String(record.id).startsWith('seed-') ? record.id : `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, updated_at: new Date().toISOString() }
     if (collection === 'posts' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
-    updateLocalContent((state) => ({ ...state, [collection]: record.id && !String(record.id).startsWith('seed-') ? rows.map((row) => row.id === record.id ? saved : row) : [...rows.filter((row) => row.id !== record.id), saved] }))
+    updateLocalContent((state) => { const existingId = record.id && !String(record.id).startsWith('seed-'); const index = existingId ? rows.findIndex((row) => String(row.id) === String(record.id)) : -1; const nextRows = [...rows]; if (index >= 0) nextRows[index] = { ...rows[index], ...saved }; else nextRows.push(saved); return { ...state, [collection]: nextRows } })
     await flushSharedContent()
     return saved
   }

@@ -18,11 +18,15 @@ import {
   ShieldCheck,
   UserRound,
   X,
+  CloudUpload,
+  CheckCircle2,
+  Eye,
 } from 'lucide-react'
 import { useAuth } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
 import { useRouter } from '../lib/routerCore'
 import { ADMIN_NAV } from '../lib/navigation'
+import { hasStagedContent, publishStagedContent } from '../lib/content'
 
 // Navigation entries are data (paths and labels); icons are presentation and
 // live here so the nav model stays serialisable.
@@ -45,6 +49,27 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
   const { signOut, user } = useAuth()
   const { pathname, navigate } = useRouter()
   const [navOpen, setNavOpen] = useState(false)
+  const [staged, setStaged] = useState(() => hasStagedContent())
+  const [publishing, setPublishing] = useState(false)
+  const [publishMessage, setPublishMessage] = useState('')
+
+  useEffect(() => {
+    const refresh = () => setStaged(hasStagedContent())
+    window.addEventListener('portfolio-staging-updated', refresh)
+    return () => window.removeEventListener('portfolio-staging-updated', refresh)
+  }, [])
+
+  const handlePreview = () => {
+    const previewUrl = `${window.location.origin}${import.meta.env.BASE_URL}?preview=local`
+    window.open(previewUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const handlePublish = async () => {
+    setPublishing(true); setPublishMessage('')
+    try { await publishStagedContent(); setStaged(false); setPublishMessage('Published successfully') }
+    catch (error) { setPublishMessage(error?.message || 'Publish failed') }
+    finally { setPublishing(false) }
+  }
 
   useEffect(() => {
     if (!navOpen) return undefined
@@ -140,7 +165,13 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
               <h1>{title}</h1>
             </div>
           </div>
-          {actions ? <div className="admin-top-actions">{actions}</div> : null}
+          <div className="admin-top-actions">
+            <span className={`publish-status ${staged ? 'is-dirty' : 'is-clean'}`} role="status">{staged ? 'Unpublished changes' : 'All changes published'}</span>
+            <button type="button" className="button button-secondary admin-preview-button" onClick={handlePreview} title="Open the local front-end preview with staged changes; nothing is published"><Eye size={15} aria-hidden="true" /> Preview locally</button>
+            <button type="button" className="button button-primary admin-publish-button" onClick={handlePublish} disabled={publishing || !staged} title="Commit staged content to GitHub">{publishing ? <span className="spinner" aria-hidden="true" /> : staged ? <CloudUpload size={15} aria-hidden="true" /> : <CheckCircle2 size={15} aria-hidden="true" />}{publishing ? 'Publishing…' : 'Publish'}</button>
+            {publishMessage ? <span className="publish-feedback" role="status">{publishMessage}</span> : null}
+            {actions}
+          </div>
         </header>
 
         {children}

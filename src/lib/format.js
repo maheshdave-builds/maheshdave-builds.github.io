@@ -41,6 +41,10 @@ export function fromDateTimeLocal(value) {
 /** Posts visible to the public: published, with a publish time that has passed. */
 export function isPostPublic(post, now = Date.now()) {
   if (!post) return false
+  // Drafts are visible only in the explicitly requested local preview session.
+  if (typeof window !== 'undefined') {
+    try { if (new URLSearchParams(window.location.search).get('preview') === 'local' || window.sessionStorage.getItem('portfolio-local-preview') === '1') return true } catch { /* use public visibility rules */ }
+  }
   // GitHub-backed CMS records may be saved as published before a publish
   // timestamp is populated. Do not hide an explicitly published article just
   // because published_at is absent; when a timestamp exists, still respect it.

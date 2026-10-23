@@ -248,7 +248,7 @@ function PreviewDialog({ post, onClose }) {
 }
 
 export default function BlogEditorPage({ mode, recordId }) {
-  const { posts, reload } = useAdminContent()
+  const { posts, reload, loading: contentLoading } = useAdminContent()
   const { navigate } = useRouter()
   const [query, setQuery] = useState('')
   const [form, setForm] = useState(blankPost)
@@ -349,9 +349,11 @@ export default function BlogEditorPage({ mode, recordId }) {
     try {
       const saved = await saveRecord('posts', payload)
       await reload()
-      setBaseline(JSON.stringify(form))
-      setNotice(status === 'published' ? 'Article published.' : 'Draft saved privately.')
-      if (!form.id && saved?.id) {
+      const savedForm = { ...payload, ...saved, tags: Array.isArray(saved?.tags) ? saved.tags.join(', ') : payload.tags.join(', '), published_at: toDateTimeLocal(saved?.published_at || publishedAt) }
+      setForm(savedForm)
+      setBaseline(JSON.stringify(savedForm))
+      setNotice(status === 'published' ? 'Article status saved as published. Click Publish in the header to deploy it.' : 'Draft saved locally. Click Publish in the header to deploy it.')
+      if (saved?.id && String(saved.id) !== String(form.id)) {
         navigate(`/mdadmin/blog/${saved.id}`, { replace: true })
       }
     } catch (saveError) {
@@ -374,6 +376,10 @@ export default function BlogEditorPage({ mode, recordId }) {
     } finally {
       setBusy(false)
     }
+  }
+
+  if (editing && !record && contentLoading) {
+    return <AdminLayout title="Loading article…" eyebrow="ARTICLES"><div className="admin-loading" role="status">Loading article details…</div></AdminLayout>
   }
 
   if (editing && !record) {
