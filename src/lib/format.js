@@ -45,15 +45,17 @@ export function isPostPublic(post, now = Date.now()) {
   if (typeof window !== 'undefined') {
     try { if (new URLSearchParams(window.location.search).get('preview') === 'local' || window.sessionStorage.getItem('portfolio-local-preview') === '1') return true } catch { /* use public visibility rules */ }
   }
-  // GitHub-backed CMS records may be saved as published before a publish
-  // timestamp is populated. Do not hide an explicitly published article just
-  // because published_at is absent; when a timestamp exists, still respect it.
-  const status = String(post.status || '').trim().toLowerCase()
-  if (status !== 'published') return false
-  if (!post.published_at) return true
-  const published = new Date(post.published_at).getTime()
-  // Treat malformed legacy timestamps as published rather than making a
-  // successfully published article disappear from the public site.
+  // Be tolerant of records created by older admin builds (for example, a
+  // capitalized status or an explicit is_published flag). Never require a
+  // publish timestamp when the record is explicitly marked as published.
+  const status = String(post.status || post.publish_status || '').trim().toLowerCase()
+  const explicitlyPublished = status === 'published' || post.is_published === true || post.isPublished === true
+  if (!explicitlyPublished) return false
+  const timestamp = post.published_at || post.publishedAt || post.publish_date || null
+  if (!timestamp) return true
+  const published = new Date(timestamp).getTime()
+  // Treat malformed legacy timestamps as published rather than making an
+  // explicitly published article disappear from the public site.
   return !Number.isFinite(published) || published <= now
 }
 

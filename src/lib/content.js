@@ -232,7 +232,7 @@ export function normalizePost(row) {
     excerpt: row.excerpt || '',
     content: row.content || '',
     cover_image_url: row.cover_image_url || '',
-    status: row.status === 'published' ? 'published' : 'draft',
+    status: String(row.status || row.publish_status || '').trim().toLowerCase() === 'published' || row.is_published === true || row.isPublished === true ? 'published' : 'draft',
     published_at: row.published_at || null,
     created_at: row.created_at || null,
     updated_at: row.updated_at || null,
@@ -328,7 +328,7 @@ function getLocalPreviewContent() {
 
 export async function fetchPublicContent() {
   if (isLocalPreviewMode()) return getLocalPreviewContent()
-  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
+  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts || shared.articles || shared.blogPosts).filter(isPostPublic).map(normalizePost)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
   if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
   const nowIso = new Date().toISOString()
@@ -373,7 +373,7 @@ export async function fetchPublicContent() {
  */
 export async function fetchPostBySlug(slug) {
   if (isLocalPreviewMode()) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug) || null
-  if (useGithubGateway) return asArray((await readSharedContent()).posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
+  if (useGithubGateway) { const shared = await readSharedContent(); return asArray(shared.posts || shared.articles || shared.blogPosts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null }
   if (!supabase) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (supabase) {
     const { data, error } = await supabase
