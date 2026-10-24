@@ -36,6 +36,13 @@ export default function StructurePage() {
   const updateCustom = (id, patch) => setCustomSections((current) => current.map((section) => section.id === id ? { ...section, ...patch } : section))
   const addMenu = () => setMenu((current) => [...current, { label: 'New menu item', href: '#contact', visible: true }])
   const updateMenu = (index, patch) => setMenu((current) => current.map((item, i) => i === index ? { ...item, ...patch } : item))
+  const moveMenu = (index, direction) => setMenu((current) => {
+    const next = [...current]
+    const target = index + direction
+    if (target < 0 || target >= next.length) return current
+    ;[next[index], next[target]] = [next[target], next[index]]
+    return next
+  })
 
   const save = async () => {
     setBusy(true); setError(''); setNotice('')
@@ -88,7 +95,7 @@ export default function StructurePage() {
       </section>
 
       <section className="admin-panel structure-panel">
-        <div className="editor-heading"><div><p className="eyebrow">PRIMARY NAVIGATION</p><h2>Menu items</h2><p>Change the label or destination, add a link, or remove a menu item.</p></div><button type="button" className="button button-secondary button-sm" onClick={addMenu}><Plus size={15} /> Add menu item</button></div>
+        <div className="editor-heading"><div><p className="eyebrow">PRIMARY NAVIGATION</p><h2>Menu items</h2><p>Change labels and destinations, control visibility, and use the arrows to set the public menu order.</p></div><button type="button" className="button button-secondary button-sm" onClick={addMenu}><Plus size={15} /> Add menu item</button></div>
         <label className="field-block menu-style-picker">Navigation style
           <select value={menuStyle} onChange={(event) => setMenuStyle(event.target.value)}>
             <option value="underline">Animated underline</option>
@@ -100,7 +107,12 @@ export default function StructurePage() {
         </label>
         <div className="menu-editor-list">
           {menu.map((item, index) => <div className="menu-editor-row" key={`${index}-${item.label}`}>
-            <Link2 size={16} className="grip" />
+            <div className="menu-position-controls" aria-label={`Position ${index + 1}`}>
+              <Link2 size={16} className="grip" />
+              <span className="structure-index">{String(index + 1).padStart(2, '0')}</span>
+              <button type="button" className="structure-icon-button" aria-label={`Move ${item.label} up`} title="Move up" disabled={index === 0} onClick={() => moveMenu(index, -1)}><ArrowUp size={14} /></button>
+              <button type="button" className="structure-icon-button" aria-label={`Move ${item.label} down`} title="Move down" disabled={index === menu.length - 1} onClick={() => moveMenu(index, 1)}><ArrowDown size={14} /></button>
+            </div>
             <label>Menu label<input value={item.label} onChange={(event) => updateMenu(index, { label: event.target.value })} /></label>
             <label>Link / section ID<input value={item.href} onChange={(event) => updateMenu(index, { href: event.target.value })} placeholder="#projects or https://example.com" /></label>
             <div className="menu-row-actions"><button type="button" className="structure-icon-button" aria-label={`${item.visible === false ? 'Show' : 'Hide'} ${item.label} menu item`} onClick={() => updateMenu(index, { visible: item.visible === false })}>{item.visible === false ? <EyeOff size={15} /> : <Eye size={15} />}</button><button type="button" className="record-action danger" aria-label="Remove menu item" onClick={() => setMenu((current) => current.filter((_, i) => i !== index))}><Trash2 size={15} /></button></div>

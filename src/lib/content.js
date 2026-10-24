@@ -140,9 +140,13 @@ export async function publishStagedContent() {
   let staged
   try { staged = JSON.parse(localStorage.getItem(STAGED_CONTENT_KEY) || 'null') } catch { staged = null }
   if (!staged) throw new Error('There are no staged changes to publish.')
-  if (useGithubGateway) {
-    await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staged) })
+  // Do not report a successful publish or discard the staging copy unless the
+  // configured publisher confirms that the shared public content was updated.
+  // Browser-local storage is suitable for preview, but cannot update GitHub Pages.
+  if (!useGithubGateway) {
+    throw new Error('These changes are saved in this browser and available in local preview, but live publishing is not configured. Configure the GitHub content publisher before publishing; your staged changes have been kept.')
   }
+  await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staged) })
   try { localStorage.removeItem(STAGED_CONTENT_KEY) } catch {}
   window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
   return true
@@ -257,6 +261,7 @@ function normalizeProfile(row) {
     location: row.location || seedProfile.location,
     email: row.email || seedProfile.email,
     profileImage: row.image_url || seedProfile.profileImage,
+    profileImageDesign: row.profile_image_design || 'editorial',
     resumeUrl: row.resume_url || seedProfile.resumeUrl,
     availability: row.availability || seedProfile.availability,
     social_urls: { ...seedProfile.social_urls, ...(row.social_urls || {}) },
@@ -328,7 +333,7 @@ function getLocalPreviewContent() {
 
 export async function fetchPublicContent() {
   if (isLocalPreviewMode()) return getLocalPreviewContent()
-  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts || shared.articles || shared.blogPosts).filter(isPostPublic).map(normalizePost)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
+  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts || shared.articles || shared.blogPosts).map(normalizePost).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
   if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
   const nowIso = new Date().toISOString()
@@ -347,7 +352,7 @@ export async function fetchPublicContent() {
     supabase
       .from('site_settings')
       .select('key,value')
-      .in('key', ['site_title', 'branding', 'copy', 'stats', 'tech_stack', 'theme_published', 'site_structure']),
+      .in('key', ['site_title', 'branding', 'copy', 'stats', 'tech_stack', 'theme_published', 'site_structure', 'profile_image_design']),
   ])
 
   const settled = (result, fallback) => (result.status === 'fulfilled' && !result.value.error ? result.value.data : fallback)
@@ -361,6 +366,7 @@ export async function fetchPublicContent() {
     experience: asArray(settled(experience, [])).map(normalizeExperience),
     education: asArray(settled(education, [])).map(normalizeEducation),
     posts: sortPosts(asArray(settled(posts, [])).map(normalizePost)),
+    profile: { ...normalizeProfile(settled(profileResult, null)), profileImageDesign: Object.fromEntries(settingRows.map((row) => [row.key, row.value])).profile_image_design || 'editorial' },
     site: mergeSiteSettings(settingRows),
     theme: themeFromSettings(settingRows),
   }
@@ -373,7 +379,7 @@ export async function fetchPublicContent() {
  */
 export async function fetchPostBySlug(slug) {
   if (isLocalPreviewMode()) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug) || null
-  if (useGithubGateway) { const shared = await readSharedContent(); return asArray(shared.posts || shared.articles || shared.blogPosts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null }
+  if (useGithubGateway) { const shared = await readSharedContent(); return asArray(shared.posts || shared.articles || shared.blogPosts).map(normalizePost).find((post) => decodeURIComponent(String(post.slug || '')) === decodeURIComponent(String(slug || '')) && isPostPublic(post)) || null }
   if (!supabase) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (supabase) {
     const { data, error } = await supabase
@@ -455,7 +461,7 @@ export async function fetchAdminContent() {
   const map = Object.fromEntries(settingRows.map((row) => [row.key, row.value]))
 
   return {
-    profile: normalizeProfile(value(profileResult)),
+    profile: { ...normalizeProfile(value(profileResult)), profileImageDesign: map.profile_image_design || 'editorial' },
     profileRow: value(profileResult),
     projects: asArray(value(projects)).map(normalizeProject),
     certifications: asArray(value(certifications)).map(normalizeCertification),

@@ -46,7 +46,6 @@ function Hero({ profile, copy, onSection }) {
           {copy.heroEyebrow}
         </p>
         <h1 id="hero-title">
-          <span className="hero-name">{profile.shortName || profile.name}</span>
           <em>{copy.heroHeadline}</em>
         </h1>
         <p className="hero-intro">{profile.intro}</p>
@@ -74,7 +73,7 @@ function Hero({ profile, copy, onSection }) {
 
       <div className="portrait-stage">
         <div className="portrait-backdrop" aria-hidden="true" />
-        <figure className="portrait-frame">
+        <figure className={`portrait-frame portrait-design-${profile.profileImageDesign || 'editorial'}`}>
           <img
             src={profile.profileImage || '/profile.jpg'}
             alt={`Portrait of ${profile.name}`}
@@ -92,7 +91,7 @@ function Hero({ profile, copy, onSection }) {
             }}
           />
         </figure>
-        <figcaption className="portrait-caption">
+        <figcaption className="portrait-caption" hidden aria-hidden="true">
           <span className="caption-dot" aria-hidden="true" />
           <div>
             <strong>{profile.shortName || profile.name}</strong>
@@ -131,9 +130,6 @@ function About({ profile, copy, stats }) {
       />
       <div className="about-grid">
         <Reveal className="about-lead">
-          <span className="large-quote" aria-hidden="true">
-            &ldquo;
-          </span>
           <p>
             {profile.about?.bio} {profile.about?.focus}
           </p>
@@ -235,7 +231,7 @@ function Projects({ projects, copy, sliderIntervalSeconds }) {
     <section id="projects" className="section-wrap projects-section" aria-labelledby="projects-title">
       <SectionHeading eyebrow="PROJECTS & CLIENTS" id="projects-title" title={copy.projectsTitle} description={copy.projectsDescription} />
       {projects.length ? (
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Selected projects" items={projects} getTitle={(project) => project.title} getImage={(project) => project.image || project.clientLogo} renderDetails={(project, index, primary) => primary ? <><p className="cinema-summary">{project.description}</p><div className="cinema-tags">{(project.techStack || []).slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>{project.url ? <a className="cinema-link" href={project.url} target="_blank" rel="noreferrer">View project <ArrowUpRight size={15}/></a> : null}</> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Selected projects" items={projects} getTitle={(project) => project.title} getImage={(project) => project.image || project.clientLogo} getLink={(project) => project.url} renderDetails={(project, index, primary) => primary ? <><p className="cinema-summary">{project.description}</p><div className="cinema-tags">{(project.techStack || []).slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>{project.url ? <a className="cinema-link" href={project.url} target="_blank" rel="noreferrer">View project <ArrowUpRight size={15}/></a> : null}</> : null} />
       ) : <div className="empty-state"><Layers3 size={22} aria-hidden="true" /><p>No projects have been added yet. Add projects from the admin dashboard.</p></div>}
     </section>
   )
@@ -291,7 +287,7 @@ function Certifications({ items, copy, sliderIntervalSeconds }) {
         description={copy.certificationsDescription}
       />
 
-      <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Certifications" items={items} getTitle={(cert) => cert.name} getImage={(cert) => cert.image} renderDetails={(cert, index, primary) => primary ? <><p className="cinema-summary">{cert.issuer || 'Adobe'}{cert.year ? ` · ${cert.year}` : ''}</p>{cert.verificationUrl ? <a className="cinema-link" href={cert.verificationUrl} target="_blank" rel="noreferrer">Verify credential <ArrowUpRight size={15}/></a> : null}</> : null} />
+      <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Certifications" items={items} getTitle={(cert) => cert.name} getImage={(cert) => cert.image} getLink={(cert) => cert.verificationUrl} renderDetails={(cert, index, primary) => primary ? <><p className="cinema-summary">{cert.issuer || 'Adobe'}{cert.year ? ` · ${cert.year}` : ''}</p>{cert.verificationUrl ? <a className="cinema-link" href={cert.verificationUrl} target="_blank" rel="noreferrer">Verify credential <ArrowUpRight size={15}/></a> : null}</> : null} />
     </section>
   )
 }
@@ -360,11 +356,11 @@ function Blog({ posts, copy, sliderIntervalSeconds }) {
 
   return (
     <section id="blog" className="section-wrap blog-section" aria-labelledby="blog-title">
-      <SectionHeading eyebrow="ARTICLES & IDEAS" id="blog-title" title={copy.blogTitle} description={copy.blogDescription} />
+      <SectionHeading eyebrow="ARTICLES & IDEAS" id="blog-title" title="Articles from the work." description="Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering." />
 
       {published.length ? (
         <>
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} getLink={(post) => `/blog/${encodeURIComponent(post.slug)}`} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
         <div className="blog-view-all"><Link className="cinema-link" to="/articles">View all articles <ArrowUpRight size={15}/></Link></div>
         </>
       ) : (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, MoveUpRight } from 'lucide-react'
+import { Link } from '../lib/RouterLink'
 
 const palettes = [
   ['#101915', '#263f32', '#b8df86'],
@@ -10,7 +11,7 @@ const palettes = [
 ]
 
 /** Cinematic, vertical image-rail carousel inspired by the user's video reference. */
-export default function CinematicSlider({ items = [], label, getTitle, getImage, renderDetails, intervalSeconds = 5 }) {
+export default function CinematicSlider({ items = [], label, getTitle, getImage, getLink, renderDetails, intervalSeconds = 5 }) {
   const [active, setActive] = useState(0)
   const reduceMotion = useReducedMotion()
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function CinematicSlider({ items = [], label, getTitle, getImage,
   const safeActive = active % items.length
   const item = items[safeActive]
   const title = getTitle?.(item) || item.title || item.name || label
+  const titleLink = getLink?.(item) || ''
   const [bg, panel, accent] = palettes[safeActive % palettes.length]
   return (
     <section className="cinematic-slider" aria-label={label} style={{ '--cinema-bg': bg, '--cinema-panel': panel, '--cinema-accent': accent }}>
@@ -32,7 +34,7 @@ export default function CinematicSlider({ items = [], label, getTitle, getImage,
         <span className="cinema-kicker">{label} <i /> {String(safeActive + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}</span>
         <AnimatePresence mode="wait">
           <motion.div key={`${safeActive}-title`} initial={reduceMotion ? false : { opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: .42 }}>
-            <h3>{title}</h3>
+            <h3>{titleLink ? (titleLink.startsWith('http') ? <a href={titleLink} target='_blank' rel='noreferrer'>{title}</a> : <Link to={titleLink}>{title}</Link>) : title}</h3>
             {renderDetails?.(item, safeActive, true)}
           </motion.div>
         </AnimatePresence>

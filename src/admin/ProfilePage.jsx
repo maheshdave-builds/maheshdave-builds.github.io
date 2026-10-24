@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, Check, ImagePlus, Loader2, Save, X, Eye } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
-import { saveProfile, uploadImage } from '../lib/content'
+import { saveProfile, saveSetting, uploadImage } from '../lib/content'
 import { AdminLayout } from './AdminLayout'
 import ImageCropDialog from './ImageCropDialog'
 
@@ -74,6 +74,7 @@ export default function ProfilePage() {
     setBusy(true)
     try {
       await saveProfile(draft)
+      await saveSetting('profile_image_design', draft.profileImageDesign || 'editorial')
       await reload()
       setNotice('Profile updated. The public site reflects this immediately.')
     } catch (saveError) {
@@ -189,10 +190,28 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="portrait-preview">
+          <div className={`portrait-preview portrait-design-${draft.profileImageDesign || 'editorial'}`}>
             {draft.profileImage ? (
               <img src={draft.profileImage} alt="Profile photo preview" onError={(event) => { event.currentTarget.style.display = 'none' }} />
             ) : <span>No photo selected</span>}
+          </div>
+          <div className="portrait-design-picker" role="radiogroup" aria-label="Profile image design">
+            <p className="field-hint">Choose a display style. It will be applied to the public portrait when you save and publish.</p>
+            {[
+              ['classic', 'Classic Circle', 'Circular crop'],
+              ['rounded', 'Rounded Rectangle', 'Soft corners'],
+              ['frame', 'Professional Frame', 'Refined frame'],
+              ['shadow', 'Soft Shadow', 'Light shadow'],
+              ['outline', 'Minimal Outline', 'Thin outline'],
+              ['accent', 'Modern Accent', 'Theme accent'],
+              ['editorial', 'Editorial Portrait', 'Hero portrait'],
+            ].map(([id, label, detail]) => (
+              <button type="button" key={id} role="radio" aria-checked={(draft.profileImageDesign || 'editorial') === id} className={`portrait-design-option ${draft.profileImageDesign === id ? 'is-selected' : ''}`} onClick={() => set('profileImageDesign', id)}>
+                <span className={`portrait-design-swatch portrait-design-${id}`}><img src={draft.profileImage || '/profile.jpg'} alt="" /></span>
+                <span><strong>{label}</strong><small>{detail}</small></span>
+                {(draft.profileImageDesign || 'editorial') === id ? <Check size={16} aria-hidden="true" /> : null}
+              </button>
+            ))}
           </div>
 
           <div className="portrait-actions">

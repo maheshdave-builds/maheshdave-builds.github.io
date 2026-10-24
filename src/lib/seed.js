@@ -227,6 +227,8 @@ export const DEFAULT_COPY = {
   blogTitle: 'Articles from the work.',
   blogDescription:
     'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
+  articlesPageTitle: 'Articles from the work.',
+  articlesPageDescription: 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
   contactTitle: 'Good work starts with a conversation.',
   contactDescription:
     'Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect.',

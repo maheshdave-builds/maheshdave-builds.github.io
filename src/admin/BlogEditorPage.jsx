@@ -436,7 +436,7 @@ export default function BlogEditorPage({ mode, recordId }) {
                     </div>
                     <div className="record-actions">
                       {post.status === 'published' && !scheduled ? (
-                        <Link className="record-action" to={`/blog/${post.slug}`} aria-label="View on site" target="_blank" rel="noreferrer">
+                        <Link className="record-action" to={`/blog/${encodeURIComponent(post.slug)}?preview=local`} aria-label="Preview article" target="_blank" rel="noreferrer">
                           <Eye size={14} />
                         </Link>
                       ) : null}

@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, Check, GripVertical, Loader2, Plus, RotateCcw, Save, Trash2 } from 'lucide-react'
+import { AlertTriangle, Check, GripVertical, Loader2, Plus, RotateCcw, Save, Trash2, Volume2, ImagePlus } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
-import { saveSetting } from '../lib/content'
+import { saveSetting, uploadImage } from '../lib/content'
 import { DEFAULT_COPY, DEFAULT_STATS } from '../lib/seed'
 import { AdminLayout } from './AdminLayout'
+import ImageCropDialog from './ImageCropDialog'
 
 const COPY_FIELDS = [
   { key: 'heroEyebrow', label: 'Hero eyebrow', group: 'Hero' },
@@ -22,6 +23,8 @@ const COPY_FIELDS = [
   { key: 'toolkitDescription', label: 'Toolkit description', group: 'Toolkit', area: true },
   { key: 'blogTitle', label: 'Blog heading', group: 'Blog' },
   { key: 'blogDescription', label: 'Blog description', group: 'Blog', area: true },
+  { key: 'articlesPageTitle', label: 'Article listing banner title', group: 'Blog' },
+  { key: 'articlesPageDescription', label: 'Article listing banner description', group: 'Blog', area: true },
   { key: 'contactTitle', label: 'Contact heading', group: 'Contact' },
   { key: 'contactDescription', label: 'Contact description', group: 'Contact', area: true },
 ]
@@ -37,6 +40,7 @@ export default function PageContentPage() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [activeGroup, setActiveGroup] = useState(GROUPS[0])
+  const [bannerCropFile, setBannerCropFile] = useState(null)
 
   const dirty = useMemo(
     () =>
@@ -127,6 +131,14 @@ export default function PageContentPage() {
             ))}
           </div>
 
+          {activeGroup === 'Blog' ? <>
+            <div className="article-banner-admin">
+              <label>Article listing banner image <input type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }} /></label>
+              {copy.articlesPageBannerImage ? <div className="article-banner-preview"><img src={copy.articlesPageBannerImage} alt="Article listing banner preview"/><div className="article-banner-actions"><button type="button" className="subtle-button" onClick={() => document.getElementById('article-banner-replace')?.click()}><ImagePlus size={15}/> Replace / crop image</button><input id="article-banner-replace" hidden type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }}/><button type="button" className="subtle-button" onClick={() => setCopy(current => ({ ...current, articlesPageBannerImage: '' }))}>Remove banner image</button></div></div> : <p className="field-hint">No common banner image uploaded. The text banner will be shown instead.</p>}
+            </div>
+            <div className="article-listen-admin-setting"><label><input type="checkbox" checked={copy.articleListenEnabled !== false} onChange={event => setCopy(current => ({ ...current, articleListenEnabled: event.target.checked }))}/><Volume2 size={17}/> Enable “Listen to Article” on public article pages</label><p className="field-hint">This setting is saved with Page content when you click Save changes.</p></div>
+            {bannerCropFile ? <ImageCropDialog file={bannerCropFile} title="Crop article listing banner" aspectRatio="16 / 5" onCancel={() => setBannerCropFile(null)} onApply={async (croppedFile) => { setBusy(true); setError(''); try { const url = await uploadImage(croppedFile, 'article-banner'); setCopy(current => ({ ...current, articlesPageBannerImage: url })); setBannerCropFile(null); setNotice('Banner image cropped and uploaded. Click Save changes to publish it.'); } catch (uploadError) { setError(uploadError.message || 'Could not upload cropped banner image. The previous banner is unchanged.'); } finally { setBusy(false); } }}/>:null}
+          </> : null}
           <div className="admin-form-grid">
             {COPY_FIELDS.filter((field) => field.group === activeGroup).map((field) => (
               <label key={field.key} className={field.area ? 'wide-field' : ''}>
