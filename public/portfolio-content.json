@@ -74,7 +74,7 @@
       "stackexchange": "https://magento.stackexchange.com/users/70881/mahesh-dave"
     },
     "availability": "Open to architecture and engineering-leadership conversations",
-    "profileImageDesign": "accent"
+    "profileImageDesign": "editorial"
   },
   "projects": [
     {
@@ -949,6 +949,139 @@
   },
   "settingsRows": [
     {
+      "key": "copy",
+      "value": {
+        "heroEyebrow": "ADOBE COMMERCE ENGINEERING · TECHNICAL LEADERSHIP",
+        "heroHeadline": "Leading engineering. Enabling business growth.",
+        "aboutTitle": "Technical excellence. Strategic leadership.",
+        "aboutDescription": "Bridging solution architecture, engineering execution, and team leadership to deliver scalable, resilient commerce platforms that create lasting business value.",
+        "experienceTitle": "Built through experience. Driven by impact.",
+        "experienceDescription": "A journey from hands-on Magento development to solution architecture and technical leadership, delivering scalable commerce platforms and guiding engineering teams through complex challenges.",
+        "projectsTitle": "Commerce work with real-world impact.",
+        "projectsDescription": "Selected commerce implementations, integrations, and client storefronts.",
+        "certificationsTitle": "Credentials that back the craft.",
+        "certificationsDescription": "Adobe credentials and product foundations, with verification links where available.",
+        "educationTitle": "The foundation behind the practice.",
+        "educationDescription": "Academic background and qualifications.",
+        "toolkitTitle": "A practical, modern toolkit.",
+        "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
+        "blogTitle": "Articles from the work.",
+        "blogDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
+        "articlesPageTitle": "Articles from the work.",
+        "articlesPageDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
+        "contactTitle": "Good work starts with a conversation.",
+        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
+      }
+    },
+    {
+      "key": "stats",
+      "value": [
+        {
+          "value": "9+",
+          "label": "Years in commerce engineering"
+        },
+        {
+          "value": "8+",
+          "label": "People led across delivery teams"
+        },
+        {
+          "value": "99%",
+          "label": "Data accuracy improvement reported on Salesforce integration"
+        },
+        {
+          "value": "35%",
+          "label": "Faster PR turnaround after AI workflow adoption"
+        }
+      ]
+    },
+    {
+      "key": "tech_stack",
+      "value": [
+        {
+          "category": "Commerce",
+          "items": [
+            "Adobe Commerce Cloud",
+            "Adobe Commerce Enterprise",
+            "Magento 2",
+            "Magento 1",
+            "Hyvä",
+            "Adobe Commerce Optimizer",
+            "Adobe App Builder"
+          ]
+        },
+        {
+          "category": "Backend & APIs",
+          "items": [
+            "PHP 8.x",
+            "Magento Framework",
+            "Laravel",
+            "Node.js",
+            "GraphQL",
+            "REST",
+            "SOAP",
+            "Webhooks",
+            "OAuth 2.0"
+          ]
+        },
+        {
+          "category": "Integration & AI",
+          "items": [
+            "Odoo ERP",
+            "Salesforce CRM",
+            "Jitterbit",
+            "Adobe I/O Events",
+            "LLM APIs",
+            "MCP",
+            "Adobe Sensei",
+            "Live Search"
+          ]
+        },
+        {
+          "category": "Frontend",
+          "items": [
+            "JavaScript",
+            "React",
+            "Alpine.js",
+            "Tailwind CSS",
+            "Knockout.js",
+            "RequireJS",
+            "jQuery",
+            "HTML5",
+            "CSS3",
+            "LESS"
+          ]
+        },
+        {
+          "category": "Data & infrastructure",
+          "items": [
+            "MySQL",
+            "MariaDB",
+            "Elasticsearch",
+            "OpenSearch",
+            "Redis",
+            "Docker",
+            "Azure",
+            "Jenkins",
+            "GitLab CI",
+            "RabbitMQ",
+            "Varnish"
+          ]
+        },
+        {
+          "category": "Quality & delivery",
+          "items": [
+            "SonarQube",
+            "PHP_CodeSniffer",
+            "Magento Coding Standards",
+            "PHPUnit",
+            "New Relic",
+            "Core Web Vitals",
+            "Agile/Scrum"
+          ]
+        }
+      ]
+    },
+    {
       "key": "site_structure",
       "value": {
         "structure": {
@@ -1103,137 +1236,8 @@
       }
     },
     {
-      "key": "copy",
-      "value": {
-        "heroEyebrow": "ADOBE COMMERCE ENGINEERING · TECHNICAL LEADERSHIP",
-        "heroHeadline": "Leading engineering. Enabling business growth.",
-        "aboutTitle": "Technical excellence. Strategic leadership.",
-        "aboutDescription": "Bridging solution architecture, engineering execution, and team leadership to deliver scalable, resilient commerce platforms that create lasting business value.",
-        "experienceTitle": "Built through experience. Driven by impact.",
-        "experienceDescription": "A journey from hands-on Magento development to solution architecture and technical leadership, delivering scalable commerce platforms and guiding engineering teams through complex challenges.",
-        "projectsTitle": "Commerce work with real-world impact.",
-        "projectsDescription": "Selected commerce implementations, integrations, and client storefronts.",
-        "certificationsTitle": "Credentials that back the craft.",
-        "certificationsDescription": "Adobe credentials and product foundations, with verification links where available.",
-        "educationTitle": "The foundation behind the practice.",
-        "educationDescription": "Academic background and qualifications.",
-        "toolkitTitle": "A practical, modern toolkit.",
-        "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
-        "blogTitle": "Articles from the work.",
-        "blogDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering.",
-        "articlesPageTitle": "Articles from the work.",
-        "articlesPageDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering.",
-        "contactTitle": "Good work starts with a conversation.",
-        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
-      }
-    },
-    {
-      "key": "stats",
-      "value": [
-        {
-          "value": "9+",
-          "label": "Years in commerce engineering"
-        },
-        {
-          "value": "8+",
-          "label": "People led across delivery teams"
-        },
-        {
-          "value": "99%",
-          "label": "Data accuracy improvement reported on Salesforce integration"
-        },
-        {
-          "value": "35%",
-          "label": "Faster PR turnaround after AI workflow adoption"
-        }
-      ]
-    },
-    {
-      "key": "tech_stack",
-      "value": [
-        {
-          "category": "Commerce",
-          "items": [
-            "Adobe Commerce Cloud",
-            "Adobe Commerce Enterprise",
-            "Magento 2",
-            "Magento 1",
-            "Hyvä",
-            "Adobe Commerce Optimizer",
-            "Adobe App Builder"
-          ]
-        },
-        {
-          "category": "Backend & APIs",
-          "items": [
-            "PHP 8.x",
-            "Magento Framework",
-            "Laravel",
-            "Node.js",
-            "GraphQL",
-            "REST",
-            "SOAP",
-            "Webhooks",
-            "OAuth 2.0"
-          ]
-        },
-        {
-          "category": "Integration & AI",
-          "items": [
-            "Odoo ERP",
-            "Salesforce CRM",
-            "Jitterbit",
-            "Adobe I/O Events",
-            "LLM APIs",
-            "MCP",
-            "Adobe Sensei",
-            "Live Search"
-          ]
-        },
-        {
-          "category": "Frontend",
-          "items": [
-            "JavaScript",
-            "React",
-            "Alpine.js",
-            "Tailwind CSS",
-            "Knockout.js",
-            "RequireJS",
-            "jQuery",
-            "HTML5",
-            "CSS3",
-            "LESS"
-          ]
-        },
-        {
-          "category": "Data & infrastructure",
-          "items": [
-            "MySQL",
-            "MariaDB",
-            "Elasticsearch",
-            "OpenSearch",
-            "Redis",
-            "Docker",
-            "Azure",
-            "Jenkins",
-            "GitLab CI",
-            "RabbitMQ",
-            "Varnish"
-          ]
-        },
-        {
-          "category": "Quality & delivery",
-          "items": [
-            "SonarQube",
-            "PHP_CodeSniffer",
-            "Magento Coding Standards",
-            "PHPUnit",
-            "New Relic",
-            "Core Web Vitals",
-            "Agile/Scrum"
-          ]
-        }
-      ]
+      "key": "profile_image_design",
+      "value": "editorial"
     }
   ]
 }
