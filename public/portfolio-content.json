@@ -480,6 +480,422 @@
       "linkLabel": "View resume PDF",
       "clientLinks": [],
       "is_published": true
+    },
+    {
+      "id": "local-1792938344593-ez8ngk",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:25:44.593Z"
+    },
+    {
+      "id": "local-1792938344603-53v187",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:25:44.603Z"
+    },
+    {
+      "id": "local-1792938347429-qjqu89",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:25:47.429Z"
+    },
+    {
+      "id": "local-1792938347441-vqkbev",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:25:47.441Z"
+    },
+    {
+      "id": "local-1792938431835-uvriz3",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:11.835Z"
+    },
+    {
+      "id": "local-1792938431852-u1xyyh",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:11.852Z"
+    },
+    {
+      "id": "local-1792938433446-f0oles",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:13.446Z"
+    },
+    {
+      "id": "local-1792938433463-b2dewg",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:13.463Z"
+    },
+    {
+      "id": "local-1792938434383-a9j68o",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:14.383Z"
+    },
+    {
+      "id": "local-1792938434394-uodk2j",
+      "title": "Who Has It?",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://whohasit.co/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:14.394Z"
+    },
+    {
+      "id": "local-1792938435507-s8u60e",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:15.507Z"
+    },
+    {
+      "id": "local-1792938435521-fam3qv",
+      "title": "Who Has It?",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://whohasit.co/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:15.521Z"
+    },
+    {
+      "id": "local-1792938436828-724nl2",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:16.828Z"
+    },
+    {
+      "id": "local-1792938436842-ygn9me",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:16.842Z"
+    },
+    {
+      "id": "local-1792938440660-j0918l",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:20.660Z"
+    },
+    {
+      "id": "local-1792938440667-4nd8ie",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:20.668Z"
+    },
+    {
+      "id": "local-1792938440856-z3mydb",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:20.856Z"
+    },
+    {
+      "id": "local-1792938440862-n5gs74",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:20.862Z"
+    },
+    {
+      "id": "local-1792938441031-uaax8h",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:21.031Z"
+    },
+    {
+      "id": "local-1792938441038-jeofh1",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:21.038Z"
+    },
+    {
+      "id": "local-1792938441211-bwdysl",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:21.211Z"
+    },
+    {
+      "id": "local-1792938441220-ui9mkn",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:21.220Z"
+    },
+    {
+      "id": "local-1792938441392-gtbr7w",
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://rev-a-shelf.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:21.392Z"
+    },
+    {
+      "id": "local-1792938441405-q1imev",
+      "title": "Magento–Odoo Connector",
+      "category": "Integrations & APIs",
+      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "techStack": [
+        "Magento",
+        "Odoo ERP",
+        "Product sync",
+        "Inventory sync"
+      ],
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:21.405Z"
+    },
+    {
+      "id": "local-1792938443765-c65h6f",
+      "title": "Midas Furniture",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://midasfurniture.com/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:23.765Z"
+    },
+    {
+      "id": "local-1792938443779-flnpaj",
+      "title": "Who Has It?",
+      "category": "Adobe Commerce Cloud",
+      "url": "https://whohasit.co/",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "linkLabel": "Visit project",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 0,
+      "updated_at": "2026-10-25T14:27:23.779Z"
     }
   ],
   "certifications": [
@@ -743,12 +1159,12 @@
       "order": [
         "home",
         "about",
+        "articles",
         "projects",
-        "experience",
         "certifications",
+        "experience",
         "education",
         "expertise",
-        "articles",
         "contact"
       ],
       "hidden": [
@@ -761,16 +1177,20 @@
         "href": "#about"
       },
       {
+        "label": "Articles",
+        "href": "#articles"
+      },
+      {
         "label": "Projects",
         "href": "#projects"
       },
       {
-        "label": "Experience",
-        "href": "#experience"
-      },
-      {
         "label": "Certifications",
         "href": "#certifications"
+      },
+      {
+        "label": "Experience",
+        "href": "#experience"
       },
       {
         "label": "Toolkit",
@@ -780,10 +1200,6 @@
       {
         "label": "Education",
         "href": "#education"
-      },
-      {
-        "label": "Articles",
-        "href": "#articles"
       },
       {
         "label": "Contact",
@@ -1047,65 +1463,6 @@
       }
     },
     {
-      "key": "site_structure",
-      "value": {
-        "structure": {
-          "order": [
-            "home",
-            "about",
-            "projects",
-            "experience",
-            "certifications",
-            "education",
-            "expertise",
-            "articles",
-            "contact",
-            "blog"
-          ],
-          "hidden": [
-            "expertise"
-          ]
-        },
-        "navigationLinks": [
-          {
-            "label": "About",
-            "href": "#about"
-          },
-          {
-            "label": "Projects",
-            "href": "#projects"
-          },
-          {
-            "label": "Experience",
-            "href": "#experience"
-          },
-          {
-            "label": "Certifications",
-            "href": "#certifications"
-          },
-          {
-            "label": "Toolkit",
-            "href": "#expertise",
-            "visible": false
-          },
-          {
-            "label": "Education",
-            "href": "#education"
-          },
-          {
-            "label": "Articles",
-            "href": "#articles"
-          },
-          {
-            "label": "Contact",
-            "href": "#contact"
-          }
-        ],
-        "customSections": [],
-        "menuStyle": "underline"
-      }
-    },
-    {
       "key": "copy",
       "value": {
         "heroEyebrow": "ADOBE COMMERCE ENGINEERING · TECHNICAL LEADERSHIP",
@@ -1239,6 +1596,64 @@
           ]
         }
       ]
+    },
+    {
+      "key": "site_structure",
+      "value": {
+        "structure": {
+          "order": [
+            "home",
+            "about",
+            "articles",
+            "projects",
+            "certifications",
+            "experience",
+            "education",
+            "expertise",
+            "contact"
+          ],
+          "hidden": [
+            "expertise"
+          ]
+        },
+        "navigationLinks": [
+          {
+            "label": "About",
+            "href": "#about"
+          },
+          {
+            "label": "Articles",
+            "href": "#articles"
+          },
+          {
+            "label": "Projects",
+            "href": "#projects"
+          },
+          {
+            "label": "Certifications",
+            "href": "#certifications"
+          },
+          {
+            "label": "Experience",
+            "href": "#experience"
+          },
+          {
+            "label": "Toolkit",
+            "href": "#expertise",
+            "visible": false
+          },
+          {
+            "label": "Education",
+            "href": "#education"
+          },
+          {
+            "label": "Contact",
+            "href": "#contact"
+          }
+        ],
+        "customSections": [],
+        "menuStyle": "underline"
+      }
     }
   ],
   "blogPosts": []
