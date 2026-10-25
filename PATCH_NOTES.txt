@@ -1,0 +1,20 @@
+Article navigation, visibility, and slider layout patch
+
+This is an overlay patch for the existing portfolio project. Copy/extract these files over the existing project; do not delete or replace your existing public/portfolio-content.json because that file contains your published content data and is intentionally excluded from this patch.
+
+Changes:
+- Canonicalizes the public Articles menu link to /#articles, including legacy saved menu entries pointing to #blog.
+- Renames the homepage section anchor to #articles and updates return links.
+- Restores GitHub Pages deep links such as /articles from the existing 404.html redirect form.
+- Fixes the Supabase article listing query so null/legacy publish dates are not excluded before shared publication rules run.
+- Surfaces article-query errors as errors instead of an empty article collection.
+- Retains an article-only fetched content result rather than replacing it with fallback seed content.
+- Shows loading while content is being fetched.
+- Moves View all articles to the right of the article heading and stacks it on narrow screens.
+- Does not change ArticlePage code-copy implementation, audio, likes, sharing, article search/sort/grid/list/load-more, or admin editor functionality.
+
+Verification limits:
+- ZIP integrity verified.
+- Static source checks only; a Vite build/browser test was not possible because the available node_modules package directories are incomplete.
+- The supplied source's public/portfolio-content.json had an empty posts array. This patch intentionally does not invent/recreate article records or overwrite that file. The actual published article must be present in the shared published content source for production to display it.
+- The live /articles URL returned 404 in the available web check; the router restoration change is included, but production deployment and browser verification are still required.

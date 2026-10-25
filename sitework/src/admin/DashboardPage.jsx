@@ -90,7 +90,7 @@ export default function DashboardPage() {
       counts={counts}
       actions={
         <>
-          <Link className="button button-secondary button-sm" to="/mdadmin/blog/new">
+          <Link className="button button-secondary button-sm" to="/mdadmin/articles/new">
             <Plus size={15} aria-hidden="true" /> New article
           </Link>
           <Link className="button button-primary button-sm" to="/mdadmin/projects/new">
@@ -132,8 +132,8 @@ export default function DashboardPage() {
       </section>
 
       <div className="admin-stat-grid">
-        <StatCard label="Published articles" value={stats.published} hint="Visible on the public site" icon={BookOpen} to="/mdadmin/blog" />
-        <StatCard label="Drafts" value={stats.drafts} hint="Private until published" icon={FileText} to="/mdadmin/blog" />
+        <StatCard label="Published articles" value={stats.published} hint="Visible on the public site" icon={BookOpen} to="/mdadmin/articles" />
+        <StatCard label="Drafts" value={stats.drafts} hint="Private until published" icon={FileText} to="/mdadmin/articles" />
         <StatCard label="Projects" value={projects.length} hint="Portfolio case cards" icon={FolderKanban} to="/mdadmin/projects" />
         <StatCard
           label="Unread messages"
@@ -151,7 +151,7 @@ export default function DashboardPage() {
               <p className="eyebrow">RECENT ACTIVITY</p>
               <h2>Recently updated</h2>
             </div>
-            <Link className="subtle-button" to="/mdadmin/blog">
+            <Link className="subtle-button" to="/mdadmin/articles">
               All articles <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
           </div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                       {live ? <CheckCircle2 size={14} /> : post.status === 'published' ? <Clock size={14} /> : <Circle size={14} />}
                     </span>
                     <div>
-                      <Link to={`/mdadmin/blog/${post.id}`}>{post.title}</Link>
+                      <Link to={`/mdadmin/articles/${post.id}`}>{post.title}</Link>
                       <small>
                         {live
                           ? `Published ${formatDate(post.published_at)}`
@@ -185,7 +185,7 @@ export default function DashboardPage() {
             <div className="records-empty">
               <BookOpen size={22} aria-hidden="true" />
               <p>No articles yet. Your first one starts with a title.</p>
-              <Link className="button button-secondary button-sm" to="/mdadmin/blog/new">
+              <Link className="button button-secondary button-sm" to="/mdadmin/articles/new">
                 Write an article
               </Link>
             </div>

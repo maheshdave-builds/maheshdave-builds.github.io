@@ -351,7 +351,7 @@ function Toolkit({ groups, copy }) {
 
 /* -------------------------------------------------------------------- blog */
 
-function Blog({ posts, copy, sliderIntervalSeconds }) {
+function ArticlesSection({ posts, copy, sliderIntervalSeconds }) {
   const published = posts.filter((post) => isPostPublic(post))
 
   return (
@@ -451,7 +451,7 @@ export default function HomePage({ onSection }) {
     certifications: <Certifications items={certifications} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     education: <Education items={education} copy={copy} />,
     expertise: <Toolkit groups={site.techStack} copy={copy} />,
-    blog: <Blog posts={posts} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
+    blog: <ArticlesSection posts={posts} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     contact: <Contact profile={profile} copy={copy} site={site} />,
   }
   const customSections = site.customSections || []

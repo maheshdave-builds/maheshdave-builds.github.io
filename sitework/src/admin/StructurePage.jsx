@@ -8,7 +8,7 @@ import { AdminLayout } from './AdminLayout'
 const DEFAULT_ORDER = ['home', 'about', 'projects', 'experience', 'certifications', 'education', 'expertise', 'blog', 'contact']
 const SECTION_LABELS = {
   home: 'Hero / intro', about: 'About', projects: 'Projects', experience: 'Experience',
-  certifications: 'Certifications', education: 'Education', expertise: 'Toolkit / expertise', blog: 'Blog / notes', contact: 'Contact',
+  certifications: 'Certifications', education: 'Education', expertise: 'Toolkit / expertise', blog: 'Articles / notes', contact: 'Contact',
 }
 const makeId = () => `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
 
@@ -106,7 +106,7 @@ export default function StructurePage() {
             <div className="menu-row-actions"><button type="button" className="structure-icon-button" aria-label={`${item.visible === false ? 'Show' : 'Hide'} ${item.label} menu item`} onClick={() => updateMenu(index, { visible: item.visible === false })}>{item.visible === false ? <EyeOff size={15} /> : <Eye size={15} />}</button><button type="button" className="record-action danger" aria-label="Remove menu item" onClick={() => setMenu((current) => current.filter((_, i) => i !== index))}><Trash2 size={15} /></button></div>
           </div>)}
         </div>
-        <p className="field-hint">Use #about or #projects for sections, /blog/slug for articles, or a full https:// URL for an external link.</p>
+        <p className="field-hint">Use #about or #projects for sections, /articles/slug for articles, or a full https:// URL for an external link.</p>
       </section>
     </AdminLayout>
   )

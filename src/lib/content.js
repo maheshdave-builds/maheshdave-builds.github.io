@@ -21,6 +21,22 @@ export const contentSource = useGithubGateway ? 'github' : isConfigured ? 'supab
 const LOCAL_CONTENT_KEY = 'mahesh-portfolio-local-cms-v1'
 const PROJECT_CATALOG_MIGRATION_KEY = 'mahesh-portfolio-project-catalog-v2'
 const STAGED_CONTENT_KEY = 'mahesh-portfolio-staged-content-v1'
+const DELETED_POSTS_KEY = 'mahesh-portfolio-deleted-articles-v1'
+
+function readDeletedPosts() {
+  try { const value = JSON.parse(localStorage.getItem(DELETED_POSTS_KEY) || '[]'); return Array.isArray(value) ? value : [] } catch { return [] }
+}
+function postIsDeleted(row, tombstones = readDeletedPosts()) {
+  const id = String(row?.id ?? '')
+  const slug = String(row?.slug ?? '').trim().toLowerCase()
+  return tombstones.some((item) => (item.id && String(item.id) === id) || (item.slug && String(item.slug).trim().toLowerCase() === slug))
+}
+function rememberDeletedPost(row) {
+  const tombstones = readDeletedPosts()
+  const entry = { id: row?.id == null ? '' : String(row.id), slug: String(row?.slug || '') }
+  const next = [...tombstones.filter((item) => !(entry.id && String(item.id) === entry.id) && !(entry.slug && String(item.slug).toLowerCase() === entry.slug.toLowerCase())), entry]
+  try { localStorage.setItem(DELETED_POSTS_KEY, JSON.stringify(next)) } catch { throw new Error('Could not persist the article deletion marker. Free browser storage and retry.') }
+}
 const LEGACY_CLIENT_CATEGORIES = {
   'rev-a-shelf': 'Adobe Commerce Cloud',
   'who has it?': 'Adobe Commerce Cloud',
@@ -146,8 +162,19 @@ export async function publishStagedContent() {
   if (!useGithubGateway) {
     throw new Error('These changes are saved in this browser and available in local preview, but live publishing is not configured. Configure the GitHub content publisher before publishing; your staged changes have been kept.')
   }
-  await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staged) })
-  try { localStorage.removeItem(STAGED_CONTENT_KEY) } catch {}
+  const tombstones = readDeletedPosts()
+  const cleanRows = (rows) => asArray(rows).filter((row) => !postIsDeleted(row, tombstones))
+  const publishable = {
+    ...staged,
+    posts: cleanRows(sharedPostRows(staged)),
+    articles: cleanRows(staged.articles),
+    blogPosts: cleanRows(staged.blogPosts),
+  }
+  await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(publishable) })
+  try {
+    localStorage.removeItem(STAGED_CONTENT_KEY)
+    localStorage.removeItem(DELETED_POSTS_KEY)
+  } catch {}
   window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
   return true
 }
@@ -187,7 +214,7 @@ function sharedPostRows(source = {}) {
       byKey.set(identity, { ...(byKey.get(identity) || {}), ...row })
     }
   }
-  return [...byKey.values()]
+  return [...byKey.values()].filter((row) => !postIsDeleted(row))
 }
 
 function normalizeProject(row) {
@@ -433,7 +460,8 @@ export async function fetchAdminContent() {
         const id = String(row.id ?? `${key}-local-${index}`)
         byId.set(id, { ...(byId.get(id) || {}), ...row })
       })
-      return [...byId.values()]
+      const rows = [...byId.values()]
+      return key === 'posts' ? rows.filter((row) => !postIsDeleted(row)) : rows
     }
     const merged = {
       ...local,
@@ -572,6 +600,10 @@ export async function saveRecord(collection, record) {
     if (!['projects', 'certifications', 'experience', 'education', 'posts'].includes(collection)) throw new Error(`Unknown collection: ${collection}`)
     const current = readLocalContent(); const rows = asArray(current[collection]); const saved = { ...record, id: record.id && !String(record.id).startsWith('seed-') ? record.id : `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, updated_at: new Date().toISOString() }
     if (collection === 'posts' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
+    if (collection === 'posts') {
+      const tombstones = readDeletedPosts().filter((item) => !(item.id && String(item.id) === String(saved.id)) && !(item.slug && String(item.slug).toLowerCase() === String(saved.slug).toLowerCase()))
+      try { localStorage.setItem(DELETED_POSTS_KEY, JSON.stringify(tombstones)) } catch { throw new Error('Could not update the article deletion markers. Free browser storage and retry.') }
+    }
     updateLocalContent((state) => { const existingId = record.id && !String(record.id).startsWith('seed-'); const index = existingId ? rows.findIndex((row) => String(row.id) === String(record.id)) : -1; const nextRows = [...rows]; if (index >= 0) nextRows[index] = { ...rows[index], ...saved }; else nextRows.push(saved); return { ...state, [collection]: nextRows } })
     await flushSharedContent()
     return saved
@@ -604,13 +636,33 @@ export async function saveRecord(collection, record) {
 }
 
 export async function deleteRecord(collection, id) {
-  if (!supabase) { updateLocalContent((state) => ({ ...state, [collection]: asArray(state[collection]).filter((row) => row.id !== id) })); await flushSharedContent(); return }
-
   if (!id || String(id).startsWith('seed-')) {
     throw new Error('Bundled sample content cannot be deleted from the database; hide it instead.')
   }
-  const { error } = await supabase.from(tableFor[collection]).delete().eq('id', id)
+  if (!supabase) {
+    const current = readLocalContent()
+    const rows = asArray(current[collection])
+    const target = rows.find((row) => String(row.id) === String(id))
+    if (!target) throw new Error('This article no longer exists in the current content store. Refresh and try again.')
+    if (collection === 'posts') rememberDeletedPost(target)
+    updateLocalContent((state) => {
+      const removeTarget = (items) => asArray(items).filter((row) => String(row.id ?? '') !== String(id) && !(collection === 'posts' && target.slug && String(row.slug || '').toLowerCase() === String(target.slug).toLowerCase()))
+      const next = { ...state, [collection]: removeTarget(state[collection]) }
+      if (collection === 'posts') {
+        next.articles = removeTarget(state.articles)
+        next.blogPosts = removeTarget(state.blogPosts)
+      }
+      return next
+    })
+    await flushSharedContent()
+    return
+  }
+
+  const table = tableFor[collection]
+  if (!table) throw new Error(`Unknown collection: ${collection}`)
+  const { data, error } = await supabase.from(table).delete().eq('id', id).select('id')
   if (error) throw new Error(error.message)
+  if (!data?.length) throw new Error('No article was deleted. It may already have been removed; refresh and try again.')
 }
 
 export async function saveProfile(profile) {

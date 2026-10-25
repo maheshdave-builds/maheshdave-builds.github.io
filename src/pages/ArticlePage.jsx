@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpRight, BookOpen, Copy, Linkedin, Play, Pause, Square,
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
 import { TextLink } from '../components/Button'
+import ContentSlider from '../components/ContentSlider'
 import { absoluteUrl, useSeo, SITE_ORIGIN } from '../lib/useSeo'
 import { formatDate, isPostPublic, readingTime, sortPosts, truncate } from '../lib/format'
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
@@ -201,9 +202,9 @@ export default function ArticlePage({ slug }) {
 
   const related = useMemo(() => {
     if (!visible) return []
-    const others = posts.filter((item) => item.id !== visible.id && isPostPublic(item))
+    const others = posts.filter((item) => String(item.id) !== String(visible.id) && item.slug !== visible.slug && isPostPublic(item))
     const sameCategory = others.filter((item) => item.category === visible.category)
-    return sortPosts(sameCategory.length ? sameCategory : others).slice(0, 2)
+    return sortPosts(sameCategory.length ? sameCategory : others).slice(0, 6)
   }, [posts, visible])
 
   useSeo({
@@ -342,21 +343,22 @@ export default function ArticlePage({ slug }) {
 
       {related.length ? (
         <aside className="article-related" aria-labelledby="related-title">
-          <h2 id="related-title">More notes</h2>
-          <div className="blog-grid">
+          <h2 id="related-title">More Notes</h2>
+          <ContentSlider label="Related articles">
             {related.map((item) => (
-              <article className="blog-card" key={item.id}>
-                <p className="eyebrow">{item.category || 'ENGINEERING NOTES'}</p>
-                <h3>
-                  <Link to={`/articles/${encodeURIComponent(item.slug)}`}>{item.title}</Link>
-                </h3>
-                <p>{item.excerpt || truncate(toPlainText(item.content), 140)}</p>
-                <TextLink to={`/articles/${encodeURIComponent(item.slug)}`} icon={ArrowUpRight}>
-                  Read article
-                </TextLink>
-              </article>
+              <div className="slider-slide" key={item.id || item.slug}>
+                <article className="blog-card">
+                  <Link to={`/articles/${encodeURIComponent(item.slug)}`} aria-label={`Read ${item.title}`}>
+                    {item.cover_image_url ? <img className="blog-cover" src={item.cover_image_url} alt="" loading="lazy" /> : null}
+                  </Link>
+                  <p className="eyebrow">{item.category || 'ENGINEERING NOTES'}</p>
+                  <h3><Link to={`/articles/${encodeURIComponent(item.slug)}`}>{item.title}</Link></h3>
+                  <p>{item.excerpt || truncate(toPlainText(item.content), 140)}</p>
+                  <TextLink to={`/articles/${encodeURIComponent(item.slug)}`} icon={ArrowUpRight}>Read article</TextLink>
+                </article>
+              </div>
             ))}
-          </div>
+          </ContentSlider>
         </aside>
       ) : null}
     </main>

@@ -355,7 +355,7 @@ function Toolkit({ groups, copy }) {
 
 /* -------------------------------------------------------------------- blog */
 
-function Blog({ posts, copy, sliderIntervalSeconds }) {
+function ArticlesSection({ posts, copy, sliderIntervalSeconds }) {
   const published = posts.filter((post) => isPostPublic(post))
 
   return (
@@ -364,7 +364,7 @@ function Blog({ posts, copy, sliderIntervalSeconds }) {
 
       {published.length ? (
         <>
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/articles/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
         <div className="blog-view-all"><Link className="cinema-link" to="/articles">View all articles <ArrowUpRight size={15}/></Link></div>
         </>
       ) : (
@@ -455,7 +455,7 @@ export default function HomePage({ onSection }) {
     certifications: <Certifications items={certifications} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     education: <Education items={education} copy={copy} />,
     expertise: <Toolkit groups={site.techStack} copy={copy} />,
-    blog: <Blog posts={posts} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
+    blog: <ArticlesSection posts={posts} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     contact: <Contact profile={profile} copy={copy} site={site} />,
   }
   const customSections = site.customSections || []

@@ -19,10 +19,10 @@ export default function ArticlesPage() {
       <button type="button" className={view === 'list' ? 'active' : ''} aria-pressed={view === 'list'} onClick={() => setView('list')}><List size={16}/> List view</button>
     </div>
     <div className={`article-list-grid ${view === 'list' ? 'article-list-grid-list' : ''}`}>{articles.map(post => <article className="article-list-card" key={post.id || post.slug}>
-      {post.cover_image_url ? <Link to={`/blog/${post.slug}`}><img src={post.cover_image_url} alt="" loading="lazy" /></Link> : null}
+      {post.cover_image_url ? <Link to={`/articles/${post.slug}`}><img src={post.cover_image_url} alt="" loading="lazy" /></Link> : null}
       <div><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p>
-      <h2><Link to={`/blog/${post.slug}`}>{post.title}</Link></h2><p>{post.excerpt || truncate(toPlainText(post.content), 180)}</p>
-      <Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></div>
+      <h2><Link to={`/articles/${post.slug}`}>{post.title}</Link></h2><p>{post.excerpt || truncate(toPlainText(post.content), 180)}</p>
+      <Link className="cinema-link" to={`/articles/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></div>
     </article>)}</div>
     </> : <p><BookOpen size={18}/> No published articles yet.</p>}
   </main>

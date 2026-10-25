@@ -23,7 +23,7 @@ npm run preview
 
 1. Build with `npm run build`.
 2. Deploy the contents of `dist/` to your static host.
-3. Configure SPA fallback/rewrite rules so `/mdadmin` and `/blog/<slug>` serve `index.html`.
+3. Configure SPA fallback/rewrite rules so `/mdadmin` and `/articles/<slug>` (legacy `/blog/<slug>` links redirect to the article URL) serve `index.html`.
 4. Confirm the resume PDF and profile assets are present in `dist/`.
 
 ## Content publishing and security
