@@ -896,6 +896,23 @@
       "is_published": true,
       "sort_order": 0,
       "updated_at": "2026-10-25T14:27:23.779Z"
+    },
+    {
+      "id": "local-1792938684789-60ua9y",
+      "is_published": true,
+      "sort_order": 0,
+      "title": "Rev-A-Shelf",
+      "category": "Adobe Commerce Cloud",
+      "linkLabel": "Visit project",
+      "url": "https://rev-a-shelf.com/",
+      "description": "",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "image": "/uploads/projects/1792938644883-tz38bk.webp",
+      "clientLinks": [],
+      "updated_at": "2026-10-25T14:31:24.789Z"
     }
   ],
   "certifications": [
