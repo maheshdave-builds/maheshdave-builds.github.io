@@ -626,10 +626,12 @@
       "educationDescription": "Academic background and qualifications.",
       "toolkitTitle": "A practical, modern toolkit.",
       "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
-      "blogTitle": "Articles from the work.",
-      "blogDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering.",
+      "articlesTitle": "Articles from the work.",
+      "articlesDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
       "articlesPageTitle": "Articles from the work.",
       "articlesPageDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering.",
+      "articlesPageBannerImage": "/uploads/article-banner/1792938088084-2yfq5f.jpg",
+      "articleListenEnabled": true,
       "contactTitle": "Good work starts with a conversation.",
       "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
     },
@@ -747,8 +749,7 @@
         "education",
         "expertise",
         "articles",
-        "contact",
-        "blog"
+        "contact"
       ],
       "hidden": [
         "expertise"
@@ -1046,6 +1047,65 @@
       }
     },
     {
+      "key": "site_structure",
+      "value": {
+        "structure": {
+          "order": [
+            "home",
+            "about",
+            "projects",
+            "experience",
+            "certifications",
+            "education",
+            "expertise",
+            "articles",
+            "contact",
+            "blog"
+          ],
+          "hidden": [
+            "expertise"
+          ]
+        },
+        "navigationLinks": [
+          {
+            "label": "About",
+            "href": "#about"
+          },
+          {
+            "label": "Projects",
+            "href": "#projects"
+          },
+          {
+            "label": "Experience",
+            "href": "#experience"
+          },
+          {
+            "label": "Certifications",
+            "href": "#certifications"
+          },
+          {
+            "label": "Toolkit",
+            "href": "#expertise",
+            "visible": false
+          },
+          {
+            "label": "Education",
+            "href": "#education"
+          },
+          {
+            "label": "Articles",
+            "href": "#articles"
+          },
+          {
+            "label": "Contact",
+            "href": "#contact"
+          }
+        ],
+        "customSections": [],
+        "menuStyle": "underline"
+      }
+    },
+    {
       "key": "copy",
       "value": {
         "heroEyebrow": "ADOBE COMMERCE ENGINEERING · TECHNICAL LEADERSHIP",
@@ -1062,12 +1122,14 @@
         "educationDescription": "Academic background and qualifications.",
         "toolkitTitle": "A practical, modern toolkit.",
         "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
+        "articlesTitle": "Articles from the work.",
+        "articlesDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
         "articlesPageTitle": "Articles from the work.",
         "articlesPageDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering.",
+        "articlesPageBannerImage": "/uploads/article-banner/1792938088084-2yfq5f.jpg",
+        "articleListenEnabled": true,
         "contactTitle": "Good work starts with a conversation.",
-        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect.",
-        "articlesTitle": "Articles from the work.",
-        "articlesDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering."
+        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
       }
     },
     {
@@ -1177,65 +1239,6 @@
           ]
         }
       ]
-    },
-    {
-      "key": "site_structure",
-      "value": {
-        "structure": {
-          "order": [
-            "home",
-            "about",
-            "projects",
-            "experience",
-            "certifications",
-            "education",
-            "expertise",
-            "articles",
-            "contact",
-            "blog"
-          ],
-          "hidden": [
-            "expertise"
-          ]
-        },
-        "navigationLinks": [
-          {
-            "label": "About",
-            "href": "#about"
-          },
-          {
-            "label": "Projects",
-            "href": "#projects"
-          },
-          {
-            "label": "Experience",
-            "href": "#experience"
-          },
-          {
-            "label": "Certifications",
-            "href": "#certifications"
-          },
-          {
-            "label": "Toolkit",
-            "href": "#expertise",
-            "visible": false
-          },
-          {
-            "label": "Education",
-            "href": "#education"
-          },
-          {
-            "label": "Articles",
-            "href": "#articles"
-          },
-          {
-            "label": "Contact",
-            "href": "#contact"
-          }
-        ],
-        "customSections": [],
-        "menuStyle": "underline"
-      }
     }
   ],
   "blogPosts": []
