@@ -131,13 +131,58 @@ export default function PageContentPage() {
             ))}
           </div>
 
-          {activeGroup === 'Blog' ? <>
+          {activeGroup === 'Articles' ? <>
             <div className="article-banner-admin">
-              <label>Article listing banner image <input type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }} /></label>
-              {copy.articlesPageBannerImage ? <div className="article-banner-preview"><img src={copy.articlesPageBannerImage} alt="Article listing banner preview"/><div className="article-banner-actions"><button type="button" className="subtle-button" onClick={() => document.getElementById('article-banner-replace')?.click()}><ImagePlus size={15}/> Replace / crop image</button><input id="article-banner-replace" hidden type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }}/><button type="button" className="subtle-button" onClick={() => setCopy(current => ({ ...current, articlesPageBannerImage: '' }))}>Remove banner image</button></div></div> : <p className="field-hint">No common banner image uploaded. The text banner will be shown instead.</p>}
+              <label>
+                Article listing banner image
+                <input type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }} />
+              </label>
+              {copy.articlesPageBannerImage ? (
+                <div className="article-banner-preview">
+                  <img src={copy.articlesPageBannerImage} alt="Article listing banner preview" />
+                  <div className="article-banner-actions">
+                    <button type="button" className="subtle-button" onClick={() => document.getElementById('article-banner-replace')?.click()}>
+                      <ImagePlus size={15} /> Replace / crop image
+                    </button>
+                    <input id="article-banner-replace" hidden type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }} />
+                    <button type="button" className="subtle-button" onClick={() => setCopy((current) => ({ ...current, articlesPageBannerImage: '' }))}>
+                      Remove banner image
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="field-hint">No common banner image uploaded. The text banner will be shown instead.</p>
+              )}
             </div>
-            <div className="article-listen-admin-setting"><label><input type="checkbox" checked={copy.articleListenEnabled !== false} onChange={event => setCopy(current => ({ ...current, articleListenEnabled: event.target.checked }))}/><Volume2 size={17}/> Enable “Listen to Article” on public article pages</label><p className="field-hint">This setting is saved with Page content when you click Save changes.</p></div>
-            {bannerCropFile ? <ImageCropDialog file={bannerCropFile} title="Crop article listing banner" aspectRatio="16 / 5" onCancel={() => setBannerCropFile(null)} onApply={async (croppedFile) => { setBusy(true); setError(''); try { const url = await uploadImage(croppedFile, 'article-banner'); setCopy(current => ({ ...current, articlesPageBannerImage: url })); setBannerCropFile(null); setNotice('Banner image cropped and uploaded. Click Save changes to publish it.'); } catch (uploadError) { setError(uploadError.message || 'Could not upload cropped banner image. The previous banner is unchanged.'); } finally { setBusy(false); } }}/>:null}
+            <div className="article-listen-admin-setting">
+              <label>
+                <input type="checkbox" checked={copy.articleListenEnabled !== false} onChange={(event) => setCopy((current) => ({ ...current, articleListenEnabled: event.target.checked }))} />
+                <Volume2 size={17} /> Enable “Listen to Article” on public article pages
+              </label>
+              <p className="field-hint">This setting is saved with Page content when you click Save changes.</p>
+            </div>
+            {bannerCropFile ? (
+              <ImageCropDialog
+                file={bannerCropFile}
+                title="Crop article listing banner"
+                aspectRatio="16 / 5"
+                onCancel={() => setBannerCropFile(null)}
+                onApply={async (croppedFile) => {
+                  setBusy(true)
+                  setError('')
+                  try {
+                    const url = await uploadImage(croppedFile, 'article-banner')
+                    setCopy((current) => ({ ...current, articlesPageBannerImage: url }))
+                    setBannerCropFile(null)
+                    setNotice('Banner image cropped and uploaded. Click Save changes to publish it.')
+                  } catch (uploadError) {
+                    setError(uploadError.message || 'Could not upload cropped banner image. The previous banner is unchanged.')
+                  } finally {
+                    setBusy(false)
+                  }
+                }}
+              />
+            ) : null}
           </> : null}
           <div className="admin-form-grid">
             {COPY_FIELDS.filter((field) => field.group === activeGroup).map((field) => (

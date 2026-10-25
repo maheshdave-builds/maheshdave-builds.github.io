@@ -113,7 +113,7 @@ function readLocalContent() {
         } catch { /* keep the in-memory migration; retry next visit if storage is full */ }
       }
       const { articles: _embeddedArticles, ...savedContent } = saved
-      return { ...fallbackContent, ...savedContent, articles: asArray(saved.articles), projects, site: { ...fallbackContent.site, ...(saved.site || {}) }, theme: saved.theme || DEFAULT_THEME, themeDraft: saved.themeDraft || saved.theme || DEFAULT_THEME, themePublished: saved.themePublished || saved.theme || DEFAULT_THEME }
+      return { ...fallbackContent, ...savedContent, articles: asArray(saved.articles), projects, site: normalizeSite(saved.site), theme: saved.theme || DEFAULT_THEME, themeDraft: saved.themeDraft || saved.theme || DEFAULT_THEME, themePublished: saved.themePublished || saved.theme || DEFAULT_THEME }
     }
   } catch { /* use bundled defaults when storage is unavailable or invalid */ }
   return { ...fallbackContent, theme: DEFAULT_THEME, themeDraft: DEFAULT_THEME, themePublished: DEFAULT_THEME, settingsRows: [] }
@@ -172,6 +172,60 @@ export function importLocalContent(json) {
 /* ------------------------------------------------------------- normalizers */
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
+
+function migrateCopy(copy = {}) {
+  const next = { ...DEFAULT_COPY, ...(copy && typeof copy === 'object' ? copy : {}) }
+  if (!String(next.articlesTitle || '').trim() && next.blogTitle) next.articlesTitle = next.blogTitle
+  if (!String(next.articlesDescription || '').trim() && next.blogDescription) next.articlesDescription = next.blogDescription
+  delete next.blogTitle
+  delete next.blogDescription
+  return next
+}
+
+/** Rename legacy homepage section ids from the old blog terminology. */
+export function migrateStructureOrder(order = []) {
+  const seen = new Set()
+  const migrated = []
+  for (const id of asArray(order)) {
+    const key = id === 'blog' ? 'articles' : id
+    if (seen.has(key)) continue
+    seen.add(key)
+    migrated.push(key)
+  }
+  return migrated
+}
+
+function migrateStructureHidden(hidden = []) {
+  return [...new Set(asArray(hidden).map((id) => (id === 'blog' ? 'articles' : id)))]
+}
+
+function migrateNavigationLinks(links = []) {
+  return asArray(links).map((item) => {
+    if (!item || typeof item !== 'object') return item
+    const next = { ...item }
+    if (String(next.href || '').trim() === '#blog') next.href = '#articles'
+    if (String(next.label || '').trim().toLowerCase() === 'blog') next.label = 'Articles'
+    return next
+  })
+}
+
+function normalizeStructure(structure = {}) {
+  return {
+    ...structure,
+    order: migrateStructureOrder(structure.order),
+    hidden: migrateStructureHidden(structure.hidden),
+  }
+}
+
+function normalizeSite(site = {}) {
+  return {
+    ...seedSite,
+    ...site,
+    copy: migrateCopy(site.copy),
+    structure: normalizeStructure(site.structure),
+    navigationLinks: site.navigationLinks ? migrateNavigationLinks(site.navigationLinks) : site.navigationLinks,
+  }
+}
 
 // Articles are loaded only from the dedicated article collection.
 function sharedArticleRows(source = {}) { return asArray(source.articles) }
@@ -278,7 +332,7 @@ function normalizeProfile(row) {
 /** Merge a `site_settings` key/value response onto the seed settings. */
 export function mergeSiteSettings(rows = []) {
   const map = Object.fromEntries(rows.map((row) => [row.key, row.value]))
-  const copy = { ...DEFAULT_COPY, ...(map.copy && typeof map.copy === 'object' ? map.copy : {}) }
+  const copy = migrateCopy(map.copy)
   const stats = Array.isArray(map.stats) ? map.stats : DEFAULT_STATS
   const techStackValue = Array.isArray(map.tech_stack) ? map.tech_stack : seedSite.techStack
 
@@ -291,8 +345,8 @@ export function mergeSiteSettings(rows = []) {
     copy,
     stats,
     techStack: techStackValue,
-    structure: map.site_structure?.structure || {},
-    navigationLinks: map.site_structure?.navigationLinks || undefined,
+    structure: normalizeStructure(map.site_structure?.structure || {}),
+    navigationLinks: map.site_structure?.navigationLinks ? migrateNavigationLinks(map.site_structure.navigationLinks) : undefined,
     customSections: map.site_structure?.customSections || [],
     menuStyle: map.site_structure?.menuStyle || 'underline',
   }
@@ -336,7 +390,21 @@ function getLocalPreviewContent() {
 
 export async function fetchPublicContent() {
   if (isLocalPreviewMode()) return getLocalPreviewContent()
-  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), articles: sortArticles(sharedArticleRows(shared).map(normalizeArticle).filter((article) => isArticlePublic(article))), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
+  if (useGithubGateway) {
+    const shared = await readSharedContent()
+    return {
+      ...shared,
+      ...fallbackContent,
+      ...shared,
+      site: normalizeSite(shared.site),
+      projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false),
+      certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false),
+      experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false),
+      education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false),
+      articles: sortArticles(sharedArticleRows(shared).map(normalizeArticle).filter((article) => isArticlePublic(article))),
+      theme: shared.themePublished || shared.theme || DEFAULT_THEME,
+    }
+  }
   if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), articles: sortArticles(asArray(local.articles).filter((article) => isArticlePublic(article))), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
   const nowIso = new Date().toISOString()
@@ -439,7 +507,7 @@ export async function fetchAdminContent() {
       education: mergeRows('education'),
       articles: mergeRows('articles'),
       profile: { ...(shared.profile || {}), ...(local.profile || {}) },
-      site: { ...(shared.site || {}), ...(local.site || {}) },
+      site: normalizeSite({ ...(shared.site || {}), ...(local.site || {}), copy: { ...(shared.site?.copy || {}), ...(local.site?.copy || {}) } }),
     }
     try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(merged)) } catch { /* keep the in-memory merged state */ }
     return merged

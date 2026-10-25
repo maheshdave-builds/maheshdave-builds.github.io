@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, Eye, EyeOff, GripVertical, Link2, Plus, Save, Trash2, Layers3, Check, Loader2 } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
-import { saveSetting } from '../lib/content'
+import { migrateStructureOrder, saveSetting } from '../lib/content'
 import { NAV_ITEMS } from '../lib/navigation'
 import { AdminLayout } from './AdminLayout'
 
@@ -15,9 +15,14 @@ const makeId = () => `custom-${Date.now().toString(36)}-${Math.random().toString
 export default function StructurePage() {
   const { site, setSite } = useAdminContent()
   const structure = site.structure || {}
-  const [order, setOrder] = useState(() => [...new Set([...(structure.order || DEFAULT_ORDER), ...DEFAULT_ORDER, ...(site.customSections || []).map((section) => section.id)])])
-  const [hidden, setHidden] = useState(structure.hidden || [])
-  const [menu, setMenu] = useState(site.navigationLinks || NAV_ITEMS.map((item) => ({ ...item })))
+  const [order, setOrder] = useState(() => migrateStructureOrder([...(structure.order || DEFAULT_ORDER), ...DEFAULT_ORDER, ...(site.customSections || []).map((section) => section.id)]))
+  const [hidden, setHidden] = useState(() => [...new Set((structure.hidden || []).map((id) => (id === 'blog' ? 'articles' : id)))])
+  const [menu, setMenu] = useState(() => (site.navigationLinks || NAV_ITEMS.map((item) => ({ ...item }))).map((item) => {
+    const next = { ...item }
+    if (String(next.href || '').trim() === '#blog') next.href = '#articles'
+    if (String(next.label || '').trim().toLowerCase() === 'blog') next.label = 'Articles'
+    return next
+  }))
   const [menuStyle, setMenuStyle] = useState(site.menuStyle || 'underline')
   const [customSections, setCustomSections] = useState(site.customSections || [])
   const [busy, setBusy] = useState(false)
@@ -47,7 +52,7 @@ export default function StructurePage() {
   const save = async () => {
     setBusy(true); setError(''); setNotice('')
     try {
-      const nextSite = { ...site, menuStyle, structure: { order, hidden }, navigationLinks: menu.filter((item) => item.label.trim() && item.href.trim()), customSections }
+      const nextSite = { ...site, menuStyle, structure: { order: migrateStructureOrder(order), hidden: [...new Set(hidden.map((id) => (id === 'blog' ? 'articles' : id)))] }, navigationLinks: menu.filter((item) => item.label.trim() && item.href.trim()), customSections }
       await saveSetting('site_structure', { structure: nextSite.structure, navigationLinks: nextSite.navigationLinks, customSections: nextSite.customSections, menuStyle: nextSite.menuStyle })
       setSite(nextSite)
       setNotice('Page structure and navigation saved.')

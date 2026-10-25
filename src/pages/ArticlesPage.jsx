@@ -27,10 +27,10 @@ export default function ArticlesPage() {
     })
   }, [articles, query, sort])
   const shown = filtered.slice(0, visibleCount)
-  useSeo({ title: `All articles — ${site.siteTitle}`, description: 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.', canonicalPath: '/articles' })
+  useSeo({ title: `All articles — ${site.siteTitle}`, description: site.copy?.articlesPageDescription || site.copy?.articlesDescription || 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.', canonicalPath: '/articles' })
   return <main className="section-wrap all-articles-page" id="all-articles">
     {site.copy?.articlesPageBannerImage ? <motion.div className="articles-page-image-banner" initial={{ opacity: 0, scale: .985 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .5 }}><img src={site.copy.articlesPageBannerImage} alt="Article listing banner"/><span className="articles-banner-count"><BookOpen size={16} /> {articles.length} published {articles.length === 1 ? 'article' : 'articles'}</span></motion.div> : <motion.header className="articles-page-banner" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }}>
-      <p className="eyebrow">ARTICLES &amp; IDEAS</p><h1>{site.copy?.articlesPageTitle || 'Articles from the work.'}</h1><p>{site.copy?.articlesPageDescription || 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.'}</p>
+      <p className="eyebrow">ARTICLES &amp; IDEAS</p><h1>{site.copy?.articlesPageTitle ?? site.copy?.articlesTitle ?? 'Articles from the work.'}</h1><p>{site.copy?.articlesPageDescription ?? site.copy?.articlesDescription ?? 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.'}</p>
       <span className="articles-banner-count"><BookOpen size={16} /> {articles.length} published {articles.length === 1 ? 'article' : 'articles'}</span>
     </motion.header>}
     <div className="articles-toolbar">

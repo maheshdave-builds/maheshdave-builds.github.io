@@ -229,6 +229,8 @@ export const DEFAULT_COPY = {
     'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
   articlesPageTitle: 'Articles from the work.',
   articlesPageDescription: 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
+  articlesPageBannerImage: '',
+  articleListenEnabled: true,
   contactTitle: 'Good work starts with a conversation.',
   contactDescription:
     'Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect.',

@@ -358,7 +358,7 @@ function Articles({ articles, copy, sliderIntervalSeconds, status, error, reload
   return (
     <section id="articles" className="section-wrap articles-section" aria-labelledby="articles-title">
       <div className="articles-section-heading">
-        <SectionHeading eyebrow="ARTICLES & IDEAS" id="articles-title" title="Articles from the work." description="Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering." />
+        <SectionHeading eyebrow="ARTICLES & IDEAS" id="articles-title" title={copy.articlesTitle} description={copy.articlesDescription} />
         <Link className="articles-view-all-link" to="/articles">View All Articles <ArrowUpRight size={15} aria-hidden="true" /></Link>
       </div>
 
