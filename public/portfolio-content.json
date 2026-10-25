@@ -626,6 +626,23 @@
       "seo_description": "When a custom Fastly VCL snippet blocks Magento admin access (for example Maintenance_Trigger), you can remove it safely using the Fastly API and curl — w…",
       "canonical_url": "",
       "updated_at": "2026-10-25T10:13:36.566Z"
+    },
+    {
+      "id": "local-1792924475569-dnlprx",
+      "title": "How to UPDATE a Fastly VCL Snippet Using CLI",
+      "slug": "how-to-update-a-fastly-vcl-snippet-using-cli",
+      "category": "Engineering notes",
+      "excerpt": "",
+      "content": "How to UPDATE a Fastly VCL Snippet Using CLI",
+      "cover_image_url": "",
+      "status": "published",
+      "published_at": "2026-10-25T10:34:35.568Z",
+      "author": "Mahesh Dave",
+      "tags": [],
+      "seo_title": "",
+      "seo_description": "",
+      "canonical_url": "",
+      "updated_at": "2026-10-25T10:34:35.569Z"
     }
   ],
   "site": {
