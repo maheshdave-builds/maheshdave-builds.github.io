@@ -5,10 +5,10 @@ import { saveSetting } from '../lib/content'
 import { NAV_ITEMS } from '../lib/navigation'
 import { AdminLayout } from './AdminLayout'
 
-const DEFAULT_ORDER = ['home', 'about', 'projects', 'experience', 'certifications', 'education', 'expertise', 'blog', 'contact']
+const DEFAULT_ORDER = ['home', 'about', 'projects', 'experience', 'certifications', 'education', 'expertise', 'articles', 'contact']
 const SECTION_LABELS = {
   home: 'Hero / intro', about: 'About', projects: 'Projects', experience: 'Experience',
-  certifications: 'Certifications', education: 'Education', expertise: 'Toolkit / expertise', blog: 'Articles / notes', contact: 'Contact',
+  certifications: 'Certifications', education: 'Education', expertise: 'Toolkit / expertise', articles: 'Articles', contact: 'Contact',
 }
 const makeId = () => `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
 

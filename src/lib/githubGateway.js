@@ -4,11 +4,14 @@ const OWNER = 'maheshdave-builds'
 const REPO = 'maheshdave-builds.github.io'
 const BRANCH = 'main'
 const CONTENT_PATH = 'public/portfolio-content.json'
+const ARTICLES_PATH = 'public/articles-content.json'
 const SESSION_KEY = 'portfolio-github-admin-session'
 const API = 'https://api.github.com'
 const RAW_CONTENT_URL = '/portfolio-content.json'
+const RAW_ARTICLES_URL = '/articles-content.json'
 const LOCAL_DEV = ['localhost', '127.0.0.1'].includes(window.location.hostname)
 const LOCAL_DEV_KEY = 'portfolio-content-local-preview'
+const LOCAL_DEV_ARTICLES_KEY = 'portfolio-articles-local-preview'
 
 export function githubGatewayConfigured() { return true }
 export function getGatewayPassword() { try { return sessionStorage.getItem(SESSION_KEY) || '' } catch { return '' } }
@@ -26,13 +29,42 @@ export function clearGatewaySession() { try { sessionStorage.removeItem(SESSION_
 function headers(token = getGatewayPassword()) {
   return { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
 }
+function mergeArticlePayload(portfolio, articlePayload) {
+  const { articles: _embedded, ...rest } = portfolio || {}
+  const articles = Array.isArray(articlePayload?.articles) ? articlePayload.articles : []
+  return { ...rest, articles }
+}
+
 async function readPublicContent() {
-  if (LOCAL_DEV) {
-    try { const draft = localStorage.getItem(LOCAL_DEV_KEY); if (draft) return JSON.parse(draft) } catch {}
+  const version = Date.now()
+  const [portfolioResponse, articlesResponse] = await Promise.all([
+    fetch(`${RAW_CONTENT_URL}?v=${version}`, { cache: 'no-store' }),
+    fetch(`${RAW_ARTICLES_URL}?v=${version}`, { cache: 'no-store' }),
+  ])
+  if (!portfolioResponse.ok) throw new Error(`Could not load published portfolio content (${portfolioResponse.status}).`)
+  if (!articlesResponse.ok) throw new Error(`Could not load published articles (${articlesResponse.status}).`)
+  const [portfolio, articlePayload] = await Promise.all([portfolioResponse.json(), articlesResponse.json()])
+  if (!portfolio || typeof portfolio !== 'object' || !articlePayload || !Array.isArray(articlePayload.articles)) {
+    throw new Error('Published content JSON has an invalid schema.')
   }
-  const response = await fetch(`${RAW_CONTENT_URL}?v=${Date.now()}`, { cache: 'no-store' })
-  if (!response.ok) throw new Error(`Could not load published portfolio content (${response.status}).`)
-  return response.json()
+
+  const published = { ...portfolio, articles: articlePayload.articles }
+
+  // Local admin preview uses staged Publish output only when both files were written
+  // and the staged snapshot actually contains articles. Empty staged copies must not
+  // hide articles that exist in public/articles-content.json.
+  if (LOCAL_DEV) {
+    try {
+      const draft = localStorage.getItem(LOCAL_DEV_KEY)
+      const articlesDraft = localStorage.getItem(LOCAL_DEV_ARTICLES_KEY)
+      if (draft && articlesDraft) {
+        const staged = mergeArticlePayload(JSON.parse(draft), JSON.parse(articlesDraft))
+        if (Array.isArray(staged.articles) && staged.articles.length) return staged
+      }
+    } catch { /* keep fetched public files */ }
+  }
+
+  return published
 }
 async function getGitHubFile(endpoint, token) {
   const response = await fetch(`${endpoint}?ref=${BRANCH}&t=${Date.now()}`, { headers: headers(token), cache: 'no-store' })
@@ -75,7 +107,10 @@ export async function gatewayRequest(path = '', options = {}) {
   if (LOCAL_DEV && options.method === 'PUT') {
     let payload
     try { payload = JSON.parse(options.body || '{}') } catch { throw new Error('Portfolio content is not valid JSON.') }
-    localStorage.setItem(LOCAL_DEV_KEY, JSON.stringify(payload))
+    const articles = Array.isArray(payload.articles) ? payload.articles : []
+    const { articles: _articles, ...portfolio } = payload
+    localStorage.setItem(LOCAL_DEV_KEY, JSON.stringify(portfolio))
+    localStorage.setItem(LOCAL_DEV_ARTICLES_KEY, JSON.stringify({ articles }))
     window.dispatchEvent(new Event('portfolio-local-content-updated'))
     return { ok: true, localPreview: true, updated_at: new Date().toISOString() }
   }
@@ -83,22 +118,34 @@ export async function gatewayRequest(path = '', options = {}) {
   if (options.method !== 'PUT') throw new Error('Unsupported GitHub content operation.')
   const token = getGatewayPassword()
   if (!token) throw new Error('Your GitHub session expired. Sign in again before saving.')
-  const endpoint = `${API}/repos/${OWNER}/${REPO}/contents/${CONTENT_PATH}`
   let payload
   try { payload = JSON.parse(options.body || '{}') } catch { throw new Error('Portfolio content is not valid JSON.') }
-  const content = encodeBase64(new TextEncoder().encode(JSON.stringify(payload, null, 2)))
-
-  // Read the latest blob SHA immediately before writing. Retry once on a 409/422
-  // because another save/deployment may have updated the same JSON file.
-  let lastError
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const current = await getGitHubFile(endpoint, token)
-    const response = await fetch(endpoint, { method: 'PUT', headers: { ...headers(token), 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Publish portfolio content ${new Date().toISOString()}`, content, branch: BRANCH, ...(current.sha ? { sha: current.sha } : {}) }) })
-    const result = await response.json().catch(() => ({}))
-    if (response.ok) return { ok: true, commit: result.commit?.sha, updated_at: result.commit?.committer?.date || new Date().toISOString() }
-    lastError = new Error(result.message || `GitHub rejected the update (${response.status}). Check token permissions and repository branch protection.`)
-    if (attempt === 0 && (response.status === 409 || response.status === 422) && /sha|conflict|does not match|already exists/i.test(result.message || '')) continue
-    throw lastError
+  const now = Date.now()
+  // The JSON file is public on GitHub Pages: never publish drafts or future-dated content into it.
+  const articles = (Array.isArray(payload.articles) ? payload.articles : []).filter((article) => {
+    if (String(article?.status || '').trim().toLowerCase() !== 'published') return false
+    if (!article.published_at) return true
+    const publishedAt = Date.parse(article.published_at)
+    return Number.isFinite(publishedAt) && publishedAt <= now
+  })
+  const { articles: _stagedArticles, ...portfolio } = payload
+  async function writeFile(path, value) {
+    const endpoint = `${API}/repos/${OWNER}/${REPO}/contents/${path}`
+    const content = encodeBase64(new TextEncoder().encode(JSON.stringify(value, null, 2) + '\n'))
+    let lastError
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const current = await getGitHubFile(endpoint, token)
+      const response = await fetch(endpoint, { method: 'PUT', headers: { ...headers(token), 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Publish ${path} ${new Date().toISOString()}`, content, branch: BRANCH, ...(current.sha ? { sha: current.sha } : {}) }) })
+      const result = await response.json().catch(() => ({}))
+      if (response.ok) return result
+      lastError = new Error(result.message || `GitHub rejected ${path} (${response.status}).`)
+      if (attempt === 0 && (response.status === 409 || response.status === 422) && /sha|conflict|does not match|already exists/i.test(result.message || '')) continue
+      throw lastError
+    }
+    throw lastError || new Error(`Could not publish ${path}.`)
   }
-  throw lastError || new Error('GitHub could not publish the content after retrying.')
+  // Both files are committed independently; surface failures rather than falsely reporting publication.
+  await writeFile(ARTICLES_PATH, { articles })
+  const result = await writeFile(CONTENT_PATH, portfolio)
+  return { ok: true, commit: result.commit?.sha, updated_at: result.commit?.committer?.date || new Date().toISOString() }
 }

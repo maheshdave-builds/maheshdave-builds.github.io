@@ -1,15 +1,13 @@
 # Portfolio Studio — Shared Admin Guide
 
-The administrator dashboard is available at `/mdadmin`. Content must be connected to Supabase to persist across browsers and devices. A static GitHub Pages build cannot use browser `localStorage` as a shared database.
+The administrator dashboard is available at `/mdadmin`. This repository uses the GitHub Contents API publishing flow: edits are staged in the current browser until the authenticated **Publish** action commits the authoritative JSON files. Browser `localStorage` alone is not a shared database.
 
 ## First-time setup
 
-1. Run the SQL in `supabase/schema.sql` and then `supabase/migration_002_admin_studio.sql` in the Supabase SQL editor, in the order appropriate for a new or existing project.
-2. Create the `portfolio-media` public storage bucket/policies (the schema includes these statements).
-3. In GitHub repository Settings → Secrets and variables → Actions → Variables, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-4. Push/re-run the GitHub Pages workflow so those variables are included at build time.
-5. Create the administrator in Supabase Authentication and grant `role: "admin"` in `app_metadata` through a trusted admin process. Disable public sign-ups. The public site contains no self-registration flow.
-6. Configure the production URL and `/mdadmin/reset-password` as allowed Supabase Auth redirect URLs.
+1. Sign in to the admin dashboard with a narrowly scoped GitHub fine-grained token that has Contents: Read and write access to this repository.
+2. Save edits to stage them in this browser, then use **Publish** to commit the separate JSON files.
+3. Confirm the GitHub Actions Pages workflow succeeds before considering changes live.
+4. Never put a privileged token in source code or build-time frontend environment variables.
 
 Never place a Supabase service-role key in frontend code or GitHub Pages build variables.
 
@@ -19,7 +17,7 @@ Never place a Supabase service-role key in frontend code or GitHub Pages build v
 - **Page content** — section headings and copy.
 - **Page structure** — reorder/hide sections, add custom sections, manage menu links, and choose an animated header navigation style.
 - **Projects / Experience / Certifications / Education** — manage portfolio records.
-- **Articles** — write and publish articles, insert images, code blocks, links, quotes, color/highlight formatting, and crop cover images.
+- **Articles** — write and publish articles, insert images, code blocks, links, quotes, color/highlight formatting, and crop cover images. The public published-article collection is `public/articles-content.json`; drafts remain in browser-local staging until published. `public/portfolio-content.json` contains portfolio/site settings only. Use a private backend if draft records must be shared across browsers.
 - **Theme & branding** — customize the visual theme.
 - **Site settings** — site metadata and appearance preferences.
 
@@ -34,4 +32,5 @@ npm ci
 npm run lint
 npm run build
 npm run preview
+node scripts/verify-articles.mjs
 ```

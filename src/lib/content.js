@@ -5,7 +5,7 @@ const useGithubGateway = githubGatewayConfigured()
 const supabase = !useGithubGateway && isConfigured ? remoteSupabase : null
 import { fallbackContent, seedSite, seedProfile, DEFAULT_COPY, DEFAULT_STATS } from './seed'
 import { DEFAULT_THEME, validateTheme } from './theme'
-import { isPostPublic, sortPosts } from './format'
+import { isArticlePublic, sortArticles } from './format'
 
 // Data access for the portfolio. Every public read is subject to RLS: the anon
 // role only ever sees published rows and a whitelist of site_settings keys, so
@@ -21,22 +21,6 @@ export const contentSource = useGithubGateway ? 'github' : isConfigured ? 'supab
 const LOCAL_CONTENT_KEY = 'mahesh-portfolio-local-cms-v1'
 const PROJECT_CATALOG_MIGRATION_KEY = 'mahesh-portfolio-project-catalog-v2'
 const STAGED_CONTENT_KEY = 'mahesh-portfolio-staged-content-v1'
-const DELETED_POSTS_KEY = 'mahesh-portfolio-deleted-articles-v1'
-
-function readDeletedPosts() {
-  try { const value = JSON.parse(localStorage.getItem(DELETED_POSTS_KEY) || '[]'); return Array.isArray(value) ? value : [] } catch { return [] }
-}
-function postIsDeleted(row, tombstones = readDeletedPosts()) {
-  const id = String(row?.id ?? '')
-  const slug = String(row?.slug ?? '').trim().toLowerCase()
-  return tombstones.some((item) => (item.id && String(item.id) === id) || (item.slug && String(item.slug).trim().toLowerCase() === slug))
-}
-function rememberDeletedPost(row) {
-  const tombstones = readDeletedPosts()
-  const entry = { id: row?.id == null ? '' : String(row.id), slug: String(row?.slug || '') }
-  const next = [...tombstones.filter((item) => !(entry.id && String(item.id) === entry.id) && !(entry.slug && String(item.slug).toLowerCase() === entry.slug.toLowerCase())), entry]
-  try { localStorage.setItem(DELETED_POSTS_KEY, JSON.stringify(next)) } catch { throw new Error('Could not persist the article deletion marker. Free browser storage and retry.') }
-}
 const LEGACY_CLIENT_CATEGORIES = {
   'rev-a-shelf': 'Adobe Commerce Cloud',
   'who has it?': 'Adobe Commerce Cloud',
@@ -128,7 +112,8 @@ function readLocalContent() {
           localStorage.setItem(PROJECT_CATALOG_MIGRATION_KEY, 'done')
         } catch { /* keep the in-memory migration; retry next visit if storage is full */ }
       }
-      return { ...fallbackContent, ...saved, projects, site: { ...fallbackContent.site, ...(saved.site || {}) }, theme: saved.theme || DEFAULT_THEME, themeDraft: saved.themeDraft || saved.theme || DEFAULT_THEME, themePublished: saved.themePublished || saved.theme || DEFAULT_THEME }
+      const { articles: _embeddedArticles, ...savedContent } = saved
+      return { ...fallbackContent, ...savedContent, articles: asArray(saved.articles), projects, site: { ...fallbackContent.site, ...(saved.site || {}) }, theme: saved.theme || DEFAULT_THEME, themeDraft: saved.themeDraft || saved.theme || DEFAULT_THEME, themePublished: saved.themePublished || saved.theme || DEFAULT_THEME }
     }
   } catch { /* use bundled defaults when storage is unavailable or invalid */ }
   return { ...fallbackContent, theme: DEFAULT_THEME, themeDraft: DEFAULT_THEME, themePublished: DEFAULT_THEME, settingsRows: [] }
@@ -162,19 +147,8 @@ export async function publishStagedContent() {
   if (!useGithubGateway) {
     throw new Error('These changes are saved in this browser and available in local preview, but live publishing is not configured. Configure the GitHub content publisher before publishing; your staged changes have been kept.')
   }
-  const tombstones = readDeletedPosts()
-  const cleanRows = (rows) => asArray(rows).filter((row) => !postIsDeleted(row, tombstones))
-  const publishable = {
-    ...staged,
-    posts: cleanRows(sharedPostRows(staged)),
-    articles: cleanRows(staged.articles),
-    blogPosts: cleanRows(staged.blogPosts),
-  }
-  await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(publishable) })
-  try {
-    localStorage.removeItem(STAGED_CONTENT_KEY)
-    localStorage.removeItem(DELETED_POSTS_KEY)
-  } catch {}
+  await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staged) })
+  try { localStorage.removeItem(STAGED_CONTENT_KEY) } catch {}
   window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
   return true
 }
@@ -199,23 +173,8 @@ export function importLocalContent(json) {
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
 
-// Older admin builds wrote articles under `articles` or `blogPosts`. Merge
-// these legacy collections by slug/id, with canonical `posts` winning on
-// duplicates. This prevents an empty or partial `posts` array from hiding
-// published records that are still present in a legacy field.
-function sharedPostRows(source = {}) {
-  const byKey = new Map()
-  for (const key of ['articles', 'blogPosts', 'posts']) {
-    for (const row of asArray(source[key])) {
-      if (!row || typeof row !== 'object') continue
-      const slug = String(row.slug || '').trim().toLowerCase()
-      const identity = slug || String(row.id || '').trim()
-      if (!identity) continue
-      byKey.set(identity, { ...(byKey.get(identity) || {}), ...row })
-    }
-  }
-  return [...byKey.values()].filter((row) => !postIsDeleted(row))
-}
+// Articles are loaded only from the dedicated article collection.
+function sharedArticleRows(source = {}) { return asArray(source.articles) }
 
 function normalizeProject(row) {
   return {
@@ -271,7 +230,7 @@ function normalizeEducation(row) {
   }
 }
 
-export function normalizePost(row) {
+export function normalizeArticle(row) {
   return {
     id: row.id,
     title: row.title || 'Untitled article',
@@ -280,7 +239,7 @@ export function normalizePost(row) {
     excerpt: row.excerpt || '',
     content: row.content || '',
     cover_image_url: row.cover_image_url || '',
-    status: String(row.status || row.publish_status || '').trim().toLowerCase() === 'published' || row.is_published === true || row.isPublished === true ? 'published' : 'draft',
+    status: String(row.status || '').trim().toLowerCase() === 'published' ? 'published' : 'draft',
     published_at: row.published_at || null,
     created_at: row.created_at || null,
     updated_at: row.updated_at || null,
@@ -368,7 +327,7 @@ function getLocalPreviewContent() {
     experience: asArray(local.experience),
     education: asArray(local.education),
     // Preview deliberately includes drafts so editors can inspect them before publishing.
-    posts: sortPosts(asArray(local.posts)),
+    articles: sortArticles(asArray(local.articles)),
     theme: local.themeDraft || local.theme || DEFAULT_THEME,
   }
 }
@@ -377,18 +336,18 @@ function getLocalPreviewContent() {
 
 export async function fetchPublicContent() {
   if (isLocalPreviewMode()) return getLocalPreviewContent()
-  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(sharedPostRows(shared).map(normalizePost).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
-  if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
+  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), articles: sortArticles(sharedArticleRows(shared).map(normalizeArticle).filter((article) => isArticlePublic(article))), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
+  if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), articles: sortArticles(asArray(local.articles).filter((article) => isArticlePublic(article))), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
   const nowIso = new Date().toISOString()
-  const [profileResult, projects, certifications, experience, education, posts, settings] = await Promise.allSettled([
+  const [profileResult, projects, certifications, experience, education, articleRows, settings] = await Promise.allSettled([
     supabase.from('profile').select('*').limit(1).maybeSingle(),
     supabase.from('projects').select('*').eq('is_published', true).order('sort_order'),
     supabase.from('certifications').select('*').eq('is_published', true).order('sort_order'),
     supabase.from('experience').select('*').eq('is_published', true).order('sort_order'),
     supabase.from('education').select('*').eq('is_published', true).order('sort_order'),
     supabase
-      .from('blog_posts')
+      .from('articles')
       .select('*')
       .eq('status', 'published')
       .lte('published_at', nowIso)
@@ -409,7 +368,7 @@ export async function fetchPublicContent() {
     certifications: asArray(settled(certifications, [])).map(normalizeCertification),
     experience: asArray(settled(experience, [])).map(normalizeExperience),
     education: asArray(settled(education, [])).map(normalizeEducation),
-    posts: sortPosts(asArray(settled(posts, [])).map(normalizePost)),
+    articles: sortArticles(asArray(settled(articleRows, [])).map(normalizeArticle)),
     profile: { ...normalizeProfile(settled(profileResult, null)), profileImageDesign: Object.fromEntries(settingRows.map((row) => [row.key, row.value])).profile_image_design || 'editorial', profileImageSectionDesign: Object.fromEntries(settingRows.map((row) => [row.key, row.value])).profile_image_section_design || 'classic-professional' },
     site: mergeSiteSettings(settingRows),
     theme: themeFromSettings(settingRows),
@@ -418,24 +377,24 @@ export async function fetchPublicContent() {
 
 /**
  * Public single-article read. Drafts are excluded by RLS regardless of slug, but
- * the timestamp check is repeated here so a future-dated post is not exposed by
+ * the timestamp check is repeated here so a future-dated article is not exposed by
  * a client that skipped the list query.
  */
-export async function fetchPostBySlug(slug) {
-  if (isLocalPreviewMode()) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug) || null
-  if (useGithubGateway) { const shared = await readSharedContent(); return sharedPostRows(shared).map(normalizePost).find((post) => decodeURIComponent(String(post.slug || '')) === decodeURIComponent(String(slug || '')) && isPostPublic(post)) || null }
-  if (!supabase) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
+export async function fetchArticleBySlug(slug) {
+  if (isLocalPreviewMode()) return asArray(readLocalContent().articles).map(normalizeArticle).find((article) => article.slug === slug) || null
+  if (useGithubGateway) { const shared = await readSharedContent(); return sharedArticleRows(shared).map(normalizeArticle).find((article) => decodeURIComponent(String(article.slug || '')) === decodeURIComponent(String(slug || '')) && isArticlePublic(article)) || null }
+  if (!supabase) return asArray(readLocalContent().articles).map(normalizeArticle).find((article) => article.slug === slug && isArticlePublic(article)) || null
   if (supabase) {
     const { data, error } = await supabase
-      .from('blog_posts')
+      .from('articles')
       .select('*')
       .eq('slug', slug)
       .eq('status', 'published')
       .limit(1)
       .maybeSingle()
     if (!error && data) {
-      const post = normalizePost(data)
-      return isPostPublic(post) ? post : null
+      const article = normalizeArticle(data)
+      return isArticlePublic(article) ? article : null
     }
   }
   return null
@@ -443,7 +402,7 @@ export async function fetchPostBySlug(slug) {
 
 /* --------------------------------------------------------------- admin read */
 
-const ADMIN_TABLES = ['profile', 'projects', 'certifications', 'experience', 'education', 'blog_posts', 'site_settings']
+const ADMIN_TABLES = ['profile', 'projects', 'certifications', 'experience', 'education', 'articles', 'site_settings']
 
 export async function fetchAdminContent() {
   if (useGithubGateway) {
@@ -453,15 +412,23 @@ export async function fetchAdminContent() {
     // rows by stable ID so a reload never discards a newly-created or edited
     // article just because the published GitHub JSON still has the old version.
     const mergeRows = (key) => {
-      const publishedRows = key === 'posts' ? sharedPostRows(shared) : asArray(shared[key])
+      const publishedRows = key === 'articles' ? sharedArticleRows(shared) : asArray(shared[key])
       const stagedRows = asArray(local[key])
+      // While staged, absence means a deliberate deletion. Without staging, deployed
+      // published rows are authoritative; only browser-local drafts are added for admin editing.
+      if (key === 'articles') {
+        if (hasStagedContent()) return stagedRows
+        const localDrafts = stagedRows.filter((article) => String(article.status || '').toLowerCase() !== 'published')
+        const byId = new Map(publishedRows.map((article) => [String(article.id), article]))
+        localDrafts.forEach((article) => byId.set(String(article.id), article))
+        return [...byId.values()]
+      }
       const byId = new Map(publishedRows.map((row, index) => [String(row.id ?? `${key}-published-${index}`), row]))
       stagedRows.forEach((row, index) => {
         const id = String(row.id ?? `${key}-local-${index}`)
         byId.set(id, { ...(byId.get(id) || {}), ...row })
       })
-      const rows = [...byId.values()]
-      return key === 'posts' ? rows.filter((row) => !postIsDeleted(row)) : rows
+      return [...byId.values()]
     }
     const merged = {
       ...local,
@@ -470,7 +437,7 @@ export async function fetchAdminContent() {
       certifications: mergeRows('certifications'),
       experience: mergeRows('experience'),
       education: mergeRows('education'),
-      posts: mergeRows('posts'),
+      articles: mergeRows('articles'),
       profile: { ...(shared.profile || {}), ...(local.profile || {}) },
       site: { ...(shared.site || {}), ...(local.site || {}) },
     }
@@ -479,17 +446,17 @@ export async function fetchAdminContent() {
   }
   if (!supabase) return readLocalContent()
 
-  const [profileResult, projects, certifications, experience, education, posts, settings] = await Promise.allSettled([
+  const [profileResult, projects, certifications, experience, education, articleRows, settings] = await Promise.allSettled([
     supabase.from('profile').select('*').limit(1).maybeSingle(),
     supabase.from('projects').select('*').order('sort_order'),
     supabase.from('certifications').select('*').order('sort_order'),
     supabase.from('experience').select('*').order('sort_order'),
     supabase.from('education').select('*').order('sort_order'),
-    supabase.from('blog_posts').select('*').order('updated_at', { ascending: false }),
+    supabase.from('articles').select('*').order('updated_at', { ascending: false }),
     supabase.from('site_settings').select('key,value'),
   ])
 
-  const failed = [profileResult, projects, certifications, experience, education, posts, settings]
+  const failed = [profileResult, projects, certifications, experience, education, articleRows, settings]
     .filter((r) => r.status === 'rejected' || r.value?.error)
     .map((r) => (r.status === 'rejected' ? r.reason?.message : r.value.error?.message))
     .filter(Boolean)
@@ -512,7 +479,7 @@ export async function fetchAdminContent() {
     certifications: asArray(value(certifications)).map(normalizeCertification),
     experience: asArray(value(experience)).map(normalizeExperience),
     education: asArray(value(education)).map(normalizeEducation),
-    posts: asArray(value(posts)).map(normalizePost),
+    articles: asArray(value(articleRows)).map(normalizeArticle),
     site: mergeSiteSettings(settingRows),
     settingsRows: settingRows,
     themePublished: themeFromSettings(settingRows),
@@ -527,7 +494,7 @@ const tableFor = {
   certifications: 'certifications',
   experience: 'experience',
   education: 'education',
-  posts: 'blog_posts',
+  articles: 'articles',
 }
 
 /** Map our UI record shape onto database columns. */
@@ -597,13 +564,9 @@ export function toDbRow(collection, record) {
 
 export async function saveRecord(collection, record) {
   if (!supabase) {
-    if (!['projects', 'certifications', 'experience', 'education', 'posts'].includes(collection)) throw new Error(`Unknown collection: ${collection}`)
+    if (!['projects', 'certifications', 'experience', 'education', 'articles'].includes(collection)) throw new Error(`Unknown collection: ${collection}`)
     const current = readLocalContent(); const rows = asArray(current[collection]); const saved = { ...record, id: record.id && !String(record.id).startsWith('seed-') ? record.id : `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, updated_at: new Date().toISOString() }
-    if (collection === 'posts' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
-    if (collection === 'posts') {
-      const tombstones = readDeletedPosts().filter((item) => !(item.id && String(item.id) === String(saved.id)) && !(item.slug && String(item.slug).toLowerCase() === String(saved.slug).toLowerCase()))
-      try { localStorage.setItem(DELETED_POSTS_KEY, JSON.stringify(tombstones)) } catch { throw new Error('Could not update the article deletion markers. Free browser storage and retry.') }
-    }
+    if (collection === 'articles' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
     updateLocalContent((state) => { const existingId = record.id && !String(record.id).startsWith('seed-'); const index = existingId ? rows.findIndex((row) => String(row.id) === String(record.id)) : -1; const nextRows = [...rows]; if (index >= 0) nextRows[index] = { ...rows[index], ...saved }; else nextRows.push(saved); return { ...state, [collection]: nextRows } })
     await flushSharedContent()
     return saved
@@ -612,7 +575,7 @@ export async function saveRecord(collection, record) {
   if (!table) throw new Error(`Unknown collection: ${collection}`)
   const row = toDbRow(collection, record)
 
-  if (table === 'blog_posts') {
+  if (collection === 'articles') {
     if (!row.slug) throw new Error('An article needs a slug.')
     if (!row.title) throw new Error('An article needs a title.')
   }
@@ -636,33 +599,13 @@ export async function saveRecord(collection, record) {
 }
 
 export async function deleteRecord(collection, id) {
+  if (!supabase) { updateLocalContent((state) => ({ ...state, [collection]: asArray(state[collection]).filter((row) => String(row.id) !== String(id)) })); await flushSharedContent(); return }
+
   if (!id || String(id).startsWith('seed-')) {
     throw new Error('Bundled sample content cannot be deleted from the database; hide it instead.')
   }
-  if (!supabase) {
-    const current = readLocalContent()
-    const rows = asArray(current[collection])
-    const target = rows.find((row) => String(row.id) === String(id))
-    if (!target) throw new Error('This article no longer exists in the current content store. Refresh and try again.')
-    if (collection === 'posts') rememberDeletedPost(target)
-    updateLocalContent((state) => {
-      const removeTarget = (items) => asArray(items).filter((row) => String(row.id ?? '') !== String(id) && !(collection === 'posts' && target.slug && String(row.slug || '').toLowerCase() === String(target.slug).toLowerCase()))
-      const next = { ...state, [collection]: removeTarget(state[collection]) }
-      if (collection === 'posts') {
-        next.articles = removeTarget(state.articles)
-        next.blogPosts = removeTarget(state.blogPosts)
-      }
-      return next
-    })
-    await flushSharedContent()
-    return
-  }
-
-  const table = tableFor[collection]
-  if (!table) throw new Error(`Unknown collection: ${collection}`)
-  const { data, error } = await supabase.from(table).delete().eq('id', id).select('id')
+  const { error } = await supabase.from(tableFor[collection]).delete().eq('id', id)
   if (error) throw new Error(error.message)
-  if (!data?.length) throw new Error('No article was deleted. It may already have been removed; refresh and try again.')
 }
 
 export async function saveProfile(profile) {
@@ -838,7 +781,7 @@ export async function markMessageRead(id, read = true) {
 }
 
 export async function deleteMessage(id) {
-  if (!supabase) { const key = 'mahesh-portfolio-local-messages-v1'; const rows = await fetchContactMessages(); localStorage.setItem(key, JSON.stringify(rows.filter((row) => row.id !== id))); return }
+  if (!supabase) { const key = 'mahesh-portfolio-local-messages-v1'; const rows = await fetchContactMessages(); localStorage.setItem(key, JSON.stringify(rows.filter((row) => String(row.id) !== String(id)))); return }
   const { error } = await supabase.from('contact_messages').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }

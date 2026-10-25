@@ -10,7 +10,7 @@ const DashboardPage = lazy(() => import('./DashboardPage'))
 const ProfilePage = lazy(() => import('./ProfilePage'))
 const PageContentPage = lazy(() => import('./PageContentPage'))
 const CollectionPage = lazy(() => import('./CollectionPage'))
-const ArticleEditorPage = lazy(() => import('./ArticleEditorPage'))
+const ArticlesEditorPage = lazy(() => import('./ArticlesEditorPage'))
 const MessagesPage = lazy(() => import('./MessagesPage'))
 const ThemeEditorPage = lazy(() => import('./ThemeEditorPage'))
 const SettingsPage = lazy(() => import('./SettingsPage'))
@@ -95,13 +95,8 @@ function ProtectedAdmin() {
 }
 
 function AdminRoutes() {
-  const { pathname, navigate } = useRouter()
+  const { pathname } = useRouter()
   const { status, error, reload } = useAdminContent()
-
-  useEffect(() => {
-    const legacy = pathname.match(/^\/mdadmin\/blog(?:\/(.*))?$/)
-    if (legacy) navigate(`/mdadmin/articles${legacy[1] ? `/${legacy[1]}` : ''}`, { replace: true })
-  }, [pathname, navigate])
 
   if (status === 'loading') {
     return (
@@ -132,13 +127,13 @@ function AdminRoutes() {
     )
   }
 
-  const articleMatch = pathname.match(/^\/mdadmin\/articles(?:\/(new|[^/]+))?$/)
-  if (articleMatch) {
-    const rawId = articleMatch[1]
+  const articlesMatch = pathname.match(/^\/mdadmin\/articles(?:\/(new|[^/]+))?$/)
+  if (articlesMatch) {
+    const rawId = articlesMatch[1]
     const mode = !rawId ? 'list' : rawId === 'new' ? 'new' : 'edit'
     return (
       <Suspense fallback={<div className="boot-screen">Loading editor…</div>}>
-        <ArticleEditorPage mode={mode} recordId={mode === 'edit' ? decodeURIComponent(rawId) : null} />
+        <ArticlesEditorPage mode={mode} recordId={mode === 'edit' ? decodeURIComponent(rawId) : null} />
       </Suspense>
     )
   }

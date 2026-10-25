@@ -32,13 +32,13 @@ create table if not exists public.education (
 create table if not exists public.site_settings (
  key text primary key, value jsonb not null default '{}'::jsonb, updated_at timestamptz not null default now()
 );
-create table if not exists public.blog_posts (
+create table if not exists public.articles (
  id uuid primary key default gen_random_uuid(), title text not null, slug text not null unique,
  excerpt text, content text not null default '', category text, cover_image_url text,
  status text not null default 'draft' check (status in ('draft','published')),
  published_at timestamptz, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
-create index if not exists blog_posts_publication_idx on public.blog_posts(status,published_at desc);
+create index if not exists articles_publication_idx on public.articles(status,published_at desc);
 
 alter table public.profile enable row level security;
 alter table public.projects enable row level security;
@@ -46,7 +46,7 @@ alter table public.certifications enable row level security;
 alter table public.experience enable row level security;
 alter table public.education enable row level security;
 alter table public.site_settings enable row level security;
-alter table public.blog_posts enable row level security;
+alter table public.articles enable row level security;
 
 -- Public SELECT is intentionally limited to published rows (and safe profile/settings data).
 drop policy if exists "public read profile" on public.profile;
@@ -63,10 +63,10 @@ do $$ declare t text; begin
  end loop;
 end $$;
 
-drop policy if exists "public read published posts" on public.blog_posts;
-create policy "public read published posts" on public.blog_posts for select to anon, authenticated using (status='published' and published_at is not null and published_at <= now());
-drop policy if exists "admin manage posts" on public.blog_posts;
-create policy "admin manage posts" on public.blog_posts for all to authenticated using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin') with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
+drop policy if exists "public read published articles" on public.articles;
+create policy "public read published articles" on public.articles for select to anon, authenticated using (status='published' and published_at is not null and published_at <= now());
+drop policy if exists "admin manage articles" on public.articles;
+create policy "admin manage articles" on public.articles for all to authenticated using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin') with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 drop policy if exists "public read site settings" on public.site_settings;
 create policy "public read site settings" on public.site_settings for select to anon, authenticated using (key in ('site_title','site_description','social_links','branding','copy','stats','tech_stack','theme_published','site_structure'));

@@ -22,7 +22,8 @@ import { Button, TextLink } from '../components/Button'
 import Reveal from '../components/Reveal'
 import { Link } from '../lib/RouterLink'
 import { useSeo, SITE_ORIGIN } from '../lib/useSeo'
-import { formatDate, isPostPublic, readingTime, truncate } from '../lib/format'
+import { formatDate, isArticlePublic, readingTime, truncate } from '../lib/format'
+import { getArticleCoverImage } from '../lib/articleImages'
 import { toPlainText } from '../lib/sanitize'
 
 function SectionHeading({ eyebrow, title, description, id }) {
@@ -349,22 +350,26 @@ function Toolkit({ groups, copy }) {
   )
 }
 
-/* -------------------------------------------------------------------- blog */
+/* ---------------------------------------------------------------- articles */
 
-function ArticlesSection({ posts, copy, sliderIntervalSeconds }) {
-  const published = posts.filter((post) => isPostPublic(post))
+function Articles({ articles, copy, sliderIntervalSeconds, status, error, reload }) {
+  const published = articles.filter((article) => isArticlePublic(article))
 
   return (
-    <section id="articles" className="section-wrap blog-section" aria-labelledby="blog-title">
-      <div className="blog-section-heading">
-        <SectionHeading eyebrow="ARTICLES & IDEAS" id="blog-title" title="Articles from the work." description="Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering." />
-        <Link className="blog-view-all-link" to="/articles">View All Articles <ArrowUpRight size={15} aria-hidden="true" /></Link>
+    <section id="articles" className="section-wrap articles-section" aria-labelledby="articles-title">
+      <div className="articles-section-heading">
+        <SectionHeading eyebrow="ARTICLES & IDEAS" id="articles-title" title="Articles from the work." description="Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering." />
+        <Link className="articles-view-all-link" to="/articles">View All Articles <ArrowUpRight size={15} aria-hidden="true" /></Link>
       </div>
 
-      {published.length ? (
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} getLink={(post) => `/articles/${encodeURIComponent(post.slug)}`} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/articles/${encodeURIComponent(post.slug)}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
+      {status === 'loading' ? (
+        <div className="articles-empty-state" role="status"><BookOpen size={22} aria-hidden="true" /><div><h3>Loading articles…</h3><p>Published articles are being loaded.</p></div></div>
+      ) : status === 'error' ? (
+        <div className="articles-empty-state" role="alert"><BookOpen size={22} aria-hidden="true" /><div><h3>Articles could not be loaded</h3><p>{error || 'The published article collection is temporarily unavailable.'}</p><button className="button button-secondary button-sm" onClick={reload}>Try again</button></div></div>
+      ) : published.length ? (
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(article) => article.title} getImage={getArticleCoverImage} getLink={(article) => `/articles/${encodeURIComponent(article.slug)}`} renderDetails={(article, index, primary) => primary ? <><p className="cinema-summary">{article.excerpt || truncate(toPlainText(article.content), 160)}</p><p className="cinema-meta">{article.category || 'ENGINEERING NOTES'}{article.published_at ? ` · ${formatDate(article.published_at)}` : ''} · {readingTime(article.content)} min read</p><Link className="cinema-link" to={`/articles/${encodeURIComponent(article.slug)}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
       ) : (
-        <div className="blog-empty-state">
+        <div className="articles-empty-state">
           <BookOpen size={22} aria-hidden="true" />
           <div>
             <h3>Articles coming soon</h3>
@@ -422,7 +427,7 @@ function Contact({ profile, copy, site }) {
 /* ------------------------------------------------------------------- page */
 
 export default function HomePage({ onSection }) {
-  const { profile, projects, certifications, experience, education, site, posts } = useContent()
+  const { profile, projects, certifications, experience, education, site, articles, status, error, reload } = useContent()
   const copy = site.copy
 
   useSeo({
@@ -451,12 +456,12 @@ export default function HomePage({ onSection }) {
     certifications: <Certifications items={certifications} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     education: <Education items={education} copy={copy} />,
     expertise: <Toolkit groups={site.techStack} copy={copy} />,
-    blog: <ArticlesSection posts={posts} copy={copy} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
+    articles: <Articles articles={articles} copy={copy} status={status} error={error} reload={reload} sliderIntervalSeconds={site.sliderIntervalSeconds ?? 5} />,
     contact: <Contact profile={profile} copy={copy} site={site} />,
   }
   const customSections = site.customSections || []
   const customMap = Object.fromEntries(customSections.map((section) => [section.id, section]))
-  const defaultOrder = ['home', 'about', 'projects', 'experience', 'certifications', 'education', 'expertise', 'blog', 'contact']
+  const defaultOrder = ['home', 'about', 'projects', 'experience', 'certifications', 'education', 'expertise', 'articles', 'contact']
   const order = [...new Set([...(site.structure?.order || defaultOrder), ...defaultOrder, ...customSections.map((section) => section.id)])]
   const hidden = site.structure?.hidden || []
 

@@ -76,7 +76,7 @@ function useActiveSection() {
 }
 
 function PublicSite() {
-  const { pathname, navigate, search, hash } = useRouter()
+  const { pathname } = useRouter()
   useRouteScroll()
   const active = useActiveSection()
 
@@ -85,9 +85,7 @@ function PublicSite() {
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const legacyArticle = matchRoute('/blog/:slug', pathname)
-  useEffect(() => { if (legacyArticle) navigate(`/articles/${encodeURIComponent(legacyArticle.slug)}${search || ''}${hash || ''}`, { replace: true }) }, [pathname, navigate, search, hash])
-  const articleMatch = matchRoute('/articles/:slug', pathname) || legacyArticle
+  const articleMatch = matchRoute('/blog/:slug', pathname)
 
   if (pathname === '/articles') {
     return <><SiteHeader activeSection="blog" /><ArticlesPage /><SiteFooter /></>

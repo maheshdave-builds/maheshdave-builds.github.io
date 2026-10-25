@@ -76,9 +76,7 @@ function useActiveSection() {
 }
 
 function PublicSite() {
-  const { pathname, navigate, search, hash } = useRouter()
-  const legacyArticle = matchRoute('/blog/:slug', pathname)
-  useEffect(() => { if (legacyArticle) navigate(`/articles/${encodeURIComponent(legacyArticle.slug)}${search || ''}${hash || ''}`, { replace: true }) }, [pathname, navigate, search, hash])
+  const { pathname } = useRouter()
   useRouteScroll()
   const active = useActiveSection()
 
@@ -87,10 +85,10 @@ function PublicSite() {
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const articleMatch = matchRoute('/articles/:slug', pathname) || matchRoute('/blog/:slug', pathname)
+  const articleMatch = matchRoute('/articles/:slug', pathname)
 
   if (pathname === '/articles') {
-    return <><SiteHeader activeSection="blog" /><ArticlesPage /><SiteFooter /></>
+    return <><SiteHeader activeSection="articles" /><ArticlesPage /><SiteFooter /></>
   }
 
   if (articleMatch) {
@@ -134,7 +132,9 @@ function PublicRoute({ preview }) {
 function Routes() {
   const { pathname, navigate } = useRouter()
   const { theme, status, error, reload } = useContent()
-  useEffect(() => { if (pathname === '/admin' || pathname.startsWith('/admin/')) navigate(pathname.replace(/^\/admin/, '/mdadmin'), { replace: true }) }, [pathname, navigate])
+  useEffect(() => {
+    if (pathname === '/admin' || pathname.startsWith('/admin/')) navigate(pathname.replace(/^\/admin/, '/mdadmin'), { replace: true })
+  }, [pathname, navigate])
   useRouteScroll()
   if (pathname === '/admin' || pathname.startsWith('/admin/')) return <div className="boot-screen">Opening admin…</div>
 

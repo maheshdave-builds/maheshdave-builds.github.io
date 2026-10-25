@@ -1,0 +1,88 @@
+/* Shared article card media frame — always 16:9 in grid and list */
+.article-list-card-media {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  aspect-ratio: 16 / 9;
+  background: var(--surface-soft, #f3f6f6);
+}
+
+.article-list-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset;
+  object-position: center;
+}
+
+.article-list-card-media.is-placeholder img {
+  object-fit: cover;
+}
+
+.article-list-card-media.is-uploaded img {
+  object-fit: contain;
+  background: var(--surface-soft, #f3f6f6);
+}
+
+/* Grid view: full-width banner */
+.article-list-card:not(.article-list-card-list) .article-list-card-media {
+  width: 100%;
+}
+
+/* List view: fixed-width banner, same 16:9 ratio (never stretch with card height) */
+.article-list-card-list {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  grid-template-columns: unset !important;
+}
+
+.article-list-card-list .article-list-card-media {
+  flex: 0 0 auto;
+  width: clamp(260px, 36%, 400px);
+  max-width: 400px;
+  min-width: 260px;
+  height: auto;
+  align-self: center;
+  border-radius: 20px 0 0 20px;
+}
+
+.article-list-card-list .article-list-card-media img {
+  position: absolute;
+  inset: 0;
+}
+
+.article-list-card-list .article-list-card-body {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.article-list-card-list:hover img,
+.article-list-card-list .article-list-card-media:focus-visible img {
+  transform: none !important;
+  filter: none !important;
+}
+
+@media (max-width: 700px) {
+  .article-list-card-list {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .article-list-card-list .article-list-card-media {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .article-list-card-list .article-list-card-media img {
+    position: absolute;
+    inset: 0;
+  }
+}

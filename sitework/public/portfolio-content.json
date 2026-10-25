@@ -606,7 +606,6 @@
       "is_published": true
     }
   ],
-  "posts": [],
   "site": {
     "siteTitle": "Mahesh Dave · Adobe Commerce Engineering",
     "siteDescription": "Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
@@ -626,10 +625,10 @@
       "educationDescription": "Academic background and qualifications.",
       "toolkitTitle": "A practical, modern toolkit.",
       "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
-      "blogTitle": "Articles from the work.",
-      "blogDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
       "contactTitle": "Good work starts with a conversation.",
-      "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
+      "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect.",
+      "articlesTitle": "Articles from the work.",
+      "articlesDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering."
     },
     "stats": [
       {
@@ -734,7 +733,8 @@
       }
     ],
     "contactEmail": "davemahesh119@gmail.com",
-    "showClientProjects": true
+    "showClientProjects": true,
+    "navigationLinks": null
   },
   "theme": {
     "version": 1,

@@ -30,7 +30,7 @@ export function useTheme() {
 }
 
 /**
- * Read a theme draft pushed by the admin's live-preview iframe. The admin posts
+ * Read a theme draft pushed by the admin's live-preview iframe. The admin articles
  * a validated theme into the preview frame over postMessage; the frame applies it
  * locally and never writes to the database, so previewing cannot publish.
  */

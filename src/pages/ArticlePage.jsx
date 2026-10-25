@@ -3,19 +3,20 @@ import { ArrowLeft, ArrowUpRight, BookOpen, Copy, Linkedin, Play, Pause, Square,
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
 import { TextLink } from '../components/Button'
-import ContentSlider from '../components/ContentSlider'
+import CinematicSlider from '../components/CinematicSlider'
 import { absoluteUrl, useSeo, SITE_ORIGIN } from '../lib/useSeo'
-import { formatDate, isPostPublic, readingTime, sortPosts, truncate } from '../lib/format'
+import { formatDate, isArticlePublic, readingTime, sortArticles, truncate } from '../lib/format'
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
-import { fetchPostBySlug, contentSource } from '../lib/content'
+import { fetchArticleBySlug, contentSource } from '../lib/content'
+import { getArticleCoverImage } from '../lib/articleImages'
 
 function useArticle(slug) {
-  const { posts, status } = useContent()
+  const { articles, status } = useContent()
   const normalizedSlug = decodeURIComponent(String(slug || '')).replace(/\/$/, '')
-  const fromList = posts.find((post) => decodeURIComponent(String(post.slug || '')).replace(/\/$/, '') === normalizedSlug) || null
+  const fromList = articles.find((article) => decodeURIComponent(String(article.slug || '')).replace(/\/$/, '') === normalizedSlug) || null
   // Fetch outcome is stored together with the slug it belongs to, so a stale
   // result for a previous slug can never be shown as the current article.
-  const [fetched, setFetched] = useState({ slug: null, post: null })
+  const [fetched, setFetched] = useState({ slug: null, article: null })
 
   useEffect(() => {
     // The home query may not include every article (it is capped) or the visitor
@@ -23,12 +24,12 @@ function useArticle(slug) {
     if (fromList || status === 'loading' || contentSource === 'local') return undefined
 
     let active = true
-    fetchPostBySlug(slug)
-      .then((post) => {
-        if (active) setFetched({ slug, post })
+    fetchArticleBySlug(slug)
+      .then((article) => {
+        if (active) setFetched({ slug, article })
       })
       .catch(() => {
-        if (active) setFetched({ slug, post: null })
+        if (active) setFetched({ slug, article: null })
       })
 
     return () => {
@@ -36,17 +37,17 @@ function useArticle(slug) {
     }
   }, [slug, fromList, status])
 
-  if (fromList) return { post: fromList, loading: false }
+  if (fromList) return { article: fromList, loading: false }
 
-  const resolved = fetched.slug === slug ? fetched.post : null
+  const resolved = fetched.slug === slug ? fetched.article : null
   const waiting = contentSource !== 'local' && status !== 'local' && !fromList && fetched.slug !== slug
 
-  return { post: resolved, loading: waiting }
+  return { article: resolved, loading: waiting }
 }
 
 export default function ArticlePage({ slug }) {
-  const { posts, site } = useContent()
-  const { post, loading } = useArticle(slug)
+  const { articles, site } = useContent()
+  const { article, loading } = useArticle(slug)
   const [copied, setCopied] = useState(false)
   const [voices, setVoices] = useState([])
   const [voiceName, setVoiceName] = useState('')
@@ -59,8 +60,8 @@ export default function ArticlePage({ slug }) {
   const speechIndexRef = useRef(0)
   const bodyRef = useRef(null)
 
-  const html = useMemo(() => (post ? sanitizeHtml(post.content) : ''), [post])
-  const visible = post && isPostPublic(post) ? post : null
+  const html = useMemo(() => (article ? sanitizeHtml(article.content) : ''), [article])
+  const visible = article && isArticlePublic(article) ? article : null
 
 
   useEffect(() => {
@@ -200,26 +201,33 @@ export default function ArticlePage({ slug }) {
     return () => contentObserver.disconnect()
   }, [html, visible?.slug])
 
-  const related = useMemo(() => {
+  const moreArticles = useMemo(() => {
     if (!visible) return []
-    const others = posts.filter((item) => String(item.id) !== String(visible.id) && item.slug !== visible.slug && isPostPublic(item))
-    const sameCategory = others.filter((item) => item.category === visible.category)
-    return sortPosts(sameCategory.length ? sameCategory : others).slice(0, 6)
-  }, [posts, visible])
+    const currentSlug = decodeURIComponent(String(visible.slug || '')).replace(/\/$/, '')
+    return sortArticles(
+      articles.filter((item) => {
+        if (!isArticlePublic(item)) return false
+        const itemSlug = decodeURIComponent(String(item.slug || '')).replace(/\/$/, '')
+        if (itemSlug === currentSlug) return false
+        if (visible.id && item.id && String(item.id) === String(visible.id)) return false
+        return true
+      }),
+    )
+  }, [articles, visible])
 
   useSeo({
     title: visible ? `${visible.seo_title || visible.title} — ${site.siteTitle}` : 'Article not found — Mahesh Dave',
     description:
       visible?.seo_description ||
       (visible ? truncate(visible.excerpt || toPlainText(visible.content), 155) : 'This article could not be found.'),
-    image: visible?.cover_image_url || '/social-share.png',
-    canonicalPath: visible?.canonical_url ? visible.canonical_url.replace('https://maheshdave-builds.github.io/blog/', 'https://maheshdave-builds.github.io/articles/').replace(/^\/blog\//, '/articles/') : `/articles/${encodeURIComponent(slug)}`,
+    image: visible ? getArticleCoverImage(visible) : '/social-share.png',
+    canonicalPath: visible?.canonical_url || `/articles/${encodeURIComponent(slug)}`,
     type: 'article',
     noindex: !visible,
     jsonLd: visible
       ? {
           '@context': 'https://schema.org',
-          '@type': 'BlogPosting',
+          '@type': 'Article',
           headline: visible.title,
           description: visible.seo_description || visible.excerpt,
           datePublished: visible.published_at,
@@ -227,7 +235,7 @@ export default function ArticlePage({ slug }) {
           author: { '@type': 'Person', name: visible.author || 'Mahesh Dave' },
           publisher: { '@type': 'Person', name: 'Mahesh Dave', url: SITE_ORIGIN },
           mainEntityOfPage: absoluteUrl(`/articles/${visible.slug}`),
-          image: visible.cover_image_url ? absoluteUrl(visible.cover_image_url) : undefined,
+          image: absoluteUrl(getArticleCoverImage(visible)),
           keywords: visible.tags?.join(', '),
         }
       : null,
@@ -312,16 +320,14 @@ export default function ArticlePage({ slug }) {
           </div>
         </header>
 
-        {visible.cover_image_url ? (
-          <img
-            className="article-cover"
-            src={visible.cover_image_url}
-            alt=""
-            width="1200"
-            height="630"
-            decoding="async"
-          />
-        ) : null}
+        <img
+          className="article-cover"
+          src={getArticleCoverImage(visible)}
+          alt=""
+          width="1200"
+          height="630"
+          decoding="async"
+        />
 
         <div ref={bodyRef} className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
 
@@ -341,24 +347,31 @@ export default function ArticlePage({ slug }) {
         </footer>
       </article>
 
-      {related.length ? (
-        <aside className="article-related" aria-labelledby="related-title">
-          <h2 id="related-title">More Notes</h2>
-          <ContentSlider label="Related articles">
-            {related.map((item) => (
-              <div className="slider-slide" key={item.id || item.slug}>
-                <article className="blog-card">
-                  <Link to={`/articles/${encodeURIComponent(item.slug)}`} aria-label={`Read ${item.title}`}>
-                    {item.cover_image_url ? <img className="blog-cover" src={item.cover_image_url} alt="" loading="lazy" /> : null}
-                  </Link>
-                  <p className="eyebrow">{item.category || 'ENGINEERING NOTES'}</p>
-                  <h3><Link to={`/articles/${encodeURIComponent(item.slug)}`}>{item.title}</Link></h3>
-                  <p>{item.excerpt || truncate(toPlainText(item.content), 140)}</p>
-                  <TextLink to={`/articles/${encodeURIComponent(item.slug)}`} icon={ArrowUpRight}>Read article</TextLink>
-                </article>
-              </div>
-            ))}
-          </ContentSlider>
+      {moreArticles.length ? (
+        <aside className="article-related" aria-labelledby="more-articles-title">
+          <h2 id="more-articles-title">More Articles</h2>
+          <CinematicSlider
+            intervalSeconds={site.sliderIntervalSeconds ?? 5}
+            label="More Articles"
+            items={moreArticles}
+            getTitle={(article) => article.title}
+            getImage={getArticleCoverImage}
+            getLink={(article) => `/articles/${encodeURIComponent(article.slug)}`}
+            renderDetails={(article, _index, primary) => primary ? (
+              <>
+                <p className="cinema-summary">{article.excerpt || truncate(toPlainText(article.content), 160)}</p>
+                <p className="cinema-meta">
+                  {article.category || 'ENGINEERING NOTES'}
+                  {article.published_at ? ` · ${formatDate(article.published_at)}` : ''}
+                  {' · '}
+                  {readingTime(article.content)} min read
+                </p>
+                <Link className="cinema-link" to={`/articles/${encodeURIComponent(article.slug)}`}>
+                  Read article <ArrowUpRight size={15} aria-hidden="true" />
+                </Link>
+              </>
+            ) : null}
+          />
         </aside>
       ) : null}
     </main>

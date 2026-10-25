@@ -3,21 +3,22 @@ import { ArrowUpRight, BookOpen, Grid2X2, List, Search, SlidersHorizontal } from
 import { motion } from 'framer-motion'
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
-import { formatDate, isPostPublic, readingTime, sortPosts, truncate } from '../lib/format'
+import { formatDate, isArticlePublic, readingTime, sortArticles, truncate } from '../lib/format'
 import { toPlainText } from '../lib/sanitize'
 import { useSeo } from '../lib/useSeo'
+import { articleHasUploadedCover, getArticleCoverImage } from '../lib/articleImages'
 
 const PAGE_SIZE = 8
 export default function ArticlesPage() {
-  const { posts = [], site, status = 'ready', error, reload } = useContent()
-  const articles = useMemo(() => sortPosts(posts.filter(isPostPublic)), [posts])
+  const { articles: sourceArticles = [], site, status = 'ready', error, reload } = useContent()
+  const articles = useMemo(() => sortArticles(sourceArticles.filter((article) => isArticlePublic(article))), [sourceArticles])
   const [view, setView] = useState('grid')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState('newest')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const filtered = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase()
-    const matched = articles.filter((post) => !needle || [post.title, post.excerpt, post.content, post.category, post.author, ...(post.tags || [])].join(' ').replace(/<[^>]*>/g, ' ').toLocaleLowerCase().includes(needle))
+    const matched = articles.filter((article) => !needle || [article.title, article.excerpt, article.content, article.category, article.author, ...(article.tags || [])].join(' ').replace(/<[^>]*>/g, ' ').toLocaleLowerCase().includes(needle))
     return matched.sort((a, b) => {
       if (sort === 'oldest') return new Date(a.published_at || a.created_at || 0) - new Date(b.published_at || b.created_at || 0)
       if (sort === 'az') return String(a.title).localeCompare(String(b.title))
@@ -41,12 +42,26 @@ export default function ArticlesPage() {
       </div>
     </div>
     {status === 'loading' ? <div className="articles-no-results" role="status">Loading published articles…</div> : status === 'error' ? <div className="articles-no-results" role="alert"><h2>Articles could not be loaded</h2><p>{error || 'The published article collection is temporarily unavailable.'}</p><button className="button button-secondary" onClick={reload}>Try again</button></div> : shown.length ? <motion.div layout className={`article-list-grid ${view === 'list' ? 'article-list-grid-list' : ''}`}>
-      {shown.map((post, index) => <motion.article layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32, delay: Math.min(index * .035, .22) }} className="article-list-card" key={post.id || post.slug}>
-        {post.cover_image_url ? <Link to={`/articles/${encodeURIComponent(post.slug)}`}><img src={post.cover_image_url} alt={post.title ? `Cover for ${post.title}` : ''} loading="lazy" /></Link> : <Link className="article-card-placeholder" to={`/articles/${encodeURIComponent(post.slug)}`}><BookOpen size={28}/></Link>}
-        <div><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p>
-        <h2><Link to={`/articles/${encodeURIComponent(post.slug)}`}>{post.title}</Link></h2><p>{post.excerpt || truncate(toPlainText(post.content), 180)}</p>
-        <Link className="cinema-link" to={`/articles/${encodeURIComponent(post.slug)}`}>Read article <ArrowUpRight size={15}/></Link></div>
-      </motion.article>)}
+      {shown.map((article, index) => (
+        <motion.article
+          layout={view === 'grid'}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: .32, delay: Math.min(index * .035, .22) }}
+          className={`article-list-card${view === 'list' ? ' article-list-card-list' : ''}`}
+          key={article.id || article.slug}
+        >
+          <Link className={`article-list-card-media${articleHasUploadedCover(article) ? ' is-uploaded' : ' is-placeholder'}`} to={`/articles/${encodeURIComponent(article.slug)}`}>
+            <img src={getArticleCoverImage(article)} alt={article.title ? `Cover for ${article.title}` : ''} loading="lazy" />
+          </Link>
+          <div className="article-list-card-body">
+            <p className="cinema-meta">{article.category || 'ENGINEERING NOTES'}{article.published_at ? ` · ${formatDate(article.published_at)}` : ''} · {readingTime(article.content)} min read</p>
+            <h2><Link to={`/articles/${encodeURIComponent(article.slug)}`}>{article.title}</Link></h2>
+            <p>{article.excerpt || truncate(toPlainText(article.content), 180)}</p>
+            <Link className="cinema-link" to={`/articles/${encodeURIComponent(article.slug)}`}>Read article <ArrowUpRight size={15}/></Link>
+          </div>
+        </motion.article>
+      ))}
     </motion.div> : <div className="articles-no-results"><BookOpen size={24}/><h2>{query ? 'No matching articles' : 'Articles coming soon'}</h2><p>{query ? 'Try another keyword. Search includes the full article text, not only titles.' : 'Articles appear here as soon as they are published from the admin dashboard.'}</p>{query ? <button className="button button-secondary" onClick={() => setQuery('')}>Clear search</button> : null}</div>}
     {shown.length < filtered.length ? <div className="articles-load-more"><button className="button button-primary" onClick={() => setVisibleCount(n => n + PAGE_SIZE)}>Load more articles <ArrowUpRight size={16}/></button><span>Showing {shown.length} of {filtered.length}</span></div> : filtered.length > 0 ? <p className="articles-results-count">Showing all {filtered.length} articles</p> : null}
   </main>

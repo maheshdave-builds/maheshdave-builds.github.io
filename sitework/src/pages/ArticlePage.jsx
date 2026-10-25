@@ -3,7 +3,6 @@ import { ArrowLeft, ArrowUpRight, BookOpen, Share2 } from 'lucide-react'
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
 import { TextLink } from '../components/Button'
-import ContentSlider from '../components/ContentSlider'
 import { absoluteUrl, useSeo, SITE_ORIGIN } from '../lib/useSeo'
 import { formatDate, isPostPublic, readingTime, sortPosts, truncate } from '../lib/format'
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
@@ -76,9 +75,9 @@ export default function ArticlePage({ slug }) {
 
   const related = useMemo(() => {
     if (!visible) return []
-    const others = posts.filter((item) => String(item.id) !== String(visible.id) && item.slug !== visible.slug && isPostPublic(item))
+    const others = posts.filter((item) => item.id !== visible.id && isPostPublic(item))
     const sameCategory = others.filter((item) => item.category === visible.category)
-    return sortPosts(sameCategory.length ? sameCategory : others).slice(0, 6)
+    return sortPosts(sameCategory.length ? sameCategory : others).slice(0, 2)
   }, [posts, visible])
 
   useSeo({
@@ -87,7 +86,7 @@ export default function ArticlePage({ slug }) {
       visible?.seo_description ||
       (visible ? truncate(visible.excerpt || toPlainText(visible.content), 155) : 'This article could not be found.'),
     image: visible?.cover_image_url || '/social-share.png',
-    canonicalPath: visible?.canonical_url ? visible.canonical_url.replace(/^https?:\/\/[^/]+\/blog\//, `${SITE_ORIGIN}/articles/`).replace(/^\/blog\//, '/articles/') : `/articles/${encodeURIComponent(slug)}`,
+    canonicalPath: visible?.canonical_url || `/blog/${slug}`,
     type: 'article',
     noindex: !visible,
     jsonLd: visible
@@ -100,7 +99,7 @@ export default function ArticlePage({ slug }) {
           dateModified: visible.updated_at || visible.published_at,
           author: { '@type': 'Person', name: visible.author || 'Mahesh Dave' },
           publisher: { '@type': 'Person', name: 'Mahesh Dave', url: SITE_ORIGIN },
-          mainEntityOfPage: absoluteUrl(`/articles/${visible.slug}`),
+          mainEntityOfPage: absoluteUrl(`/blog/${visible.slug}`),
           image: visible.cover_image_url ? absoluteUrl(visible.cover_image_url) : undefined,
           keywords: visible.tags?.join(', '),
         }
@@ -147,7 +146,7 @@ export default function ArticlePage({ slug }) {
             This article may have been unpublished, renamed, or the link may be incorrect. Published notes are listed
             on the portfolio.
           </p>
-          <Link className="button button-primary" to="/#articles">
+          <Link className="button button-primary" to="/#blog">
             <ArrowLeft size={16} aria-hidden="true" /> Back to notes
           </Link>
         </div>
@@ -159,7 +158,7 @@ export default function ArticlePage({ slug }) {
     <main id="main" className="article-shell">
       <article className="article-main">
         <nav className="article-breadcrumb" aria-label="Breadcrumb">
-          <Link to="/#articles">
+          <Link to="/#blog">
             <ArrowLeft size={14} aria-hidden="true" /> All notes
           </Link>
         </nav>
@@ -208,22 +207,21 @@ export default function ArticlePage({ slug }) {
 
       {related.length ? (
         <aside className="article-related" aria-labelledby="related-title">
-          <h2 id="related-title">More Notes</h2>
-          <ContentSlider label="Related articles">
+          <h2 id="related-title">More notes</h2>
+          <div className="blog-grid">
             {related.map((item) => (
-              <div className="slider-slide" key={item.id || item.slug}>
-                <article className="blog-card">
-                  <Link to={`/articles/${encodeURIComponent(item.slug)}`} aria-label={`Read ${item.title}`}>
-                    {item.cover_image_url ? <img className="blog-cover" src={item.cover_image_url} alt="" loading="lazy" /> : null}
-                  </Link>
-                  <p className="eyebrow">{item.category || 'ENGINEERING NOTES'}</p>
-                  <h3><Link to={`/articles/${encodeURIComponent(item.slug)}`}>{item.title}</Link></h3>
-                  <p>{item.excerpt || truncate(toPlainText(item.content), 140)}</p>
-                  <TextLink to={`/articles/${encodeURIComponent(item.slug)}`} icon={ArrowUpRight}>Read article</TextLink>
-                </article>
-              </div>
+              <article className="blog-card" key={item.id}>
+                <p className="eyebrow">{item.category || 'ENGINEERING NOTES'}</p>
+                <h3>
+                  <Link to={`/blog/${item.slug}`}>{item.title}</Link>
+                </h3>
+                <p>{item.excerpt || truncate(toPlainText(item.content), 140)}</p>
+                <TextLink to={`/blog/${item.slug}`} icon={ArrowUpRight}>
+                  Read article
+                </TextLink>
+              </article>
             ))}
-          </ContentSlider>
+          </div>
         </aside>
       ) : null}
     </main>

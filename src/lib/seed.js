@@ -224,8 +224,8 @@ export const DEFAULT_COPY = {
   toolkitTitle: 'A practical, modern toolkit.',
   toolkitDescription:
     'Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.',
-  blogTitle: 'Articles from the work.',
-  blogDescription:
+  articlesTitle: 'Articles from the work.',
+  articlesDescription:
     'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
   articlesPageTitle: 'Articles from the work.',
   articlesPageDescription: 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
@@ -260,7 +260,7 @@ export const emptyContent = {
   certifications: [],
   experience: [],
   education: [],
-  posts: [],
+  articles: [],
   site: seedSite,
 }
 
@@ -270,6 +270,6 @@ export const fallbackContent = {
   certifications: seedCertifications,
   experience: seedExperience,
   education: seedEducation,
-  posts: [],
+  articles: [],
   site: seedSite,
 }

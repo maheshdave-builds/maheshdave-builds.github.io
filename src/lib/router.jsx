@@ -3,7 +3,7 @@ import { RouterContext, buildLocation, readPath } from './routerCore'
 
 // Minimal History-API router. The site has two entry surfaces (the portfolio at
 // "/" and the admin app under "/mdadmin/*") plus article permalinks at
-// "/articles/:slug" and the legacy alias "/blog/:slug", so a router dependency is not warranted. Deep links on static
+// "/articles/:slug", so a router dependency is not warranted. Deep links on static
 // hosting are rescued by public/404.html, which re-enters the app at the
 // requested path.
 //

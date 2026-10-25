@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowUpRight, Linkedin, Menu, Github, Sun, Moon, X, Mail } from 'lucide-react'
+import { ArrowUp, ArrowUpRight, Linkedin, Menu, Github, Sun, Moon, X, Mail } from 'lucide-react'
 import { useTheme } from '../contexts/hooks'
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
@@ -39,7 +39,7 @@ export default function SiteHeader({ activeSection }) {
 
   const close = () => setOpen(false)
   const socials = profile.social_urls || {}
-  const navLinks = (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_LINKS).map((item) => { const href = String(item.href || ''); const label = String(item.label || '').trim().toLowerCase(); const pointsToArticles = href === '#blog' || href === '/#blog' || href.endsWith('#blog'); return pointsToArticles ? { ...item, label: ['blog', 'notes', 'noted'].includes(label) ? 'Articles' : item.label, href: href.replace(/#blog$/, '#articles') } : item }).filter((item) => item.visible !== false)
+  const navLinks = (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_LINKS).filter((item) => item.visible !== false)
   const navTarget = (href) => String(href || '#home').startsWith('http') || String(href || '').startsWith('/') ? href : `/${href}`
 
   return (
@@ -144,9 +144,18 @@ export function SiteFooter() {
   const socials = profile.social_urls || {}
   const year = new Date().getFullYear()
 
-
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+  }
 
   return (
+    <>
+    <div className="scroll-to-top-anchor">
+      <button type="button" className="scroll-to-top" onClick={scrollToTop} aria-label="Back to top">
+        <ArrowUp size={18} aria-hidden="true" />
+        <span className="sr-only">Back to top</span>
+      </button>
+    </div>
     <footer className="site-footer">
       <div className="footer-orb footer-orb-one" aria-hidden="true" />
       <div className="footer-orb footer-orb-two" aria-hidden="true" />
@@ -208,9 +217,9 @@ export function SiteFooter() {
           <a href={`mailto:${site?.contactEmail || profile.email}`}>
             <Mail size={13} aria-hidden="true" /> {site?.contactEmail || profile.email}
           </a>
-          <Link to="/#home">Back to top ↑</Link>
         </div>
       </div>
     </footer>
+    </>
   )
 }

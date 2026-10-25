@@ -20,8 +20,8 @@ const COPY_FIELDS = [
   { key: 'educationDescription', label: 'Education description', group: 'Education', area: true },
   { key: 'toolkitTitle', label: 'Toolkit heading', group: 'Toolkit' },
   { key: 'toolkitDescription', label: 'Toolkit description', group: 'Toolkit', area: true },
-  { key: 'blogTitle', label: 'Articles heading', group: 'Articles' },
-  { key: 'blogDescription', label: 'Articles description', group: 'Articles', area: true },
+  { key: 'blogTitle', label: 'Blog heading', group: 'Blog' },
+  { key: 'blogDescription', label: 'Blog description', group: 'Blog', area: true },
   { key: 'contactTitle', label: 'Contact heading', group: 'Contact' },
   { key: 'contactDescription', label: 'Contact description', group: 'Contact', area: true },
 ]

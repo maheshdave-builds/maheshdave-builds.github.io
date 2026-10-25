@@ -20,7 +20,7 @@ export function AdminContentProvider({ children }) {
     certifications: fallbackContent.certifications,
     experience: fallbackContent.experience,
     education: fallbackContent.education,
-    posts: [],
+    articles: [],
     site: fallbackContent.site,
     settingsRows: [],
     themePublished: DEFAULT_THEME,

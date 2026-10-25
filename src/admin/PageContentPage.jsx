@@ -21,8 +21,8 @@ const COPY_FIELDS = [
   { key: 'educationDescription', label: 'Education description', group: 'Education', area: true },
   { key: 'toolkitTitle', label: 'Toolkit heading', group: 'Toolkit' },
   { key: 'toolkitDescription', label: 'Toolkit description', group: 'Toolkit', area: true },
-  { key: 'blogTitle', label: 'Articles heading', group: 'Articles' },
-  { key: 'blogDescription', label: 'Articles description', group: 'Articles', area: true },
+  { key: 'articlesTitle', label: 'Articles heading', group: 'Articles' },
+  { key: 'articlesDescription', label: 'Articles description', group: 'Articles', area: true },
   { key: 'articlesPageTitle', label: 'Article listing banner title', group: 'Articles' },
   { key: 'articlesPageDescription', label: 'Article listing banner description', group: 'Articles', area: true },
   { key: 'contactTitle', label: 'Contact heading', group: 'Contact' },
@@ -131,7 +131,7 @@ export default function PageContentPage() {
             ))}
           </div>
 
-          {activeGroup === 'Articles' ? <>
+          {activeGroup === 'Blog' ? <>
             <div className="article-banner-admin">
               <label>Article listing banner image <input type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }} /></label>
               {copy.articlesPageBannerImage ? <div className="article-banner-preview"><img src={copy.articlesPageBannerImage} alt="Article listing banner preview"/><div className="article-banner-actions"><button type="button" className="subtle-button" onClick={() => document.getElementById('article-banner-replace')?.click()}><ImagePlus size={15}/> Replace / crop image</button><input id="article-banner-replace" hidden type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setBannerCropFile(file); event.target.value = ''; }}/><button type="button" className="subtle-button" onClick={() => setCopy(current => ({ ...current, articlesPageBannerImage: '' }))}>Remove banner image</button></div></div> : <p className="field-hint">No common banner image uploaded. The text banner will be shown instead.</p>}

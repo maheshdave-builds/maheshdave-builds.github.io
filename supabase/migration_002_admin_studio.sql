@@ -13,15 +13,15 @@ alter table public.projects add column if not exists link_label text;
 alter table public.projects add column if not exists client_logo_url text;
 alter table public.projects add column if not exists client_links jsonb not null default '[]'::jsonb;
 
--- ------------------------------------------------------------ blog_posts
-alter table public.blog_posts add column if not exists author text default 'Mahesh Dave';
-alter table public.blog_posts add column if not exists tags text[] not null default '{}';
-alter table public.blog_posts add column if not exists seo_title text;
-alter table public.blog_posts add column if not exists seo_description text;
-alter table public.blog_posts add column if not exists canonical_url text;
+-- --------------------------------------------------------------- articles
+alter table public.articles add column if not exists author text default 'Mahesh Dave';
+alter table public.articles add column if not exists tags text[] not null default '{}';
+alter table public.articles add column if not exists seo_title text;
+alter table public.articles add column if not exists seo_description text;
+alter table public.articles add column if not exists canonical_url text;
 
-create index if not exists blog_posts_slug_idx on public.blog_posts (slug);
-create index if not exists blog_posts_updated_idx on public.blog_posts (updated_at desc);
+create index if not exists articles_slug_idx on public.articles (slug);
+create index if not exists articles_updated_idx on public.articles (updated_at desc);
 
 -- ---------------------------------------------------------- contact inbox
 create table if not exists public.contact_messages (
@@ -102,8 +102,8 @@ insert into public.site_settings (key, value) values
      "educationDescription":"Academic background and qualifications.",
      "toolkitTitle":"A practical, modern toolkit.",
      "toolkitDescription":"Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
-     "blogTitle":"Lessons from the work.",
-     "blogDescription":"Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
+     "articlesTitle":"Lessons from the work.",
+     "articlesDescription":"Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
      "contactTitle":"Good work starts with a conversation.",
      "contactDescription":"Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
    }'::jsonb),

@@ -15,7 +15,7 @@ import {
 import { Link } from '../lib/RouterLink'
 import { useAdminContent } from '../contexts/hooks'
 import { fetchContactMessages } from '../lib/content'
-import { formatDate, isPostPublic, readingTime } from '../lib/format'
+import { formatDate, isArticlePublic, readingTime } from '../lib/format'
 import { toPlainText } from '../lib/sanitize'
 import { AdminLayout } from './AdminLayout'
 
@@ -42,7 +42,7 @@ function StatCard({ label, value, hint, icon: Icon, to }) {
 }
 
 export default function DashboardPage() {
-  const { projects, certifications, experience, education, posts, site, themePublished, status } = useAdminContent()
+  const { projects, certifications, experience, education, articles, site, themePublished, status } = useAdminContent()
   const [messages, setMessages] = useState({ status: 'loading', rows: [] })
 
   useEffect(() => {
@@ -56,21 +56,21 @@ export default function DashboardPage() {
   }, [])
 
   const stats = useMemo(() => {
-    const published = posts.filter((post) => isPostPublic(post)).length
-    const drafts = posts.filter((post) => post.status !== 'published').length
-    const scheduled = posts.filter(
-      (post) => post.status === 'published' && post.published_at && !isPostPublic(post),
+    const published = articles.filter((article) => isArticlePublic(article)).length
+    const drafts = articles.filter((article) => article.status !== 'published').length
+    const scheduled = articles.filter(
+      (article) => article.status === 'published' && article.published_at && !isArticlePublic(article),
     ).length
     const unread = messages.rows.filter((row) => !row.is_read).length
     return { published, drafts, scheduled, unread }
-  }, [posts, messages.rows])
+  }, [articles, messages.rows])
 
   const recentPosts = useMemo(
     () =>
-      [...posts]
+      [...articles]
         .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0))
         .slice(0, 5),
-    [posts],
+    [articles],
   )
 
   const recentMessages = messages.rows.slice(0, 4)
@@ -80,7 +80,7 @@ export default function DashboardPage() {
     experience: experience.length,
     certifications: certifications.length,
     education: education.length,
-    posts: posts.length,
+    articles: articles.length,
   }
 
   return (
@@ -158,23 +158,23 @@ export default function DashboardPage() {
 
           {recentPosts.length ? (
             <ul className="activity-list">
-              {recentPosts.map((post) => {
-                const live = isPostPublic(post)
+              {recentPosts.map((article) => {
+                const live = isArticlePublic(article)
                 return (
-                  <li key={post.id}>
-                    <span className={`activity-status ${live ? 'live' : post.status}`} aria-hidden="true">
-                      {live ? <CheckCircle2 size={14} /> : post.status === 'published' ? <Clock size={14} /> : <Circle size={14} />}
+                  <li key={article.id}>
+                    <span className={`activity-status ${live ? 'live' : article.status}`} aria-hidden="true">
+                      {live ? <CheckCircle2 size={14} /> : article.status === 'published' ? <Clock size={14} /> : <Circle size={14} />}
                     </span>
                     <div>
-                      <Link to={`/mdadmin/articles/${post.id}`}>{post.title}</Link>
+                      <Link to={`/mdadmin/articles/${article.id}`}>{article.title}</Link>
                       <small>
                         {live
-                          ? `Published ${formatDate(post.published_at)}`
-                          : post.status === 'published'
-                            ? `Scheduled for ${formatDate(post.published_at)}`
+                          ? `Published ${formatDate(article.published_at)}`
+                          : article.status === 'published'
+                            ? `Scheduled for ${formatDate(article.published_at)}`
                             : 'Draft'}
-                        {` · ${readingTime(post.content)} min read`}
-                        {post.excerpt ? ` · ${toPlainText(post.excerpt).slice(0, 70)}` : ''}
+                        {` · ${readingTime(article.content)} min read`}
+                        {article.excerpt ? ` · ${toPlainText(article.excerpt).slice(0, 70)}` : ''}
                       </small>
                     </div>
                   </li>

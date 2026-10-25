@@ -21,7 +21,7 @@ export const ADMIN_NAV = [
   { key: 'experience', path: '/mdadmin/experience', label: 'Experience', countKey: 'experience' },
   { key: 'certifications', path: '/mdadmin/certifications', label: 'Certifications', countKey: 'certifications' },
   { key: 'education', path: '/mdadmin/education', label: 'Education', countKey: 'education' },
-  { key: 'blog', path: '/mdadmin/articles', label: 'Articles', countKey: 'posts' },
+  { key: 'blog', path: '/mdadmin/blog', label: 'Articles', countKey: 'posts' },
   { key: 'messages', path: '/mdadmin/messages', label: 'Messages' },
   { key: 'theme', path: '/mdadmin/theme', label: 'Theme & branding' },
   { key: 'settings', path: '/mdadmin/settings', label: 'Site settings' },

@@ -17,7 +17,7 @@ export const profile = {
   navItems: [
     { label: 'Home', href: '#home' }, { label: 'About', href: '#about' },
     { label: 'Experience', href: '#experience' }, { label: 'Projects', href: '#projects' },
-    { label: 'Certifications', href: '#certifications' }, { label: 'Articles', href: '#articles' }, { label: 'Contact', href: '#contact' }
+    { label: 'Certifications', href: '#certifications' }, { label: 'Blog', href: '#blog' }, { label: 'Contact', href: '#contact' }
   ],
   cta: { primary: 'Explore projects', secondary: 'Contact me' },
   socials: [

@@ -22,6 +22,10 @@ export default function CinematicSlider({ items = [], label, getTitle, getImage,
   }, [intervalSeconds, items.length, reduceMotion])
   if (!items.length) return null
   const move = (step) => setActive((current) => (current + step + items.length) % items.length)
+  const handleSwipe = (_, info) => {
+    if (info.offset.x <= -40 || info.velocity.x <= -300) move(1)
+    else if (info.offset.x >= 40 || info.velocity.x >= 300) move(-1)
+  }
   const safeActive = active % items.length
   const item = items[safeActive]
   const title = getTitle?.(item) || item.title || item.name || label
@@ -45,7 +49,14 @@ export default function CinematicSlider({ items = [], label, getTitle, getImage,
         </div>
         <span className="cinema-footnote"><MoveUpRight size={13} /> Explore the collection</span>
       </div>
-      <div className="cinema-rail" aria-live="polite">
+      <motion.div
+        className="cinema-rail"
+        aria-live="polite"
+        drag={items.length > 1 ? 'x' : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.12}
+        onDragEnd={handleSwipe}
+      >
         {[-1, 0, 1].map((offset) => {
           const index = (safeActive + offset + items.length) % items.length
           const slide = items[index]
@@ -55,7 +66,7 @@ export default function CinematicSlider({ items = [], label, getTitle, getImage,
             {offset === 0 && <span className="cinema-image-caption">{getTitle?.(slide) || slide.title || slide.name}</span>}
           </motion.button>
         })}
-      </div>
+      </motion.div>
       <div className="cinema-detail-mobile">{renderDetails?.(item, safeActive, false)}</div>
     </section>
   )

@@ -23,7 +23,7 @@ import { sanitizeHtml, toPlainText } from '../lib/sanitize'
 import { AdminLayout, SearchField } from './AdminLayout'
 import ImageCropDialog from './ImageCropDialog'
 
-function blankPost() {
+function blankArticle() {
   return {
     id: null,
     title: '',
@@ -200,8 +200,8 @@ function RichText({ value, onChange }) {
   )
 }
 
-function PreviewDialog({ post, onClose }) {
-  const html = useMemo(() => sanitizeHtml(post.content), [post.content])
+function PreviewDialog({ article, onClose }) {
+  const html = useMemo(() => sanitizeHtml(article.content), [article.content])
 
   useEffect(() => {
     const onKey = (event) => event.key === 'Escape' && onClose()
@@ -224,7 +224,7 @@ function PreviewDialog({ post, onClose }) {
       >
         <header className="dialog-heading">
           <div>
-            <p className="eyebrow">PREVIEW · {post.status === 'published' ? 'PUBLISHED' : 'DRAFT'}</p>
+            <p className="eyebrow">PREVIEW · {article.status === 'published' ? 'PUBLISHED' : 'DRAFT'}</p>
             <h2 id="preview-title">How this will read</h2>
           </div>
           <button type="button" className="icon-button" onClick={onClose} aria-label="Close preview">
@@ -234,11 +234,11 @@ function PreviewDialog({ post, onClose }) {
         <div className="dialog-body">
           <article className="article-preview">
             <p className="eyebrow">
-              {post.category} · {readingTime(post.content)} min read
+              {article.category} · {readingTime(article.content)} min read
             </p>
-            <h1>{post.title || 'Untitled article'}</h1>
-            {post.excerpt ? <p className="article-excerpt">{post.excerpt}</p> : null}
-            {post.cover_image_url ? <img src={post.cover_image_url} alt="" /> : null}
+            <h1>{article.title || 'Untitled article'}</h1>
+            {article.excerpt ? <p className="article-excerpt">{article.excerpt}</p> : null}
+            {article.cover_image_url ? <img src={article.cover_image_url} alt="" /> : null}
             <div className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
           </article>
         </div>
@@ -247,12 +247,12 @@ function PreviewDialog({ post, onClose }) {
   )
 }
 
-export default function BlogEditorPage({ mode, recordId }) {
-  const { posts, reload, loading: contentLoading } = useAdminContent()
+export default function ArticlesEditorPage({ mode, recordId }) {
+  const { articles, reload, loading: contentLoading } = useAdminContent()
   const { navigate } = useRouter()
   const [query, setQuery] = useState('')
-  const [form, setForm] = useState(blankPost)
-  const [baseline, setBaseline] = useState(() => JSON.stringify(blankPost()))
+  const [form, setForm] = useState(blankArticle)
+  const [baseline, setBaseline] = useState(() => JSON.stringify(blankArticle()))
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
@@ -261,17 +261,17 @@ export default function BlogEditorPage({ mode, recordId }) {
   const [coverCropFile, setCoverCropFile] = useState(null)
 
   const editing = mode === 'edit'
-  const record = editing ? posts.find((post) => String(post.id) === String(recordId)) : null
+  const record = editing ? articles.find((article) => String(article.id) === String(recordId)) : null
 
   useEffect(() => {
     const next = record
       ? {
-          ...blankPost(),
+          ...blankArticle(),
           ...record,
           tags: Array.isArray(record.tags) ? record.tags.join(', ') : '',
           published_at: toDateTimeLocal(record.published_at),
         }
-      : blankPost()
+      : blankArticle()
     setForm(next)
     setBaseline(JSON.stringify(next))
     setSlugTouched(Boolean(record))
@@ -301,9 +301,9 @@ export default function BlogEditorPage({ mode, recordId }) {
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
-    if (!needle) return posts
-    return posts.filter((post) => `${post.title} ${post.category} ${post.status}`.toLowerCase().includes(needle))
-  }, [posts, query])
+    if (!needle) return articles
+    return articles.filter((article) => `${article.title} ${article.category} ${article.status}`.toLowerCase().includes(needle))
+  }, [articles, query])
 
   const save = async (status) => {
     setError('')
@@ -327,7 +327,7 @@ export default function BlogEditorPage({ mode, recordId }) {
     }
 
     const publishedAt = status === 'published' ? fromDateTimeLocal(form.published_at) || new Date().toISOString() : fromDateTimeLocal(form.published_at)
-    const duplicate = posts.find((post) => post.slug === slug && String(post.id) !== String(form.id))
+    const duplicate = articles.find((article) => article.slug === slug && String(article.id) !== String(form.id))
     if (duplicate) {
       setError(`Another article already uses the slug “${slug}”.`)
       return
@@ -347,14 +347,14 @@ export default function BlogEditorPage({ mode, recordId }) {
 
     setBusy(true)
     try {
-      const saved = await saveRecord('posts', payload)
+      const saved = await saveRecord('articles', payload)
       await reload()
       const savedForm = { ...payload, ...saved, tags: Array.isArray(saved?.tags) ? saved.tags.join(', ') : payload.tags.join(', '), published_at: toDateTimeLocal(saved?.published_at || publishedAt) }
       setForm(savedForm)
       setBaseline(JSON.stringify(savedForm))
       setNotice(status === 'published' ? 'Article status saved as published. Click Publish in the header to deploy it.' : 'Draft saved locally. Click Publish in the header to deploy it.')
       if (saved?.id && String(saved.id) !== String(form.id)) {
-        navigate(`/mdadmin/blog/${saved.id}`, { replace: true })
+        navigate(`/mdadmin/articles/${saved.id}`, { replace: true })
       }
     } catch (saveError) {
       setError(saveError.message || 'The article could not be saved.')
@@ -368,9 +368,9 @@ export default function BlogEditorPage({ mode, recordId }) {
     if (!window.confirm(`Delete “${form.title}”? This removes the article permanently.`)) return
     setBusy(true)
     try {
-      await deleteRecord('posts', form.id)
+      await deleteRecord('articles', form.id)
       await reload()
-      navigate('/mdadmin/blog', { replace: true })
+      navigate('/mdadmin/articles', { replace: true })
     } catch (deleteError) {
       setError(deleteError.message || 'The article could not be deleted.')
     } finally {
@@ -387,7 +387,7 @@ export default function BlogEditorPage({ mode, recordId }) {
       <AdminLayout title="Article not found" eyebrow="ARTICLES">
         <div className="admin-error">
           <h2>That article no longer exists</h2>
-          <Link className="button button-secondary" to="/mdadmin/blog">
+          <Link className="button button-secondary" to="/mdadmin/articles">
             Back to articles
           </Link>
         </div>
@@ -400,9 +400,9 @@ export default function BlogEditorPage({ mode, recordId }) {
       <AdminLayout
         title="Articles"
         eyebrow="BLOG"
-        counts={{ posts: posts.length }}
+        counts={{ articles: articles.length }}
         actions={
-          <Link className="button button-primary button-sm" to="/mdadmin/blog/new">
+          <Link className="button button-primary button-sm" to="/mdadmin/articles/new">
             <FileText size={15} aria-hidden="true" /> New article
           </Link>
         }
@@ -412,7 +412,7 @@ export default function BlogEditorPage({ mode, recordId }) {
             <div>
               <p className="eyebrow">CONTENT LIBRARY</p>
               <h2>
-                All articles <span className="record-count">{posts.length}</span>
+                All articles <span className="record-count">{articles.length}</span>
               </h2>
             </div>
             <SearchField value={query} onChange={setQuery} placeholder="Search articles…" />
@@ -420,27 +420,27 @@ export default function BlogEditorPage({ mode, recordId }) {
 
           {filtered.length ? (
             <ul className="record-list">
-              {filtered.map((post) => {
-                const scheduled = post.status === 'published' && post.published_at && new Date(post.published_at) > new Date()
+              {filtered.map((article) => {
+                const scheduled = article.status === 'published' && article.published_at && new Date(article.published_at) > new Date()
                 return (
-                  <li key={post.id}>
-                    <span className={`record-status ${post.status}`}>{post.status === 'published' ? (scheduled ? 'scheduled' : 'live') : 'draft'}</span>
+                  <li key={article.id}>
+                    <span className={`record-status ${article.status}`}>{article.status === 'published' ? (scheduled ? 'scheduled' : 'live') : 'draft'}</span>
                     <div className="record-info">
                       <strong>
-                        <Link to={`/mdadmin/blog/${post.id}`}>{post.title}</Link>
+                        <Link to={`/mdadmin/articles/${article.id}`}>{article.title}</Link>
                       </strong>
                       <small>
-                        /articles/{post.slug} · {readingTime(post.content)} min read
-                        {post.published_at ? ` · ${formatDate(post.published_at)}` : ''}
+                        /articles/{article.slug} · {readingTime(article.content)} min read
+                        {article.published_at ? ` · ${formatDate(article.published_at)}` : ''}
                       </small>
                     </div>
                     <div className="record-actions">
-                      {post.slug ? (
-                        <Link className="record-action" to={`/articles/${encodeURIComponent(post.slug)}?preview=local`} aria-label="Preview article" target="_blank" rel="noreferrer">
+                      {article.slug ? (
+                        <Link className="record-action" to={`/articles/${encodeURIComponent(article.slug)}?preview=local`} aria-label="Preview article" target="_blank" rel="noreferrer">
                           <Eye size={14} />
                         </Link>
                       ) : null}
-                      <Link className="record-action" to={`/mdadmin/blog/${post.id}`} aria-label="Edit article">
+                      <Link className="record-action" to={`/mdadmin/articles/${article.id}`} aria-label="Edit article">
                         <FileText size={14} />
                       </Link>
                     </div>
@@ -453,7 +453,7 @@ export default function BlogEditorPage({ mode, recordId }) {
               <FileText size={22} aria-hidden="true" />
               <p>{query ? 'No articles match that search.' : 'No articles yet. The first one starts with a title.'}</p>
               {!query ? (
-                <Link className="button button-secondary button-sm" to="/mdadmin/blog/new">
+                <Link className="button button-secondary button-sm" to="/mdadmin/articles/new">
                   Write the first article
                 </Link>
               ) : null}
@@ -468,13 +468,13 @@ export default function BlogEditorPage({ mode, recordId }) {
     <AdminLayout
       title={editing ? 'Edit article' : 'New article'}
       eyebrow="BLOG"
-      counts={{ posts: posts.length }}
+      counts={{ articles: articles.length }}
       actions={
         <>
           <button type="button" className="button button-secondary button-sm" onClick={() => setPreviewOpen(true)}>
             <Eye size={15} aria-hidden="true" /> Preview
           </button>
-          <Link className="button button-secondary button-sm" to="/mdadmin/blog">
+          <Link className="button button-secondary button-sm" to="/mdadmin/articles">
             <ArrowLeft size={15} aria-hidden="true" /> Back
           </Link>
         </>
@@ -491,8 +491,8 @@ export default function BlogEditorPage({ mode, recordId }) {
         </p>
       ) : null}
 
-      <div className="blog-editor">
-        <div className="blog-editor-main">
+      <div className="articles-editor">
+        <div className="articles-editor-main">
           <section className="admin-panel">
             <div className="editor-heading">
               <div>
@@ -584,7 +584,7 @@ export default function BlogEditorPage({ mode, recordId }) {
           </section>
         </div>
 
-        <aside className="blog-editor-side">
+        <aside className="articles-editor-side">
           <section className="admin-panel">
             <div className="editor-heading">
               <div>
@@ -688,13 +688,13 @@ export default function BlogEditorPage({ mode, recordId }) {
               rows={4}
               value={form.excerpt}
               onChange={(event) => change('excerpt', event.target.value)}
-              placeholder="One or two sentences shown on the blog index."
+              placeholder="One or two sentences shown on the articles listing."
             />
           </section>
         </aside>
       </div>
 
-      {previewOpen ? <PreviewDialog post={form} onClose={() => setPreviewOpen(false)} /> : null}
+      {previewOpen ? <PreviewDialog article={form} onClose={() => setPreviewOpen(false)} /> : null}
       <ImageCropDialog file={coverCropFile} aspectRatio="16 / 9" title="Crop article cover" onCancel={() => setCoverCropFile(null)} onApply={async (croppedFile) => { try { const url = await uploadImage(croppedFile, 'articles'); change('cover_image_url', url); setCoverCropFile(null) } catch (uploadError) { setError(uploadError.message || 'Could not upload cropped cover.') } }} />
     </AdminLayout>
   )

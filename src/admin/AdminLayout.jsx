@@ -39,7 +39,7 @@ const NAV_ICONS = {
   experience: BriefcaseBusiness,
   certifications: ShieldCheck,
   education: GraduationCap,
-  blog: BookOpen,
+  articles: BookOpen,
   messages: Inbox,
   theme: Palette,
   settings: Settings2,
