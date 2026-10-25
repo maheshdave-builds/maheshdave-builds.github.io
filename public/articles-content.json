@@ -10,14 +10,15 @@
       "cover_image_url": "/uploads/articles/1792929004320-xnvm0p.jpg",
       "status": "published",
       "published_at": "2026-10-25T11:50:11.109Z",
+      "created_at": null,
+      "updated_at": "2026-10-25T11:50:11.110Z",
       "author": "Mahesh Dave",
       "tags": [
         "Fastly"
       ],
       "seo_title": "",
       "seo_description": "",
-      "canonical_url": "",
-      "updated_at": "2026-10-25T11:50:11.110Z"
+      "canonical_url": ""
     }
   ]
 }
