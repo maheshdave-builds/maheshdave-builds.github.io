@@ -102,7 +102,7 @@ function readLocalContent() {
     const raw = localStorage.getItem(LOCAL_CONTENT_KEY)
     const saved = JSON.parse(raw || 'null')
     if (saved && typeof saved === 'object') {
-      let projects = migrateLegacyProjectCategories(saved.projects || fallbackContent.projects)
+      let projects = dedupeCollectionRows(migrateLegacyProjectCategories(saved.projects || fallbackContent.projects), 'projects')
       // One-time additive migration: preserve admin-created content and edits,
       // while restoring every missing resume-derived project from the new catalog.
       if (localStorage.getItem(PROJECT_CATALOG_MIGRATION_KEY) !== 'done') {
@@ -147,7 +147,15 @@ export async function publishStagedContent() {
   if (!useGithubGateway) {
     throw new Error('These changes are saved in this browser and available in local preview, but live publishing is not configured. Configure the GitHub content publisher before publishing; your staged changes have been kept.')
   }
-  await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staged) })
+  const payload = {
+    ...staged,
+    projects: dedupeCollectionRows(staged.projects, 'projects'),
+    certifications: dedupeCollectionRows(staged.certifications, 'certifications'),
+    experience: dedupeCollectionRows(staged.experience, 'experience'),
+    education: dedupeCollectionRows(staged.education, 'education'),
+    articles: dedupeCollectionRows(staged.articles, 'articles'),
+  }
+  await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
   try { localStorage.removeItem(STAGED_CONTENT_KEY) } catch {}
   window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
   return true
@@ -179,6 +187,58 @@ export function sortCollectionRows(rows = []) {
     const diff = (a.sort_order ?? 0) - (b.sort_order ?? 0)
     return diff !== 0 ? diff : String(a.id ?? '').localeCompare(String(b.id ?? ''))
   })
+}
+
+function collectionDedupeKey(row, collection) {
+  if (collection === 'articles') return String(row.slug || row.id || '').trim().toLowerCase()
+  if (collection === 'projects') return String(row.title || '').trim().toLowerCase().replace(/\s+/g, ' ')
+  if (collection === 'certifications') return String(row.name || '').trim().toLowerCase()
+  if (collection === 'experience') {
+    return `${String(row.role || '').trim().toLowerCase()}|${String(row.company || '').trim().toLowerCase()}`
+  }
+  if (collection === 'education') {
+    return `${String(row.degree || '').trim().toLowerCase()}|${String(row.school || row.institution || '').trim().toLowerCase()}`
+  }
+  return String(row.id || '')
+}
+
+function collectionRowScore(row) {
+  let score = 0
+  if (String(row.id || '').startsWith('seed-')) score += 100
+  if (row.image || row.image_url || row.cover_image_url) score += 50
+  if (row.url || row.demo_url) score += 5
+  if (row.description) score += 3
+  const updated = Date.parse(row.updated_at || '')
+  if (Number.isFinite(updated)) score += updated / 1e15
+  return score
+}
+
+function mergeCollectionRow(existing, incoming) {
+  const keepIncoming = collectionRowScore(incoming) >= collectionRowScore(existing)
+  const merged = keepIncoming ? { ...existing, ...incoming } : { ...incoming, ...existing }
+  const image = incoming.image || incoming.image_url || existing.image || existing.image_url
+  if (image) merged.image = image
+  if (String(incoming.id || '').startsWith('seed-')) merged.id = incoming.id
+  else if (String(existing.id || '').startsWith('seed-')) merged.id = existing.id
+  else merged.id = keepIncoming ? incoming.id : existing.id
+  return merged
+}
+
+/** Collapse accidental duplicate rows created by repeated saves with new IDs. */
+export function dedupeCollectionRows(rows = [], collection = 'projects') {
+  const byKey = new Map()
+  const order = []
+  for (const row of asArray(rows)) {
+    const key = collectionDedupeKey(row, collection)
+    if (!key) continue
+    if (!byKey.has(key)) {
+      byKey.set(key, row)
+      order.push(key)
+      continue
+    }
+    byKey.set(key, mergeCollectionRow(byKey.get(key), row))
+  }
+  return sortCollectionRows(order.map((key) => byKey.get(key)))
 }
 
 function migrateCopy(copy = {}) {
@@ -405,7 +465,7 @@ export async function fetchPublicContent() {
       ...fallbackContent,
       ...shared,
       site: normalizeSite(shared.site),
-      projects: sortCollectionRows(asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false).map(normalizeProject)),
+      projects: dedupeCollectionRows(asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), 'projects').map(normalizeProject),
       certifications: sortCollectionRows(asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false).map(normalizeCertification)),
       experience: sortCollectionRows(asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false)),
       education: sortCollectionRows(asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false)),
@@ -515,7 +575,7 @@ export async function fetchAdminContent() {
         const id = String(row.id ?? `${key}-local-${index}`)
         byId.set(id, { ...(byId.get(id) || {}), ...row })
       })
-      return sortCollectionRows([...byId.values()])
+      return dedupeCollectionRows(sortCollectionRows([...byId.values()]), key)
     }
     const merged = {
       ...local,
@@ -667,7 +727,10 @@ export async function saveRecord(collection, record) {
       const nextRows = [...rows]
       if (index >= 0) nextRows[index] = { ...rows[index], ...saved }
       else nextRows.push(saved)
-      return { ...state, [collection]: nextRows }
+      const deduped = ['projects', 'certifications', 'experience', 'education', 'articles'].includes(collection)
+        ? dedupeCollectionRows(nextRows, collection)
+        : nextRows
+      return { ...state, [collection]: deduped }
     })
     await flushSharedContent()
     return saved

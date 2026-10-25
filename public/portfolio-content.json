@@ -3,7 +3,7 @@
     "name": "Mahesh Dave",
     "shortName": "Mahesh Dave",
     "title": "Adobe Commerce Team Lead",
-    "intro": "I architect and scale Adobe Commerce experiences across B2B and B2C—bringing together composable commerce, thoughtful integrations, performance engineering, and AI-assisted delivery.",
+    "intro": "I architect and scale Adobe Commerce experiences across B2B and B2C\u2014bringing together composable commerce, thoughtful integrations, performance engineering, and AI-assisted delivery.",
     "location": "Ahmedabad, Gujarat, India",
     "profileImage": "/uploads/profile/1792874208078-inepq0.jpg",
     "resumeUrl": "/Mahesh_Dave_Resume_2026.pdf",
@@ -13,11 +13,11 @@
       "description": "Commerce engineering shaped by technical depth, team leadership, and a focus on reliable delivery."
     },
     "contactSection": {
-      "title": "Let’s connect",
+      "title": "Let\u2019s connect",
       "description": "For conversations about Adobe Commerce, architecture, integrations, or engineering leadership, reach out by email."
     },
     "about": {
-      "bio": "I’m an Adobe Commerce engineering lead with 9 years of hands-on experience building and scaling commerce platforms.",
+      "bio": "I\u2019m an Adobe Commerce engineering lead with 9 years of hands-on experience building and scaling commerce platforms.",
       "focus": "My work spans Adobe Commerce Cloud and Enterprise, Magento 2, headless and composable storefronts, GraphQL, ERP/CRM integrations, cloud delivery, and performance optimization.",
       "summary": "At Brainvire, I lead cross-functional teams across enterprise implementations, support solution architecture and pre-sales, and introduce practical AI-assisted workflows into the software delivery lifecycle."
     },
@@ -79,7 +79,7 @@
   "projects": [
     {
       "id": "seed-project-0",
-      "title": "ACE Configurator — American Lighting",
+      "title": "ACE Configurator \u2014 American Lighting",
       "category": "Headless & Storefronts",
       "description": "Headless commerce experience on Adobe Commerce Cloud using React and GraphQL for dynamic product configuration, pricing, and product data. Optimized API interactions and rendering to reduce network requests.",
       "techStack": [
@@ -91,7 +91,8 @@
       "url": "https://ace.americanlighting.com/",
       "linkLabel": "Visit live project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 10
     },
     {
       "id": "seed-project-1",
@@ -106,15 +107,16 @@
       "url": "",
       "linkLabel": "View project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 20
     },
     {
       "id": "seed-project-2",
-      "title": "Hyvä Storefront Implementations",
+      "title": "Hyv\u00e4 Storefront Implementations",
       "category": "Headless & Storefronts",
-      "description": "Delivered lightweight storefronts using Hyvä, Tailwind CSS, and Alpine.js, including a Store Locator module refactor for Hyvä compatibility.",
+      "description": "Delivered lightweight storefronts using Hyv\u00e4, Tailwind CSS, and Alpine.js, including a Store Locator module refactor for Hyv\u00e4 compatibility.",
       "techStack": [
-        "Hyvä",
+        "Hyv\u00e4",
         "Tailwind CSS",
         "Alpine.js",
         "Magento 2"
@@ -122,11 +124,12 @@
       "url": "",
       "linkLabel": "View project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 30
     },
     {
       "id": "seed-integration-0",
-      "title": "Adobe App Builder — Odoo Connector",
+      "title": "Adobe App Builder \u2014 Odoo Connector",
       "category": "Integrations & APIs",
       "description": "Real-time Adobe Commerce and Odoo ERP integration using event-driven flows with Adobe I/O Events. Published on Adobe Exchange with monitoring and logging.",
       "techStack": [
@@ -137,11 +140,12 @@
       "url": "https://exchange.adobe.com/apps/ec/abt7pvp37o/odoo-connector-for-adobe-commerce",
       "linkLabel": "View on Adobe Exchange",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 40
     },
     {
       "id": "seed-integration-1",
-      "title": "Adobe Commerce — Salesforce Integration",
+      "title": "Adobe Commerce \u2014 Salesforce Integration",
       "category": "Integrations & APIs",
       "description": "Bi-directional synchronization of customer, order, and product data using Jitterbit; the resume reports a 99% improvement in data accuracy and elimination of manual entry.",
       "techStack": [
@@ -150,13 +154,14 @@
         "Jitterbit"
       ],
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 50
     },
     {
       "id": "seed-integration-2",
-      "title": "Magento–Odoo Connector",
+      "title": "Magento\u2013Odoo Connector",
       "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
+      "description": "Implemented Magento\u2013Odoo connector functionality for product, inventory, and order synchronization.",
       "techStack": [
         "Magento",
         "Odoo ERP",
@@ -164,7 +169,8 @@
         "Inventory sync"
       ],
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 60
     },
     {
       "id": "seed-client-0",
@@ -178,7 +184,9 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "image": "/uploads/projects/1792938644883-tz38bk.webp",
+      "sort_order": 70
     },
     {
       "id": "seed-client-1",
@@ -192,7 +200,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 80
     },
     {
       "id": "seed-client-2",
@@ -206,7 +215,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 90
     },
     {
       "id": "seed-client-3",
@@ -220,7 +230,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 100
     },
     {
       "id": "seed-client-4",
@@ -234,7 +245,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 110
     },
     {
       "id": "seed-client-5",
@@ -248,11 +260,12 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 120
     },
     {
       "id": "seed-client-6",
-      "title": "Okapius — Hyvä Storefront",
+      "title": "Okapius \u2014 Hyv\u00e4 Storefront",
       "category": "Headless & Storefronts",
       "url": "",
       "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
@@ -262,7 +275,8 @@
       ],
       "linkLabel": "Project reference",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 130
     },
     {
       "id": "seed-client-7",
@@ -276,7 +290,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 140
     },
     {
       "id": "seed-client-8",
@@ -290,7 +305,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 150
     },
     {
       "id": "seed-client-9",
@@ -304,7 +320,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 160
     },
     {
       "id": "seed-client-10",
@@ -318,7 +335,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 170
     },
     {
       "id": "seed-client-11",
@@ -332,7 +350,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 180
     },
     {
       "id": "seed-client-12",
@@ -346,7 +365,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 190
     },
     {
       "id": "seed-client-13",
@@ -360,7 +380,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 200
     },
     {
       "id": "seed-client-14",
@@ -374,7 +395,8 @@
       ],
       "linkLabel": "Visit project",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 210
     },
     {
       "id": "seed-innovation-0",
@@ -389,7 +411,8 @@
       "url": "",
       "linkLabel": "Project details",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 220
     },
     {
       "id": "seed-innovation-1",
@@ -404,7 +427,8 @@
       "url": "",
       "linkLabel": "Project details",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 230
     },
     {
       "id": "seed-innovation-2",
@@ -419,7 +443,8 @@
       "url": "",
       "linkLabel": "Project details",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 240
     },
     {
       "id": "seed-innovation-3",
@@ -434,7 +459,8 @@
       "url": "",
       "linkLabel": "Project details",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 250
     },
     {
       "id": "seed-innovation-4",
@@ -449,7 +475,8 @@
       "url": "",
       "linkLabel": "Project details",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 260
     },
     {
       "id": "seed-community",
@@ -464,11 +491,12 @@
       "url": "https://magento.stackexchange.com/users/70881/mahesh-dave",
       "linkLabel": "View community profile",
       "clientLinks": [],
-      "is_published": true
+      "is_published": true,
+      "sort_order": 270
     },
     {
       "id": "seed-resume-2026",
-      "title": "Mahesh Dave — Resume 2026",
+      "title": "Mahesh Dave \u2014 Resume 2026",
       "category": "Professional Resources",
       "description": "Download the 2026 resume covering Adobe Commerce experience, integrations, AI initiatives, certifications, and education.",
       "techStack": [
@@ -479,446 +507,14 @@
       "url": "/Mahesh_Dave_Resume_2026.pdf",
       "linkLabel": "View resume PDF",
       "clientLinks": [],
-      "is_published": true
-    },
-    {
-      "id": "local-1792938344593-ez8ngk",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
       "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:25:44.593Z"
-    },
-    {
-      "id": "local-1792938344603-53v187",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:25:44.603Z"
-    },
-    {
-      "id": "local-1792938347429-qjqu89",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:25:47.429Z"
-    },
-    {
-      "id": "local-1792938347441-vqkbev",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:25:47.441Z"
-    },
-    {
-      "id": "local-1792938431835-uvriz3",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:11.835Z"
-    },
-    {
-      "id": "local-1792938431852-u1xyyh",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:11.852Z"
-    },
-    {
-      "id": "local-1792938433446-f0oles",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:13.446Z"
-    },
-    {
-      "id": "local-1792938433463-b2dewg",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:13.463Z"
-    },
-    {
-      "id": "local-1792938434383-a9j68o",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:14.383Z"
-    },
-    {
-      "id": "local-1792938434394-uodk2j",
-      "title": "Who Has It?",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://whohasit.co/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:14.394Z"
-    },
-    {
-      "id": "local-1792938435507-s8u60e",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:15.507Z"
-    },
-    {
-      "id": "local-1792938435521-fam3qv",
-      "title": "Who Has It?",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://whohasit.co/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:15.521Z"
-    },
-    {
-      "id": "local-1792938436828-724nl2",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:16.828Z"
-    },
-    {
-      "id": "local-1792938436842-ygn9me",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:16.842Z"
-    },
-    {
-      "id": "local-1792938440660-j0918l",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:20.660Z"
-    },
-    {
-      "id": "local-1792938440667-4nd8ie",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:20.668Z"
-    },
-    {
-      "id": "local-1792938440856-z3mydb",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:20.856Z"
-    },
-    {
-      "id": "local-1792938440862-n5gs74",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:20.862Z"
-    },
-    {
-      "id": "local-1792938441031-uaax8h",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:21.031Z"
-    },
-    {
-      "id": "local-1792938441038-jeofh1",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:21.038Z"
-    },
-    {
-      "id": "local-1792938441211-bwdysl",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:21.211Z"
-    },
-    {
-      "id": "local-1792938441220-ui9mkn",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:21.220Z"
-    },
-    {
-      "id": "local-1792938441392-gtbr7w",
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://rev-a-shelf.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:21.392Z"
-    },
-    {
-      "id": "local-1792938441405-q1imev",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:21.405Z"
-    },
-    {
-      "id": "local-1792938443765-c65h6f",
-      "title": "Midas Furniture",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://midasfurniture.com/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:23.765Z"
-    },
-    {
-      "id": "local-1792938443779-flnpaj",
-      "title": "Who Has It?",
-      "category": "Adobe Commerce Cloud",
-      "url": "https://whohasit.co/",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "linkLabel": "Visit project",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 0,
-      "updated_at": "2026-10-25T14:27:23.779Z"
-    },
-    {
-      "id": "local-1792938684789-60ua9y",
-      "is_published": true,
-      "sort_order": 0,
-      "title": "Rev-A-Shelf",
-      "category": "Adobe Commerce Cloud",
-      "linkLabel": "Visit project",
-      "url": "https://rev-a-shelf.com/",
-      "description": "",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "image": "/uploads/projects/1792938644883-tz38bk.webp",
-      "clientLinks": [],
-      "updated_at": "2026-10-25T14:31:24.789Z"
+      "sort_order": 280
     }
   ],
   "certifications": [
     {
       "id": "seed-cert-0",
-      "name": "Adobe Certified Expert – Adobe Commerce Business Practitioner",
+      "name": "Adobe Certified Expert \u2013 Adobe Commerce Business Practitioner",
       "issuer": "Adobe",
       "year": "",
       "verificationUrl": "https://certification.adobe.com/credential/verify/92b40b16-0f0d-45c5-aa0c-a68d58e19555",
@@ -927,7 +523,7 @@
     },
     {
       "id": "seed-cert-1",
-      "name": "Adobe Certified Professional – Adobe Commerce Business Practitioner",
+      "name": "Adobe Certified Professional \u2013 Adobe Commerce Business Practitioner",
       "issuer": "Adobe",
       "year": "",
       "verificationUrl": "https://certification.adobe.com/completion/verify/3311dc33-d610-4589-87b0-b41b29f40273",
@@ -936,7 +532,7 @@
     },
     {
       "id": "seed-cert-2",
-      "name": "Adobe Certified Professional – Adobe Commerce Developer",
+      "name": "Adobe Certified Professional \u2013 Adobe Commerce Developer",
       "issuer": "Adobe",
       "year": "",
       "verificationUrl": "https://certification.adobe.com/credential/verify/03ca53f9-db0a-4f90-9c10-7d17dd1c21f7",
@@ -984,8 +580,8 @@
     {
       "id": "seed-exp-0",
       "company": "Brainvire Infotech Inc.",
-      "role": "Team Lead – Adobe Commerce",
-      "duration": "Oct 2024 – Present",
+      "role": "Team Lead \u2013 Adobe Commerce",
+      "duration": "Oct 2024 \u2013 Present",
       "description": "Lead a cross-functional team of 8+ across Adobe Commerce Cloud and Enterprise implementations. Introduced AI-assisted development and code-review workflows, architect headless commerce solutions, own technical estimation, and establish code-quality governance.",
       "is_published": true
     },
@@ -993,15 +589,15 @@
       "id": "seed-exp-1",
       "company": "Brainvire Infotech Inc.",
       "role": "Senior Software Engineer",
-      "duration": "Apr 2022 – Sep 2024",
-      "description": "Built custom enterprise Adobe Commerce modules, engineered bi-directional Jitterbit and Salesforce integration, developed an Adobe App Builder Odoo connector published on Adobe Exchange, delivered Hyvä storefronts, and optimized production performance and delivery pipelines.",
+      "duration": "Apr 2022 \u2013 Sep 2024",
+      "description": "Built custom enterprise Adobe Commerce modules, engineered bi-directional Jitterbit and Salesforce integration, developed an Adobe App Builder Odoo connector published on Adobe Exchange, delivered Hyv\u00e4 storefronts, and optimized production performance and delivery pipelines.",
       "is_published": true
     },
     {
       "id": "seed-exp-2",
       "company": "Brainvire Infotech Inc.",
       "role": "Software Engineer",
-      "duration": "Mar 2020 – Mar 2022",
+      "duration": "Mar 2020 \u2013 Mar 2022",
       "description": "Developed Magento 2 modules, themes and extensions; integrated payment, shipping and tax services; diagnosed production performance issues; supported Magento 1-to-2 migrations and release validation.",
       "is_published": true
     },
@@ -1009,8 +605,8 @@
       "id": "seed-exp-3",
       "company": "Emipro Technologies Pvt. Ltd.",
       "role": "Magento Developer",
-      "duration": "Mar 2018 – Feb 2020",
-      "description": "Built custom Magento modules and storefront features, contributed Magento–Odoo synchronization, resolved production issues, and collaborated on responsive storefront themes.",
+      "duration": "Mar 2018 \u2013 Feb 2020",
+      "description": "Built custom Magento modules and storefront features, contributed Magento\u2013Odoo synchronization, resolved production issues, and collaborated on responsive storefront themes.",
       "is_published": true
     }
   ],
@@ -1020,7 +616,7 @@
       "degree": "Master of Computer Applications (MCA)",
       "school": "Saurashtra University, Rajkot, India",
       "year": "2018",
-      "detail": "First Class with Distinction · 75.66% · Second Rank in University",
+      "detail": "First Class with Distinction \u00b7 75.66% \u00b7 Second Rank in University",
       "is_published": true
     },
     {
@@ -1028,24 +624,24 @@
       "degree": "Bachelor of Computer Applications (BCA)",
       "school": "Shree Swaminarayan College of Computer Science, Bhavnagar",
       "year": "2015",
-      "detail": "First Class · 64.49%",
+      "detail": "First Class \u00b7 64.49%",
       "is_published": true
     },
     {
       "id": "seed-edu-2",
-      "degree": "H.S.C. — Commerce",
+      "degree": "H.S.C. \u2014 Commerce",
       "school": "Dakshinamurti Vinaymandir, Bhavnagar",
       "year": "2012",
-      "detail": "First Class · 67.57%",
+      "detail": "First Class \u00b7 67.57%",
       "is_published": true
     }
   ],
   "site": {
-    "siteTitle": "Mahesh Dave · Adobe Commerce Team Lead",
-    "siteDescription": "Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
+    "siteTitle": "Mahesh Dave \u00b7 Adobe Commerce Team Lead",
+    "siteDescription": "Mahesh Dave \u2014 Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
     "siteLogo": "/uploads/branding/1792874849922-xysv0s.jpg",
     "copy": {
-      "heroEyebrow": "ADOBE COMMERCE ENGINEERING · TECHNICAL LEADERSHIP",
+      "heroEyebrow": "ADOBE COMMERCE ENGINEERING \u00b7 TECHNICAL LEADERSHIP",
       "heroHeadline": "Leading engineering. Enabling business growth.",
       "aboutTitle": "Technical excellence. Strategic leadership.",
       "aboutDescription": "Bridging solution architecture, engineering execution, and team leadership to deliver scalable, resilient commerce platforms that create lasting business value.",
@@ -1066,7 +662,7 @@
       "articlesPageBannerImage": "/uploads/article-banner/1792938088084-2yfq5f.jpg",
       "articleListenEnabled": true,
       "contactTitle": "Good work starts with a conversation.",
-      "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
+      "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I\u2019d be glad to connect."
     },
     "stats": [
       {
@@ -1094,7 +690,7 @@
           "Adobe Commerce Enterprise",
           "Magento 2",
           "Magento 1",
-          "Hyvä",
+          "Hyv\u00e4",
           "Adobe Commerce Optimizer",
           "Adobe App Builder"
         ]
@@ -1233,7 +829,7 @@
       "slug": "how-to-remove-a-fastly-vcl-snippet-using-cli",
       "category": "Engineering notes",
       "excerpt": "",
-      "content": "<h1><span>When a custom Fastly VCL snippet blocks Magento admin access (for example</span><span>&nbsp;</span><code>RAS_Maintenance_Trigger</code><span>), you can remove it safely using the</span><span>&nbsp;</span><strong>Fastly API</strong><span>&nbsp;</span><span>and</span><span>&nbsp;</span><code>curl</code><span>&nbsp;</span><span>— without Magento admin or the Fastly web UI.</span></h1><p>This guide covers:</p><ol><li>Backing up existing VCL snippets</li><li>Removing a specific snippet</li><li>Activating the new VCL version</li><li>Purging Fastly cache</li></ol><hr><h2>Prerequisites</h2><table><thead><tr><th>Item</th><th>Description</th></tr></thead><tbody><tr><td><strong>Fastly Service ID</strong></td><td>Fastly dashboard → Service configuration, or Magento Cloud&nbsp;<code>FASTLY_SERVICE_ID</code></td></tr><tr><td><strong>Fastly API Token</strong></td><td>Fastly dashboard → Account → API tokens (snippet edit + purge permissions)</td></tr><tr><td><strong>Snippet name</strong></td><td>Exact name, e.g.&nbsp;<code>RAS_Maintenance_Trigger</code></td></tr><tr><td><strong>Tools</strong></td><td><code>curl</code>,&nbsp;<code>bash</code>, optionally&nbsp;<code>python3</code>&nbsp;or&nbsp;<code>jq</code></td></tr></tbody></table><hr><h2>Important: Fastly version rules</h2><p>You&nbsp;<strong>cannot</strong>&nbsp;edit an active (locked) version directly.</p><p>Workflow:</p><ol><li>Clone the active version</li><li>Delete the snippet on the cloned draft</li><li>Validate the new version</li><li>Activate the new version</li><li>Purge cache</li></ol><hr><h2>Step 1 — Set environment variables</h2><pre><code class=\"lang-bash\">export FASTLY_SERVICE_ID=<span class=\"hljs-string\">\"YOUR_SERVICE_ID_HERE\"</span>\nexport FASTLY_API_TOKEN=<span class=\"hljs-string\">\"YOUR_API_TOKEN_HERE\"</span>\nexport SNIPPET_NAME=<span class=\"hljs-string\">\"RAS_Maintenance_Trigger\"</span>\nexport BACKUP_DIR=<span class=\"hljs-string\">\"./fastly-vcl-backup-$(date +%Y%m%d-%H%M%S)\"</span>\n\n<span class=\"hljs-keyword\">mkdir</span> -p <span class=\"hljs-string\">\"$BACKUP_DIR\"</span>\necho <span class=\"hljs-string\">\"Backup directory: $BACKUP_DIR\"</span>\n</code></pre><hr><h2>Step 2 — Get the active VCL version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/active\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n</code></pre><p>Extract the active version number:</p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n</code></pre><p><strong>Alternative (Python):</strong></p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(python3 -c <span class=\"hljs-string\">\"import json; print(json.load(open('<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json'))['number'])\"</span>)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n</code></pre><p><strong>Alternative (jq):</strong></p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(jq -r <span class=\"hljs-string\">'.number'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n</code></pre><blockquote><p><strong>Note:</strong>&nbsp;Use&nbsp;<code>-o</code>&nbsp;to save JSON. Do&nbsp;<strong>not</strong>&nbsp;use&nbsp;<code>curl -w</code>&nbsp;with JSON files — it appends&nbsp;<code>HTTP_STATUS:200</code>&nbsp;and breaks JSON parsing.</p></blockquote><hr><h2>Step 3 — Backup all VCL snippets</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n</code></pre><p>List all snippet names:</p><pre><code class=\"lang-bash\"><span class=\"hljs-attribute\">grep</span> -o '<span class=\"hljs-string\">\"name\"</span>:<span class=\"hljs-string\">\"[^\"</span>]*<span class=\"hljs-string\">\"' \"</span>$BACKUP_DIR/<span class=\"hljs-literal\">all</span>-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json<span class=\"hljs-string\">\"</span>\n</code></pre><p>Confirm target snippet exists:</p><pre><code class=\"lang-bash\"><span class=\"hljs-keyword\">grep</span> -i <span class=\"hljs-string\">\"$SNIPPET_NAME\"</span> <span class=\"hljs-string\">\"$BACKUP_DIR/all-snippets-active-v<span class=\"hljs-subst\">${ACTIVE_VERSION}</span>.json\"</span>\n</code></pre><hr><h2>Step 4 — Backup the specific snippet</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/<span class=\"hljs-variable\">${SNIPPET_NAME}</span>-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/<span class=\"hljs-variable\">${SNIPPET_NAME}</span>-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n</code></pre><p>Save VCL content to a&nbsp;<code>.vcl</code>&nbsp;file (optional):</p><pre><code class=\"lang-bash\">python3 - &lt;&lt;<span class=\"hljs-string\">'PY'</span>\n<span class=\"hljs-keyword\">import</span> json, os\n\nbackup_dir = os.environ[<span class=\"hljs-string\">\"BACKUP_DIR\"</span>]\nsnippet = os.environ[<span class=\"hljs-string\">\"SNIPPET_NAME\"</span>]\nversion = os.environ[<span class=\"hljs-string\">\"ACTIVE_VERSION\"</span>]\npath = f<span class=\"hljs-string\">\"{backup_dir}/{snippet}-active-v{version}.json\"</span>\n\n<span class=\"hljs-keyword\">data</span> = json.load(<span class=\"hljs-keyword\">open</span>(path))\n<span class=\"hljs-keyword\">out</span> = f<span class=\"hljs-string\">\"{backup_dir}/{snippet}.vcl\"</span>\n\nwith <span class=\"hljs-keyword\">open</span>(<span class=\"hljs-keyword\">out</span>, <span class=\"hljs-string\">\"w\"</span>) <span class=\"hljs-keyword\">as</span> f:\n    f.write(<span class=\"hljs-keyword\">data</span>.<span class=\"hljs-keyword\">get</span>(<span class=\"hljs-string\">\"content\"</span>, <span class=\"hljs-string\">\"\"</span>))\n\nprint(f<span class=\"hljs-string\">\"Saved: {out}\"</span>)\nPY\n</code></pre><hr><h2>Step 5 — Clone the active version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/clone\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span>\n</code></pre><p>Set the new draft version:</p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> NEW_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"New draft version: <span class=\"hljs-variable\">$NEW_VERSION</span>\"</span>\n</code></pre><hr><h2>Step 6 — Delete the snippet from cloned version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X DELETE -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/delete-snippet-response.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/delete-snippet-response.json\"</span>\n</code></pre><p>Verify snippet is removed:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/snippet\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-new-v<span class=\"hljs-variable\">${NEW_VERSION}</span>.json\"</span>\n\ngrep -i <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-new-v<span class=\"hljs-variable\">${NEW_VERSION}</span>.json\"</span> \\\n  || <span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Snippet removed successfully\"</span>\n</code></pre><hr><h2>Step 7 — Validate VCL before activation</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/validate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\n</code></pre><p>Confirm&nbsp;<code>status</code>&nbsp;is&nbsp;<code>ok</code>&nbsp;before activating.&nbsp;<strong>Do not activate if validation fails.</strong></p><hr><h2>Step 8 — Activate the new VCL version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/activate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/activate.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/activate.json\"</span>\n</code></pre><hr><h2>Step 9 — Purge Fastly cache</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/purge.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/purge.json\"</span>\n</code></pre><hr><h2>Step 10 — Verify admin access</h2><p>Open Magento admin in a private/incognito window:</p><pre><code class=\"lang-text\"><span class=\"hljs-symbol\">https:</span><span class=\"hljs-comment\">//your-domain.com/admin</span>\n</code></pre><hr><h2>Complete one-shot script</h2><p>Save as&nbsp;<code>remove-fastly-snippet.sh</code>:</p><pre><code class=\"lang-bash\"><span class=\"hljs-meta\">#!/usr/bin/env bash</span>\n<span class=\"hljs-built_in\">set</span> -euo pipefail\n\n<span class=\"hljs-built_in\">export</span> FASTLY_SERVICE_ID=<span class=\"hljs-string\">\"YOUR_SERVICE_ID_HERE\"</span>\n<span class=\"hljs-built_in\">export</span> FASTLY_API_TOKEN=<span class=\"hljs-string\">\"YOUR_API_TOKEN_HERE\"</span>\n<span class=\"hljs-built_in\">export</span> SNIPPET_NAME=<span class=\"hljs-string\">\"RAS_Maintenance_Trigger\"</span>\n<span class=\"hljs-built_in\">export</span> BACKUP_DIR=<span class=\"hljs-string\">\"./fastly-vcl-backup-<span class=\"hljs-variable\">$(date +%Y%m%d-%H%M%S)</span>\"</span>\n\nmkdir -p <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 1) Get active version\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/active\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n\n<span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"    Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 2) Backup all snippets\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 3) Backup target snippet\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/<span class=\"hljs-variable\">${SNIPPET_NAME}</span>-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 4) Clone version\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/clone\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span>\n\n<span class=\"hljs-built_in\">export</span> NEW_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"    New version: <span class=\"hljs-variable\">$NEW_VERSION</span>\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 5) Delete snippet\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X DELETE -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/delete-snippet-response.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 6) Validate\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/validate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 7) Activate\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/activate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/activate.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 8) Purge cache\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/purge.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Done. Backups saved in: <span class=\"hljs-variable\">$BACKUP_DIR</span>\"</span>\n</code></pre><p>Make executable and run:</p><pre><code class=\"lang-bash\">chmod +<span class=\"hljs-keyword\">x</span> <span class=\"hljs-built_in\">remove</span>-fastly-snippet.<span class=\"hljs-keyword\">sh</span>\n./<span class=\"hljs-built_in\">remove</span>-fastly-snippet.<span class=\"hljs-keyword\">sh</span>\n</code></pre><hr><h2>Alternative: Fastly CLI</h2><p>If&nbsp;<a href=\"https://github.com/fastly/cli\">Fastly CLI</a>&nbsp;is installed:</p><pre><code class=\"lang-bash\"><span class=\"hljs-keyword\">export</span> FASTLY_API_TOKEN=<span class=\"hljs-string\">\"YOUR_API_TOKEN_HERE\"</span>\n<span class=\"hljs-keyword\">export</span> FASTLY_SERVICE_ID=<span class=\"hljs-string\">\"YOUR_SERVICE_ID_HERE\"</span>\n</code></pre><p>Backup:</p><pre><code class=\"lang-bash\">fastly service vcl snippet list \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version active\n</span>\nfastly service vcl snippet describe \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version active \\\n</span>  -<span class=\"ruby\">-name RAS_Maintenance_Trigger</span>\n</code></pre><p>Delete (auto-clones if needed):</p><pre><code class=\"lang-bash\">fastly service vcl snippet delete \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version active \\\n</span>  -<span class=\"ruby\">-name RAS_Maintenance_Trigger \\\n</span>  -<span class=\"ruby\">-autoclone</span>\n</code></pre><p>Activate and purge:</p><pre><code class=\"lang-bash\">fastly service version activate \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version latest\n</span>\nfastly purge \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-all</span>\n</code></pre><hr><h2>Rollback</h2><p>Reactivate the previous version if something goes wrong:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/activate\"</span>\n</code></pre><p>Purge cache again:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span>\n</code></pre><hr><h2>Troubleshooting</h2><h3><code>FileNotFoundError: active-version.json</code></h3><p>Backup file was not created. Re-run Step 2 and confirm&nbsp;<code>BACKUP_DIR</code>&nbsp;is set in the same shell.</p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"BACKUP_DIR=<span class=\"hljs-variable\">${BACKUP_DIR:-NOT_SET}</span>\"</span>\nls -la <span class=\"hljs-string\">\"<span class=\"hljs-variable\">${BACKUP_DIR:-missing}</span>\"</span>\n</code></pre><h3><code>JSONDecodeError: Extra data</code></h3><p><code>curl -w</code>&nbsp;appended&nbsp;<code>HTTP_STATUS:200</code>&nbsp;after JSON. Re-fetch cleanly:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/active\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n</code></pre><p>Or fix existing file:</p><pre><code class=\"lang-bash\">head -n <span class=\"hljs-number\">1</span> <span class=\"hljs-string\">\"$BACKUP_DIR/active-version.json\"</span> &gt; /tmp/active-version<span class=\"hljs-selector-class\">.clean</span><span class=\"hljs-selector-class\">.json</span>\nmv /tmp/active-version<span class=\"hljs-selector-class\">.clean</span><span class=\"hljs-selector-class\">.json</span> <span class=\"hljs-string\">\"$BACKUP_DIR/active-version.json\"</span>\n</code></pre><p>Validate JSON:</p><pre><code class=\"lang-bash\"><span class=\"hljs-attribute\">python3</span> -m json.tool <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n</code></pre><h3>Invalid credentials</h3><pre><code class=\"lang-json\">{<span class=\"hljs-attr\">\"msg\"</span>:<span class=\"hljs-string\">\"Provided credentials are missing or invalid\"</span>}\n</code></pre><p>Check&nbsp;<code>FASTLY_API_TOKEN</code>&nbsp;and regenerate if needed.</p><h3>Service or snippet not found</h3><pre><code class=\"lang-json\">{<span class=\"hljs-attr\">\"msg\"</span>:<span class=\"hljs-string\">\"Record not found\"</span>}\n</code></pre><p>Verify&nbsp;<code>FASTLY_SERVICE_ID</code>&nbsp;and snippet name (case-sensitive):</p><pre><code class=\"lang-bash\"><span class=\"hljs-attribute\">grep</span> -o '<span class=\"hljs-string\">\"name\"</span>:<span class=\"hljs-string\">\"[^\"</span>]*<span class=\"hljs-string\">\"' \"</span>$BACKUP_DIR/<span class=\"hljs-literal\">all</span>-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json<span class=\"hljs-string\">\"</span>\n</code></pre><h3>Admin still blocked after removal</h3><pre><code class=\"lang-bash\"><span class=\"hljs-comment\"># Purge again</span>\ncurl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span>\n</code></pre><p>Also check on the server:</p><pre><code class=\"lang-bash\"># Magento Cloud SSH\n<span class=\"hljs-keyword\">ls</span> -<span class=\"hljs-keyword\">la</span> <span class=\"hljs-keyword\">var</span>/maintenance.flag\nbin/magento maintenance:status\n</code></pre><p>Test admin in incognito/private browser window.</p><hr><h2>API reference summary</h2><table><thead><tr><th>Step</th><th>Action</th><th>Method</th><th>Endpoint</th></tr></thead><tbody><tr><td>1</td><td>Get active version</td><td><code>GET</code></td><td><code>/service/{service_id}/version/active</code></td></tr><tr><td>2</td><td>List snippets</td><td><code>GET</code></td><td><code>/service/{service_id}/version/{version_id}/snippet</code></td></tr><tr><td>3</td><td>Get snippet</td><td><code>GET</code></td><td><code>/service/{service_id}/version/{version_id}/snippet/{name}</code></td></tr><tr><td>4</td><td>Clone version</td><td><code>PUT</code></td><td><code>/service/{service_id}/version/{version_id}/clone</code></td></tr><tr><td>5</td><td>Delete snippet</td><td><code>DELETE</code></td><td><code>/service/{service_id}/version/{version_id}/snippet/{name}</code></td></tr><tr><td>6</td><td>Validate VCL</td><td><code>GET</code></td><td><code>/service/{service_id}/version/{version_id}/validate</code></td></tr><tr><td>7</td><td>Activate version</td><td><code>PUT</code></td><td><code>/service/{service_id}/version/{version_id}/activate</code></td></tr><tr><td>8</td><td>Purge cache</td><td><code>POST</code></td><td><code>/service/{service_id}/purge_all</code></td></tr></tbody></table><p><strong>Auth header for all requests:</strong></p><pre><code class=\"lang-bash\">-H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span>\n</code></pre><hr><h2>Best practices</h2><ul><li>Always back up before deleting snippets</li><li>Validate VCL before activation</li><li>Keep the backup directory until admin access is confirmed</li><li>Never commit API tokens to git</li><li>Use incognito/private window when testing admin after changes</li></ul><hr><p><em>Applicable to Adobe Commerce / Magento 2 with Fastly CDN (<code>fastly/magento2</code>&nbsp;module).</em></p>",
+      "content": "<h1><span>When a custom Fastly VCL snippet blocks Magento admin access (for example</span><span>&nbsp;</span><code>RAS_Maintenance_Trigger</code><span>), you can remove it safely using the</span><span>&nbsp;</span><strong>Fastly API</strong><span>&nbsp;</span><span>and</span><span>&nbsp;</span><code>curl</code><span>&nbsp;</span><span>\u2014 without Magento admin or the Fastly web UI.</span></h1><p>This guide covers:</p><ol><li>Backing up existing VCL snippets</li><li>Removing a specific snippet</li><li>Activating the new VCL version</li><li>Purging Fastly cache</li></ol><hr><h2>Prerequisites</h2><table><thead><tr><th>Item</th><th>Description</th></tr></thead><tbody><tr><td><strong>Fastly Service ID</strong></td><td>Fastly dashboard \u2192 Service configuration, or Magento Cloud&nbsp;<code>FASTLY_SERVICE_ID</code></td></tr><tr><td><strong>Fastly API Token</strong></td><td>Fastly dashboard \u2192 Account \u2192 API tokens (snippet edit + purge permissions)</td></tr><tr><td><strong>Snippet name</strong></td><td>Exact name, e.g.&nbsp;<code>RAS_Maintenance_Trigger</code></td></tr><tr><td><strong>Tools</strong></td><td><code>curl</code>,&nbsp;<code>bash</code>, optionally&nbsp;<code>python3</code>&nbsp;or&nbsp;<code>jq</code></td></tr></tbody></table><hr><h2>Important: Fastly version rules</h2><p>You&nbsp;<strong>cannot</strong>&nbsp;edit an active (locked) version directly.</p><p>Workflow:</p><ol><li>Clone the active version</li><li>Delete the snippet on the cloned draft</li><li>Validate the new version</li><li>Activate the new version</li><li>Purge cache</li></ol><hr><h2>Step 1 \u2014 Set environment variables</h2><pre><code class=\"lang-bash\">export FASTLY_SERVICE_ID=<span class=\"hljs-string\">\"YOUR_SERVICE_ID_HERE\"</span>\nexport FASTLY_API_TOKEN=<span class=\"hljs-string\">\"YOUR_API_TOKEN_HERE\"</span>\nexport SNIPPET_NAME=<span class=\"hljs-string\">\"RAS_Maintenance_Trigger\"</span>\nexport BACKUP_DIR=<span class=\"hljs-string\">\"./fastly-vcl-backup-$(date +%Y%m%d-%H%M%S)\"</span>\n\n<span class=\"hljs-keyword\">mkdir</span> -p <span class=\"hljs-string\">\"$BACKUP_DIR\"</span>\necho <span class=\"hljs-string\">\"Backup directory: $BACKUP_DIR\"</span>\n</code></pre><hr><h2>Step 2 \u2014 Get the active VCL version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/active\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n</code></pre><p>Extract the active version number:</p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n</code></pre><p><strong>Alternative (Python):</strong></p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(python3 -c <span class=\"hljs-string\">\"import json; print(json.load(open('<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json'))['number'])\"</span>)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n</code></pre><p><strong>Alternative (jq):</strong></p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(jq -r <span class=\"hljs-string\">'.number'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n</code></pre><blockquote><p><strong>Note:</strong>&nbsp;Use&nbsp;<code>-o</code>&nbsp;to save JSON. Do&nbsp;<strong>not</strong>&nbsp;use&nbsp;<code>curl -w</code>&nbsp;with JSON files \u2014 it appends&nbsp;<code>HTTP_STATUS:200</code>&nbsp;and breaks JSON parsing.</p></blockquote><hr><h2>Step 3 \u2014 Backup all VCL snippets</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n</code></pre><p>List all snippet names:</p><pre><code class=\"lang-bash\"><span class=\"hljs-attribute\">grep</span> -o '<span class=\"hljs-string\">\"name\"</span>:<span class=\"hljs-string\">\"[^\"</span>]*<span class=\"hljs-string\">\"' \"</span>$BACKUP_DIR/<span class=\"hljs-literal\">all</span>-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json<span class=\"hljs-string\">\"</span>\n</code></pre><p>Confirm target snippet exists:</p><pre><code class=\"lang-bash\"><span class=\"hljs-keyword\">grep</span> -i <span class=\"hljs-string\">\"$SNIPPET_NAME\"</span> <span class=\"hljs-string\">\"$BACKUP_DIR/all-snippets-active-v<span class=\"hljs-subst\">${ACTIVE_VERSION}</span>.json\"</span>\n</code></pre><hr><h2>Step 4 \u2014 Backup the specific snippet</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/<span class=\"hljs-variable\">${SNIPPET_NAME}</span>-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/<span class=\"hljs-variable\">${SNIPPET_NAME}</span>-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n</code></pre><p>Save VCL content to a&nbsp;<code>.vcl</code>&nbsp;file (optional):</p><pre><code class=\"lang-bash\">python3 - &lt;&lt;<span class=\"hljs-string\">'PY'</span>\n<span class=\"hljs-keyword\">import</span> json, os\n\nbackup_dir = os.environ[<span class=\"hljs-string\">\"BACKUP_DIR\"</span>]\nsnippet = os.environ[<span class=\"hljs-string\">\"SNIPPET_NAME\"</span>]\nversion = os.environ[<span class=\"hljs-string\">\"ACTIVE_VERSION\"</span>]\npath = f<span class=\"hljs-string\">\"{backup_dir}/{snippet}-active-v{version}.json\"</span>\n\n<span class=\"hljs-keyword\">data</span> = json.load(<span class=\"hljs-keyword\">open</span>(path))\n<span class=\"hljs-keyword\">out</span> = f<span class=\"hljs-string\">\"{backup_dir}/{snippet}.vcl\"</span>\n\nwith <span class=\"hljs-keyword\">open</span>(<span class=\"hljs-keyword\">out</span>, <span class=\"hljs-string\">\"w\"</span>) <span class=\"hljs-keyword\">as</span> f:\n    f.write(<span class=\"hljs-keyword\">data</span>.<span class=\"hljs-keyword\">get</span>(<span class=\"hljs-string\">\"content\"</span>, <span class=\"hljs-string\">\"\"</span>))\n\nprint(f<span class=\"hljs-string\">\"Saved: {out}\"</span>)\nPY\n</code></pre><hr><h2>Step 5 \u2014 Clone the active version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/clone\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span>\n</code></pre><p>Set the new draft version:</p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">export</span> NEW_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"New draft version: <span class=\"hljs-variable\">$NEW_VERSION</span>\"</span>\n</code></pre><hr><h2>Step 6 \u2014 Delete the snippet from cloned version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X DELETE -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/delete-snippet-response.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/delete-snippet-response.json\"</span>\n</code></pre><p>Verify snippet is removed:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/snippet\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-new-v<span class=\"hljs-variable\">${NEW_VERSION}</span>.json\"</span>\n\ngrep -i <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-new-v<span class=\"hljs-variable\">${NEW_VERSION}</span>.json\"</span> \\\n  || <span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Snippet removed successfully\"</span>\n</code></pre><hr><h2>Step 7 \u2014 Validate VCL before activation</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/validate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\n</code></pre><p>Confirm&nbsp;<code>status</code>&nbsp;is&nbsp;<code>ok</code>&nbsp;before activating.&nbsp;<strong>Do not activate if validation fails.</strong></p><hr><h2>Step 8 \u2014 Activate the new VCL version</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/activate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/activate.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/activate.json\"</span>\n</code></pre><hr><h2>Step 9 \u2014 Purge Fastly cache</h2><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/purge.json\"</span>\n\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/purge.json\"</span>\n</code></pre><hr><h2>Step 10 \u2014 Verify admin access</h2><p>Open Magento admin in a private/incognito window:</p><pre><code class=\"lang-text\"><span class=\"hljs-symbol\">https:</span><span class=\"hljs-comment\">//your-domain.com/admin</span>\n</code></pre><hr><h2>Complete one-shot script</h2><p>Save as&nbsp;<code>remove-fastly-snippet.sh</code>:</p><pre><code class=\"lang-bash\"><span class=\"hljs-meta\">#!/usr/bin/env bash</span>\n<span class=\"hljs-built_in\">set</span> -euo pipefail\n\n<span class=\"hljs-built_in\">export</span> FASTLY_SERVICE_ID=<span class=\"hljs-string\">\"YOUR_SERVICE_ID_HERE\"</span>\n<span class=\"hljs-built_in\">export</span> FASTLY_API_TOKEN=<span class=\"hljs-string\">\"YOUR_API_TOKEN_HERE\"</span>\n<span class=\"hljs-built_in\">export</span> SNIPPET_NAME=<span class=\"hljs-string\">\"RAS_Maintenance_Trigger\"</span>\n<span class=\"hljs-built_in\">export</span> BACKUP_DIR=<span class=\"hljs-string\">\"./fastly-vcl-backup-<span class=\"hljs-variable\">$(date +%Y%m%d-%H%M%S)</span>\"</span>\n\nmkdir -p <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 1) Get active version\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/active\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n\n<span class=\"hljs-built_in\">export</span> ACTIVE_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"    Active version: <span class=\"hljs-variable\">$ACTIVE_VERSION</span>\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 2) Backup all snippets\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/all-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 3) Backup target snippet\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/<span class=\"hljs-variable\">${SNIPPET_NAME}</span>-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 4) Clone version\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/clone\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span>\n\n<span class=\"hljs-built_in\">export</span> NEW_VERSION=$(grep -o <span class=\"hljs-string\">'\"number\":[0-9]*'</span> <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/cloned-version.json\"</span> | head -1 | cut <span class=\"hljs-_\">-d</span>: <span class=\"hljs-_\">-f</span>2)\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"    New version: <span class=\"hljs-variable\">$NEW_VERSION</span>\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 5) Delete snippet\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X DELETE -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/snippet/<span class=\"hljs-variable\">$SNIPPET_NAME</span>\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/delete-snippet-response.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 6) Validate\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/validate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\ncat <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/validate.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 7) Activate\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$NEW_VERSION</span>/activate\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/activate.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"==&gt; 8) Purge cache\"</span>\ncurl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/purge.json\"</span>\n\n<span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"Done. Backups saved in: <span class=\"hljs-variable\">$BACKUP_DIR</span>\"</span>\n</code></pre><p>Make executable and run:</p><pre><code class=\"lang-bash\">chmod +<span class=\"hljs-keyword\">x</span> <span class=\"hljs-built_in\">remove</span>-fastly-snippet.<span class=\"hljs-keyword\">sh</span>\n./<span class=\"hljs-built_in\">remove</span>-fastly-snippet.<span class=\"hljs-keyword\">sh</span>\n</code></pre><hr><h2>Alternative: Fastly CLI</h2><p>If&nbsp;<a href=\"https://github.com/fastly/cli\">Fastly CLI</a>&nbsp;is installed:</p><pre><code class=\"lang-bash\"><span class=\"hljs-keyword\">export</span> FASTLY_API_TOKEN=<span class=\"hljs-string\">\"YOUR_API_TOKEN_HERE\"</span>\n<span class=\"hljs-keyword\">export</span> FASTLY_SERVICE_ID=<span class=\"hljs-string\">\"YOUR_SERVICE_ID_HERE\"</span>\n</code></pre><p>Backup:</p><pre><code class=\"lang-bash\">fastly service vcl snippet list \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version active\n</span>\nfastly service vcl snippet describe \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version active \\\n</span>  -<span class=\"ruby\">-name RAS_Maintenance_Trigger</span>\n</code></pre><p>Delete (auto-clones if needed):</p><pre><code class=\"lang-bash\">fastly service vcl snippet delete \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version active \\\n</span>  -<span class=\"ruby\">-name RAS_Maintenance_Trigger \\\n</span>  -<span class=\"ruby\">-autoclone</span>\n</code></pre><p>Activate and purge:</p><pre><code class=\"lang-bash\">fastly service version activate \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-version latest\n</span>\nfastly purge \\\n  -<span class=\"ruby\">-service-id <span class=\"hljs-string\">\"$FASTLY_SERVICE_ID\"</span> \\\n</span>  -<span class=\"ruby\">-all</span>\n</code></pre><hr><h2>Rollback</h2><p>Reactivate the previous version if something goes wrong:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X PUT -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/<span class=\"hljs-variable\">$ACTIVE_VERSION</span>/activate\"</span>\n</code></pre><p>Purge cache again:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span>\n</code></pre><hr><h2>Troubleshooting</h2><h3><code>FileNotFoundError: active-version.json</code></h3><p>Backup file was not created. Re-run Step 2 and confirm&nbsp;<code>BACKUP_DIR</code>&nbsp;is set in the same shell.</p><pre><code class=\"lang-bash\"><span class=\"hljs-built_in\">echo</span> <span class=\"hljs-string\">\"BACKUP_DIR=<span class=\"hljs-variable\">${BACKUP_DIR:-NOT_SET}</span>\"</span>\nls -la <span class=\"hljs-string\">\"<span class=\"hljs-variable\">${BACKUP_DIR:-missing}</span>\"</span>\n</code></pre><h3><code>JSONDecodeError: Extra data</code></h3><p><code>curl -w</code>&nbsp;appended&nbsp;<code>HTTP_STATUS:200</code>&nbsp;after JSON. Re-fetch cleanly:</p><pre><code class=\"lang-bash\">curl <span class=\"hljs-_\">-s</span>S -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/version/active\"</span> \\\n  -o <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n</code></pre><p>Or fix existing file:</p><pre><code class=\"lang-bash\">head -n <span class=\"hljs-number\">1</span> <span class=\"hljs-string\">\"$BACKUP_DIR/active-version.json\"</span> &gt; /tmp/active-version<span class=\"hljs-selector-class\">.clean</span><span class=\"hljs-selector-class\">.json</span>\nmv /tmp/active-version<span class=\"hljs-selector-class\">.clean</span><span class=\"hljs-selector-class\">.json</span> <span class=\"hljs-string\">\"$BACKUP_DIR/active-version.json\"</span>\n</code></pre><p>Validate JSON:</p><pre><code class=\"lang-bash\"><span class=\"hljs-attribute\">python3</span> -m json.tool <span class=\"hljs-string\">\"<span class=\"hljs-variable\">$BACKUP_DIR</span>/active-version.json\"</span>\n</code></pre><h3>Invalid credentials</h3><pre><code class=\"lang-json\">{<span class=\"hljs-attr\">\"msg\"</span>:<span class=\"hljs-string\">\"Provided credentials are missing or invalid\"</span>}\n</code></pre><p>Check&nbsp;<code>FASTLY_API_TOKEN</code>&nbsp;and regenerate if needed.</p><h3>Service or snippet not found</h3><pre><code class=\"lang-json\">{<span class=\"hljs-attr\">\"msg\"</span>:<span class=\"hljs-string\">\"Record not found\"</span>}\n</code></pre><p>Verify&nbsp;<code>FASTLY_SERVICE_ID</code>&nbsp;and snippet name (case-sensitive):</p><pre><code class=\"lang-bash\"><span class=\"hljs-attribute\">grep</span> -o '<span class=\"hljs-string\">\"name\"</span>:<span class=\"hljs-string\">\"[^\"</span>]*<span class=\"hljs-string\">\"' \"</span>$BACKUP_DIR/<span class=\"hljs-literal\">all</span>-snippets-active-v<span class=\"hljs-variable\">${ACTIVE_VERSION}</span>.json<span class=\"hljs-string\">\"</span>\n</code></pre><h3>Admin still blocked after removal</h3><pre><code class=\"lang-bash\"><span class=\"hljs-comment\"># Purge again</span>\ncurl <span class=\"hljs-_\">-s</span>S -X POST -H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span> \\\n  <span class=\"hljs-string\">\"https://api.fastly.com/service/<span class=\"hljs-variable\">$FASTLY_SERVICE_ID</span>/purge_all\"</span>\n</code></pre><p>Also check on the server:</p><pre><code class=\"lang-bash\"># Magento Cloud SSH\n<span class=\"hljs-keyword\">ls</span> -<span class=\"hljs-keyword\">la</span> <span class=\"hljs-keyword\">var</span>/maintenance.flag\nbin/magento maintenance:status\n</code></pre><p>Test admin in incognito/private browser window.</p><hr><h2>API reference summary</h2><table><thead><tr><th>Step</th><th>Action</th><th>Method</th><th>Endpoint</th></tr></thead><tbody><tr><td>1</td><td>Get active version</td><td><code>GET</code></td><td><code>/service/{service_id}/version/active</code></td></tr><tr><td>2</td><td>List snippets</td><td><code>GET</code></td><td><code>/service/{service_id}/version/{version_id}/snippet</code></td></tr><tr><td>3</td><td>Get snippet</td><td><code>GET</code></td><td><code>/service/{service_id}/version/{version_id}/snippet/{name}</code></td></tr><tr><td>4</td><td>Clone version</td><td><code>PUT</code></td><td><code>/service/{service_id}/version/{version_id}/clone</code></td></tr><tr><td>5</td><td>Delete snippet</td><td><code>DELETE</code></td><td><code>/service/{service_id}/version/{version_id}/snippet/{name}</code></td></tr><tr><td>6</td><td>Validate VCL</td><td><code>GET</code></td><td><code>/service/{service_id}/version/{version_id}/validate</code></td></tr><tr><td>7</td><td>Activate version</td><td><code>PUT</code></td><td><code>/service/{service_id}/version/{version_id}/activate</code></td></tr><tr><td>8</td><td>Purge cache</td><td><code>POST</code></td><td><code>/service/{service_id}/purge_all</code></td></tr></tbody></table><p><strong>Auth header for all requests:</strong></p><pre><code class=\"lang-bash\">-H <span class=\"hljs-string\">\"Fastly-Key: <span class=\"hljs-variable\">$FASTLY_API_TOKEN</span>\"</span>\n</code></pre><hr><h2>Best practices</h2><ul><li>Always back up before deleting snippets</li><li>Validate VCL before activation</li><li>Keep the backup directory until admin access is confirmed</li><li>Never commit API tokens to git</li><li>Use incognito/private window when testing admin after changes</li></ul><hr><p><em>Applicable to Adobe Commerce / Magento 2 with Fastly CDN (<code>fastly/magento2</code>&nbsp;module).</em></p>",
       "cover_image_url": "/uploads/articles/1792929004320-xnvm0p.jpg",
       "status": "published",
       "published_at": "2026-10-25T11:50:11.109Z",
@@ -1482,7 +1078,7 @@
     {
       "key": "copy",
       "value": {
-        "heroEyebrow": "ADOBE COMMERCE ENGINEERING · TECHNICAL LEADERSHIP",
+        "heroEyebrow": "ADOBE COMMERCE ENGINEERING \u00b7 TECHNICAL LEADERSHIP",
         "heroHeadline": "Leading engineering. Enabling business growth.",
         "aboutTitle": "Technical excellence. Strategic leadership.",
         "aboutDescription": "Bridging solution architecture, engineering execution, and team leadership to deliver scalable, resilient commerce platforms that create lasting business value.",
@@ -1503,7 +1099,7 @@
         "articlesPageBannerImage": "/uploads/article-banner/1792938088084-2yfq5f.jpg",
         "articleListenEnabled": true,
         "contactTitle": "Good work starts with a conversation.",
-        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
+        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I\u2019d be glad to connect."
       }
     },
     {
@@ -1537,7 +1133,7 @@
             "Adobe Commerce Enterprise",
             "Magento 2",
             "Magento 1",
-            "Hyvä",
+            "Hyv\u00e4",
             "Adobe Commerce Optimizer",
             "Adobe App Builder"
           ]
