@@ -782,7 +782,7 @@
       },
       {
         "label": "Articles",
-        "href": "#blog"
+        "href": "#articles"
       },
       {
         "label": "Contact",
@@ -928,64 +928,6 @@
     }
   },
   "settingsRows": [
-    {
-      "key": "site_structure",
-      "value": {
-        "structure": {
-          "order": [
-            "home",
-            "about",
-            "projects",
-            "experience",
-            "certifications",
-            "education",
-            "expertise",
-            "blog",
-            "contact"
-          ],
-          "hidden": [
-            "expertise"
-          ]
-        },
-        "navigationLinks": [
-          {
-            "label": "About",
-            "href": "#about"
-          },
-          {
-            "label": "Projects",
-            "href": "#projects"
-          },
-          {
-            "label": "Experience",
-            "href": "#experience"
-          },
-          {
-            "label": "Certifications",
-            "href": "#certifications"
-          },
-          {
-            "label": "Toolkit",
-            "href": "#expertise",
-            "visible": false
-          },
-          {
-            "label": "Education",
-            "href": "#education"
-          },
-          {
-            "label": "Articles",
-            "href": "#articles"
-          },
-          {
-            "label": "Contact",
-            "href": "#contact"
-          }
-        ],
-        "customSections": [],
-        "menuStyle": "underline"
-      }
-    },
     {
       "key": "theme_published",
       "value": {
@@ -1214,6 +1156,64 @@
           ]
         }
       ]
+    },
+    {
+      "key": "site_structure",
+      "value": {
+        "structure": {
+          "order": [
+            "home",
+            "about",
+            "projects",
+            "experience",
+            "certifications",
+            "education",
+            "expertise",
+            "blog",
+            "contact"
+          ],
+          "hidden": [
+            "expertise"
+          ]
+        },
+        "navigationLinks": [
+          {
+            "label": "About",
+            "href": "#about"
+          },
+          {
+            "label": "Projects",
+            "href": "#projects"
+          },
+          {
+            "label": "Experience",
+            "href": "#experience"
+          },
+          {
+            "label": "Certifications",
+            "href": "#certifications"
+          },
+          {
+            "label": "Toolkit",
+            "href": "#expertise",
+            "visible": false
+          },
+          {
+            "label": "Education",
+            "href": "#education"
+          },
+          {
+            "label": "Articles",
+            "href": "#articles"
+          },
+          {
+            "label": "Contact",
+            "href": "#contact"
+          }
+        ],
+        "customSections": [],
+        "menuStyle": "underline"
+      }
     }
   ],
   "articles": [],
