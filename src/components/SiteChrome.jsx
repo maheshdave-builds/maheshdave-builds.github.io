@@ -8,7 +8,7 @@ import { NAV_ITEMS } from '../lib/navigation'
 
 const NAV_LINKS = NAV_ITEMS
 
-export default function SiteHeader({ activeSection }) {
+export default function SiteHeader({ activeSection, onSectionSelect }) {
   const { mode, toggle } = useTheme()
   const { site, profile } = useContent()
   const [open, setOpen] = useState(false)
@@ -64,7 +64,7 @@ export default function SiteHeader({ activeSection }) {
           const isExternal = /^https?:\/\//i.test(href)
           const sectionId = href.includes('#') ? href.split('#').pop() : ''
           return isExternal ? <a key={`${item.label}-${index}`} href={href} target="_blank" rel="noreferrer" onClick={close}>{item.label}</a> : (
-            <Link key={`${item.label}-${index}`} to={navTarget(href)} className={sectionId && activeSection === sectionId ? 'is-active' : ''} onClick={close} aria-current={sectionId && activeSection === sectionId ? 'true' : undefined}>{item.label}</Link>
+            <Link key={`${item.label}-${index}`} to={navTarget(href)} className={sectionId && activeSection === sectionId ? 'is-active' : ''} onClick={() => { if (sectionId) onSectionSelect?.(sectionId); close() }} aria-current={sectionId && activeSection === sectionId ? 'true' : undefined}>{item.label}</Link>
           )
         })}
         <div className="mobile-nav-footer">

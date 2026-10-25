@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { RouterProvider } from './lib/router'
 import { useRouteScroll, useRouter, matchRoute } from './lib/routerCore'
 import { ContentProvider } from './contexts/ContentContext'
@@ -6,7 +6,6 @@ import { AuthProvider } from './contexts/AuthContext'
 import { PublicThemeProvider } from './components/PublicThemeProvider'
 import { ThemeProvider } from './contexts/ThemeContext'
 import SiteHeader, { SiteFooter, SiteFavicon } from './components/SiteChrome'
-import { NAV_ITEMS } from './lib/navigation'
 import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
 import ArticlesPage from './pages/ArticlesPage'
@@ -50,35 +49,77 @@ function ScrollProgress() {
   )
 }
 
+function readHashSection() {
+  const hash = window.location.hash
+  if (!hash) return ''
+  const id = decodeURIComponent(hash.slice(1))
+  return document.getElementById(id) ? id : ''
+}
+
+/** Picks the last homepage section whose top has passed the scroll marker. */
+function pickActiveSection() {
+  const sections = [...document.querySelectorAll('#main section[id]')]
+  if (!sections.length) return readHashSection() || 'home'
+
+  const headerHeight = document.querySelector('header')?.getBoundingClientRect().height ?? 0
+  const marker = headerHeight + Math.min(window.innerHeight * 0.28, 120)
+  let current = sections[0].id
+
+  for (const section of sections) {
+    if (section.getBoundingClientRect().top <= marker) current = section.id
+  }
+
+  return current
+}
+
 /** Tracks which section is in view so the header can mark the current link. */
 function useActiveSection() {
-  const [active, setActive] = useState('home')
+  const { hash } = useRouter()
+  const [active, setActive] = useState(() => readHashSection() || 'home')
+  const lockUntilRef = useRef(0)
 
-  useEffect(() => {
-    const ids = ['home', ...NAV_ITEMS.map((item) => item.href.slice(1))]
-    const sections = ids.map((id) => document.getElementById(id)).filter(Boolean)
-    if (!sections.length || typeof IntersectionObserver === 'undefined') return undefined
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (visible) setActive(visible.target.id)
-      },
-      { rootMargin: '-45% 0px -50% 0px', threshold: [0, 0.25, 0.5] },
-    )
-    sections.forEach((section) => observer.observe(section))
-    return () => observer.disconnect()
+  const selectSection = useCallback((id) => {
+    if (!id) return
+    lockUntilRef.current = Date.now() + 900
+    setActive(id)
   }, [])
 
-  return active
+  // Highlight immediately when the URL hash changes (nav click or browser history).
+  useEffect(() => {
+    if (!hash) return
+    const id = decodeURIComponent(hash.slice(1))
+    if (document.getElementById(id)) selectSection(id)
+  }, [hash, selectSection])
+
+  // Scroll spy follows DOM section order, including admin structure reordering.
+  useEffect(() => {
+    let frame = 0
+    const sync = () => {
+      frame = 0
+      if (Date.now() < lockUntilRef.current) return
+      setActive(pickActiveSection())
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(sync)
+    }
+
+    sync()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }, [])
+
+  return [active, selectSection]
 }
 
 function PublicSite() {
   const { pathname } = useRouter()
   useRouteScroll()
-  const active = useActiveSection()
+  const [active, selectSection] = useActiveSection()
 
   const scrollToSection = (id) => {
     const target = document.getElementById(id)
@@ -114,7 +155,7 @@ function PublicSite() {
   return (
     <>
       <ScrollProgress />
-      <SiteHeader activeSection={active} />
+      <SiteHeader activeSection={active} onSectionSelect={selectSection} />
       <HomePage onSection={scrollToSection} />
       <SiteFooter />
     </>

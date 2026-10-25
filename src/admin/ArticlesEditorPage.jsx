@@ -85,6 +85,7 @@ function RichText({ value, onChange }) {
   const ref = useRef(null)
   const fileRef = useRef(null)
   const [uploading, setUploading] = useState(false)
+  const [inlineCropFile, setInlineCropFile] = useState(null)
   const [textColor, setTextColor] = useState('#2563eb')
 
   useEffect(() => {
@@ -123,19 +124,27 @@ function RichText({ value, onChange }) {
     if (ref.current) onChange(ref.current.innerHTML)
   }
 
-  const insertImage = async (file) => {
+  const insertImageUrl = (url) => {
+    ref.current?.focus()
+    document.execCommand('insertImage', false, url)
+    sync()
+  }
+
+  const stageInlineImage = (file) => {
     if (!file) return
-    setUploading(true)
-    try {
-      const url = await uploadImage(file, 'articles')
-      ref.current?.focus()
-      document.execCommand('insertImage', false, url)
-      sync()
-    } catch (error) {
-      window.alert(error.message || 'The image could not be uploaded.')
-    } finally {
-      setUploading(false)
+    if (file.type === 'image/svg+xml') {
+      setUploading(true)
+      uploadImage(file, 'articles')
+        .then(insertImageUrl)
+        .catch((error) => window.alert(error.message || 'The image could not be uploaded.'))
+        .finally(() => setUploading(false))
+      return
     }
+    if (!file.type.startsWith('image/')) {
+      window.alert('Choose a valid image file.')
+      return
+    }
+    setInlineCropFile(file)
   }
 
   return (
@@ -167,11 +176,31 @@ function RichText({ value, onChange }) {
           accept="image/*"
           hidden
           onChange={(event) => {
-            insertImage(event.target.files?.[0])
+            stageInlineImage(event.target.files?.[0])
             event.target.value = ''
           }}
         />
       </div>
+      {inlineCropFile ? (
+        <ImageCropDialog
+          file={inlineCropFile}
+          title="Crop article image"
+          aspectRatio="16 / 9"
+          onCancel={() => setInlineCropFile(null)}
+          onApply={async (croppedFile) => {
+            setInlineCropFile(null)
+            setUploading(true)
+            try {
+              const url = await uploadImage(croppedFile, 'articles')
+              insertImageUrl(url)
+            } catch (error) {
+              window.alert(error.message || 'The image could not be uploaded.')
+            } finally {
+              setUploading(false)
+            }
+          }}
+        />
+      ) : null}
       <div
         ref={ref}
         className="wysiwyg-canvas"

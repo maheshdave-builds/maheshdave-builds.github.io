@@ -232,7 +232,7 @@ function Projects({ projects, copy, sliderIntervalSeconds }) {
     <section id="projects" className="section-wrap projects-section" aria-labelledby="projects-title">
       <SectionHeading eyebrow="PROJECTS & CLIENTS" id="projects-title" title={copy.projectsTitle} description={copy.projectsDescription} />
       {projects.length ? (
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Selected projects" items={projects} getTitle={(project) => project.title} getImage={(project) => project.image || project.clientLogo} getLink={(project) => project.url} renderDetails={(project, index, primary) => primary ? <><p className="cinema-summary">{project.description}</p><div className="cinema-tags">{(project.techStack || []).slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>{project.url ? <a className="cinema-link" href={project.url} target="_blank" rel="noreferrer">View project <ArrowUpRight size={15}/></a> : null}</> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Selected projects" items={projects} imageFit="contain" getTitle={(project) => project.title} getImage={(project) => project.image || project.clientLogo} getLink={(project) => project.url} renderDetails={(project, index, primary) => primary ? <><p className="cinema-summary">{project.description}</p><div className="cinema-tags">{(project.techStack || []).slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>{project.url ? <a className="cinema-link" href={project.url} target="_blank" rel="noreferrer">View project <ArrowUpRight size={15}/></a> : null}</> : null} />
       ) : <div className="empty-state"><Layers3 size={22} aria-hidden="true" /><p>No projects have been added yet. Add projects from the admin dashboard.</p></div>}
     </section>
   )
@@ -288,7 +288,7 @@ function Certifications({ items, copy, sliderIntervalSeconds }) {
         description={copy.certificationsDescription}
       />
 
-      <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Certifications" items={items} getTitle={(cert) => cert.name} getImage={(cert) => cert.image} getLink={(cert) => cert.verificationUrl} renderDetails={(cert, index, primary) => primary ? <><p className="cinema-summary">{cert.issuer || 'Adobe'}{cert.year ? ` · ${cert.year}` : ''}</p>{cert.verificationUrl ? <a className="cinema-link" href={cert.verificationUrl} target="_blank" rel="noreferrer">Verify credential <ArrowUpRight size={15}/></a> : null}</> : null} />
+      <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Certifications" items={items} imageFit="contain" getTitle={(cert) => cert.name} getImage={(cert) => cert.image} getLink={(cert) => cert.verificationUrl} renderDetails={(cert, index, primary) => primary ? <><p className="cinema-summary">{cert.issuer || 'Adobe'}{cert.year ? ` · ${cert.year}` : ''}</p>{cert.verificationUrl ? <a className="cinema-link" href={cert.verificationUrl} target="_blank" rel="noreferrer">Verify credential <ArrowUpRight size={15}/></a> : null}</> : null} />
     </section>
   )
 }

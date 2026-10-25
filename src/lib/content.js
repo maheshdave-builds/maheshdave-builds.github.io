@@ -173,6 +173,14 @@ export function importLocalContent(json) {
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
 
+/** Stable ordering for admin-managed collections (projects, certs, experience, education). */
+export function sortCollectionRows(rows = []) {
+  return [...asArray(rows)].sort((a, b) => {
+    const diff = (a.sort_order ?? 0) - (b.sort_order ?? 0)
+    return diff !== 0 ? diff : String(a.id ?? '').localeCompare(String(b.id ?? ''))
+  })
+}
+
 function migrateCopy(copy = {}) {
   const next = { ...DEFAULT_COPY, ...(copy && typeof copy === 'object' ? copy : {}) }
   if (!String(next.articlesTitle || '').trim() && next.blogTitle) next.articlesTitle = next.blogTitle
@@ -376,10 +384,10 @@ function getLocalPreviewContent() {
   const local = readLocalContent()
   return {
     ...local,
-    projects: asArray(local.projects),
-    certifications: asArray(local.certifications),
-    experience: asArray(local.experience),
-    education: asArray(local.education),
+    projects: sortCollectionRows(local.projects),
+    certifications: sortCollectionRows(local.certifications),
+    experience: sortCollectionRows(local.experience),
+    education: sortCollectionRows(local.education),
     // Preview deliberately includes drafts so editors can inspect them before publishing.
     articles: sortArticles(asArray(local.articles)),
     theme: local.themeDraft || local.theme || DEFAULT_THEME,
@@ -397,15 +405,26 @@ export async function fetchPublicContent() {
       ...fallbackContent,
       ...shared,
       site: normalizeSite(shared.site),
-      projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false),
-      certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false),
-      experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false),
-      education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false),
+      projects: sortCollectionRows(asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false).map(normalizeProject)),
+      certifications: sortCollectionRows(asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false).map(normalizeCertification)),
+      experience: sortCollectionRows(asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false)),
+      education: sortCollectionRows(asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false)),
       articles: sortArticles(sharedArticleRows(shared).map(normalizeArticle).filter((article) => isArticlePublic(article))),
       theme: shared.themePublished || shared.theme || DEFAULT_THEME,
     }
   }
-  if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), articles: sortArticles(asArray(local.articles).filter((article) => isArticlePublic(article))), theme: local.themePublished || local.theme || DEFAULT_THEME } }
+  if (!supabase) {
+    const local = readLocalContent()
+    return {
+      ...local,
+      projects: sortCollectionRows(asArray(local.projects).filter((x) => x.is_published !== false)),
+      certifications: sortCollectionRows(asArray(local.certifications).filter((x) => x.is_published !== false)),
+      experience: sortCollectionRows(asArray(local.experience).filter((x) => x.is_published !== false)),
+      education: sortCollectionRows(asArray(local.education).filter((x) => x.is_published !== false)),
+      articles: sortArticles(asArray(local.articles).filter((article) => isArticlePublic(article))),
+      theme: local.themePublished || local.theme || DEFAULT_THEME,
+    }
+  }
 
   const nowIso = new Date().toISOString()
   const [profileResult, projects, certifications, experience, education, articleRows, settings] = await Promise.allSettled([
@@ -496,16 +515,16 @@ export async function fetchAdminContent() {
         const id = String(row.id ?? `${key}-local-${index}`)
         byId.set(id, { ...(byId.get(id) || {}), ...row })
       })
-      return [...byId.values()]
+      return sortCollectionRows([...byId.values()])
     }
     const merged = {
       ...local,
       ...shared,
-      projects: mergeRows('projects'),
-      certifications: mergeRows('certifications'),
-      experience: mergeRows('experience'),
-      education: mergeRows('education'),
-      articles: mergeRows('articles'),
+      projects: mergeRows('projects').map(normalizeProject),
+      certifications: mergeRows('certifications').map(normalizeCertification),
+      experience: mergeRows('experience').map(normalizeExperience),
+      education: mergeRows('education').map(normalizeEducation),
+      articles: mergeRows('articles').map(normalizeArticle),
       profile: { ...(shared.profile || {}), ...(local.profile || {}) },
       site: normalizeSite({ ...(shared.site || {}), ...(local.site || {}), copy: { ...(shared.site?.copy || {}), ...(local.site?.copy || {}) } }),
     }
@@ -633,9 +652,23 @@ export function toDbRow(collection, record) {
 export async function saveRecord(collection, record) {
   if (!supabase) {
     if (!['projects', 'certifications', 'experience', 'education', 'articles'].includes(collection)) throw new Error(`Unknown collection: ${collection}`)
-    const current = readLocalContent(); const rows = asArray(current[collection]); const saved = { ...record, id: record.id && !String(record.id).startsWith('seed-') ? record.id : `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, updated_at: new Date().toISOString() }
+    const current = readLocalContent()
+    const rows = asArray(current[collection])
+    // Keep bundled seed IDs in place for GitHub/local CMS edits. Replacing them
+    // created duplicate rows so image uploads appeared to vanish after save.
+    const saved = {
+      ...record,
+      id: record.id || `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      updated_at: new Date().toISOString(),
+    }
     if (collection === 'articles' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
-    updateLocalContent((state) => { const existingId = record.id && !String(record.id).startsWith('seed-'); const index = existingId ? rows.findIndex((row) => String(row.id) === String(record.id)) : -1; const nextRows = [...rows]; if (index >= 0) nextRows[index] = { ...rows[index], ...saved }; else nextRows.push(saved); return { ...state, [collection]: nextRows } })
+    updateLocalContent((state) => {
+      const index = record.id ? rows.findIndex((row) => String(row.id) === String(record.id)) : -1
+      const nextRows = [...rows]
+      if (index >= 0) nextRows[index] = { ...rows[index], ...saved }
+      else nextRows.push(saved)
+      return { ...state, [collection]: nextRows }
+    })
     await flushSharedContent()
     return saved
   }

@@ -18,8 +18,9 @@ import {
 import { Link } from '../lib/RouterLink'
 import { useRouter } from '../lib/routerCore'
 import { useAdminContent } from '../contexts/hooks'
-import { deleteRecord, saveRecord, uploadImage } from '../lib/content'
+import { deleteRecord, saveRecord, sortCollectionRows, uploadImage } from '../lib/content'
 import { AdminLayout, SearchField } from './AdminLayout'
+import ImageCropDialog from './ImageCropDialog'
 
 /* ------------------------------------------------------------ field schema */
 
@@ -97,27 +98,18 @@ function fromForm(form) {
 
 /* ------------------------------------------------------------------ fields */
 
-function ImageField({ label, value, onChange, hint }) {
+function ImageField({ label, value, onChange, hint, folder = 'projects', aspectRatio = '16 / 9', fitEntireImage = false, previewVariant = 'default' }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [cropFile, setCropFile] = useState(null)
   const inputRef = useRef(null)
+  const replaceRef = useRef(null)
 
-  const pick = async (file) => {
-    if (!file) return
-    setError('')
-
-    if (file.size > 4 * 1024 * 1024) {
-      setError('That file is larger than 4 MB. Please compress it first.')
-      return
-    }
-    if (!/^image\/(jpeg|png|webp|avif|gif|svg\+xml)$/.test(file.type)) {
-      setError('Use a JPG, PNG, WebP, AVIF or SVG image.')
-      return
-    }
-
+  const uploadDirect = async (file) => {
     setBusy(true)
+    setError('')
     try {
-      const url = await uploadImage(file, 'projects')
+      const url = await uploadImage(file, folder)
       onChange(url)
     } catch (uploadError) {
       setError(uploadError.message || 'The upload failed.')
@@ -126,11 +118,29 @@ function ImageField({ label, value, onChange, hint }) {
     }
   }
 
+  const stageFile = (file) => {
+    if (!file) return
+    setError('')
+    if (file.size > 4 * 1024 * 1024) {
+      setError('That file is larger than 4 MB. Please compress it first.')
+      return
+    }
+    if (file.type === 'image/svg+xml') {
+      uploadDirect(file)
+      return
+    }
+    if (!/^image\/(jpeg|png|webp|avif|gif)$/.test(file.type)) {
+      setError('Use a JPG, PNG, WebP, AVIF, GIF, or SVG image.')
+      return
+    }
+    setCropFile(file)
+  }
+
   return (
     <div className="image-field">
       <span className="field-label">{label}</span>
       <div className="image-field-body">
-        <div className="image-field-preview">
+        <div className={`image-field-preview ${previewVariant === 'logo' ? 'image-field-preview-logo' : ''}`}>
           {value ? <img src={value} alt="" /> : <ImagePlus size={20} aria-hidden="true" />}
         </div>
         <div className="image-field-controls">
@@ -139,9 +149,14 @@ function ImageField({ label, value, onChange, hint }) {
             {busy ? 'Uploading…' : value ? 'Replace image' : 'Upload image'}
           </button>
           {value ? (
-            <button type="button" className="subtle-button" onClick={() => onChange('')}>
-              <X size={14} aria-hidden="true" /> Remove
-            </button>
+            <>
+              <button type="button" className="subtle-button" onClick={() => replaceRef.current?.click()} disabled={busy}>
+                <ImagePlus size={14} aria-hidden="true" /> Replace / crop
+              </button>
+              <button type="button" className="subtle-button" onClick={() => onChange('')}>
+                <X size={14} aria-hidden="true" /> Remove
+              </button>
+            </>
           ) : null}
           <input
             ref={inputRef}
@@ -149,7 +164,17 @@ function ImageField({ label, value, onChange, hint }) {
             accept="image/*"
             hidden
             onChange={(event) => {
-              pick(event.target.files?.[0])
+              stageFile(event.target.files?.[0])
+              event.target.value = ''
+            }}
+          />
+          <input
+            ref={replaceRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(event) => {
+              stageFile(event.target.files?.[0])
               event.target.value = ''
             }}
           />
@@ -166,6 +191,19 @@ function ImageField({ label, value, onChange, hint }) {
           {error ? <small className="form-error">{error}</small> : null}
         </div>
       </div>
+      {cropFile ? (
+        <ImageCropDialog
+          file={cropFile}
+          title={fitEntireImage ? `Fit ${label.toLowerCase()}` : `Crop ${label.toLowerCase()}`}
+          aspectRatio={aspectRatio}
+          fitEntireImage={fitEntireImage}
+          onCancel={() => setCropFile(null)}
+          onApply={async (croppedFile) => {
+            setCropFile(null)
+            await uploadDirect(croppedFile)
+          }}
+        />
+      ) : null}
     </div>
   )
 }
@@ -252,7 +290,7 @@ export default function CollectionPage({ config, mode, recordId }) {
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
-    const sorted = [...rows].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    const sorted = sortCollectionRows(rows)
     if (!needle) return sorted
     return sorted.filter((row) => JSON.stringify(row).toLowerCase().includes(needle))
   }, [rows, query])
@@ -273,9 +311,18 @@ export default function CollectionPage({ config, mode, recordId }) {
     setBusy(true)
     try {
       const saved = await saveRecord(config.key, fromForm(form))
+      patchCollection(config.key, (list) => {
+        const index = list.findIndex((row) => String(row.id) === String(saved.id))
+        if (index < 0) return [...list, saved]
+        const next = [...list]
+        next[index] = { ...list[index], ...saved }
+        return next
+      })
+      const nextForm = toForm(saved, config.key)
+      setForm(nextForm)
+      setBaseline(JSON.stringify(nextForm))
       await reload()
       setNotice(editing ? 'Changes saved.' : 'Item published to the site.')
-      setBaseline(JSON.stringify(form))
       if (!editing && saved?.id) navigate(`/mdadmin/${config.key}`, { replace: true })
     } catch (saveError) {
       setError(saveError.message || 'The item could not be saved.')
@@ -301,16 +348,31 @@ export default function CollectionPage({ config, mode, recordId }) {
   }
 
   const move = async (row, direction) => {
-    const sorted = [...rows].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    const sorted = sortCollectionRows(rows)
     const index = sorted.findIndex((item) => item.id === row.id)
-    const swapWith = sorted[index + direction]
-    if (!swapWith) return
+    const target = index + direction
+    if (target < 0 || target >= sorted.length) return
+
+    const reordered = [...sorted]
+    ;[reordered[index], reordered[target]] = [reordered[target], reordered[index]]
+
+    setBusy(true)
+    setError('')
     try {
-      await saveRecord(config.key, { ...row, sort_order: swapWith.sort_order ?? 0 })
-      await saveRecord(config.key, { ...swapWith, sort_order: row.sort_order ?? 0 })
+      const normalized = reordered.map((item, i) => ({ ...item, sort_order: (i + 1) * 10 }))
+      const previous = new Map(sorted.map((item) => [String(item.id), item.sort_order ?? 0]))
+      for (const item of normalized) {
+        if (previous.get(String(item.id)) !== item.sort_order) {
+          await saveRecord(config.key, item)
+        }
+      }
+      patchCollection(config.key, () => normalized)
       await reload()
+      setNotice('Order updated.')
     } catch (moveError) {
       setError(moveError.message || 'The order could not be updated.')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -381,6 +443,10 @@ export default function CollectionPage({ config, mode, recordId }) {
                       value={form[field.name] || ''}
                       onChange={(value) => change(field.name, value)}
                       hint={field.hint}
+                      folder={config.key}
+                      aspectRatio={config.key === 'certifications' ? '1 / 1' : '16 / 9'}
+                      fitEntireImage={config.key === 'projects'}
+                      previewVariant={config.key === 'projects' ? 'logo' : 'default'}
                     />
                   )
                 }

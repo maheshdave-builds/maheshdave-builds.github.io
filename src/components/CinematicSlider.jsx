@@ -11,7 +11,7 @@ const palettes = [
 ]
 
 /** Cinematic, vertical image-rail carousel inspired by the user's video reference. */
-export default function CinematicSlider({ items = [], label, getTitle, getImage, getLink, renderDetails, intervalSeconds = 5 }) {
+export default function CinematicSlider({ items = [], label, getTitle, getImage, getLink, renderDetails, intervalSeconds = 5, imageFit = 'cover' }) {
   const [active, setActive] = useState(0)
   const reduceMotion = useReducedMotion()
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function CinematicSlider({ items = [], label, getTitle, getImage,
   const titleLink = getLink?.(item) || ''
   const [bg, panel, accent] = palettes[safeActive % palettes.length]
   return (
-    <section className="cinematic-slider" aria-label={label} style={{ '--cinema-bg': bg, '--cinema-panel': panel, '--cinema-accent': accent }}>
+    <section className={`cinematic-slider ${imageFit === 'contain' ? 'fit-contain' : ''}`} aria-label={label} style={{ '--cinema-bg': bg, '--cinema-panel': panel, '--cinema-accent': accent }}>
       <div className="cinema-atmosphere" aria-hidden="true" />
       <div className="cinema-copy">
         <span className="cinema-kicker">{label} <i /> {String(safeActive + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}</span>
