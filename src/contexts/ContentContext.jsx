@@ -6,9 +6,9 @@ import { ContentContext } from './contexts'
 
 /**
  * Public content provider. Loads once for the whole site so the portfolio and
- * article pages share a single fetch. While loading it serves the bundled seed
- * so the page never renders empty; if the fetch fails it keeps the seed and
- * records the error for a non-blocking notice.
+ * article pages share a single source. The public route shows a stable loading
+ * shell until this request resolves, rather than briefly rendering stale seed data.
+ * Fetch failures are represented as an explicit error state, never an empty list.
  *
  * State is only written after the first `await`, which keeps the effect from
  * triggering a synchronous cascading render.
@@ -23,7 +23,7 @@ export function ContentProvider({ children }) {
     let active = true
     const loadLocal = async () => {
       try { const next = await fetchPublicContent(); if (active) { setContent(next); setStatus(contentSource === 'local' ? 'local' : 'ready'); setError('') } }
-      catch (loadError) { if (active) setError(loadError?.message || 'Content could not be loaded.') }
+      catch (loadError) { if (active) { setError(loadError?.message || 'Content could not be loaded.'); setStatus('error') } }
     }
     if (contentSource === 'local' || contentSource === 'github') { loadLocal(); const onUpdate = () => loadLocal(); window.addEventListener('portfolio-local-content-updated', onUpdate); return () => { active = false; window.removeEventListener('portfolio-local-content-updated', onUpdate) } }
 

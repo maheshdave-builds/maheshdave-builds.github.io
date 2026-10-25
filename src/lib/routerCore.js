@@ -25,6 +25,16 @@ export function matchRoute(pattern, pathname) {
 
 /** Current pathname without a trailing slash (except the root). */
 export function readPath() {
+  // GitHub Pages serves unknown deep links through 404.html. That page stores
+  // the requested path and returns to `/`; restore it before route matching so
+  // `/articles/:slug` survives direct navigation and browser refresh.
+  let recovered = ''
+  try { recovered = window.sessionStorage.getItem('portfolio-gh-pages-requested-path') || '' } catch { /* query fallback below remains available */ }
+  if (!recovered) recovered = new URLSearchParams(window.location.search).get('__ghp') || ''
+  if (recovered) {
+    try { window.sessionStorage.removeItem('portfolio-gh-pages-requested-path') } catch { /* ignore unavailable storage */ }
+    if (recovered.startsWith('/') && !recovered.startsWith('//')) window.history.replaceState(null, '', recovered)
+  }
   const base = import.meta.env.BASE_URL.replace(/\/$/, '')
   let path = window.location.pathname
   if (base && path.startsWith(base)) path = path.slice(base.length)

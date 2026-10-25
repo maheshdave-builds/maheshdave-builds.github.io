@@ -430,13 +430,13 @@ export default function BlogEditorPage({ mode, recordId }) {
                         <Link to={`/mdadmin/blog/${post.id}`}>{post.title}</Link>
                       </strong>
                       <small>
-                        /blog/{post.slug} · {readingTime(post.content)} min read
+                        /articles/{post.slug} · {readingTime(post.content)} min read
                         {post.published_at ? ` · ${formatDate(post.published_at)}` : ''}
                       </small>
                     </div>
                     <div className="record-actions">
-                      {post.status === 'published' && !scheduled ? (
-                        <Link className="record-action" to={`/blog/${encodeURIComponent(post.slug)}?preview=local`} aria-label="Preview article" target="_blank" rel="noreferrer">
+                      {post.slug ? (
+                        <Link className="record-action" to={`/articles/${encodeURIComponent(post.slug)}?preview=local`} aria-label="Preview article" target="_blank" rel="noreferrer">
                           <Eye size={14} />
                         </Link>
                       ) : null}
@@ -515,7 +515,7 @@ export default function BlogEditorPage({ mode, recordId }) {
             <label className="field-block">
               Slug
               <div className="slug-input">
-                <span>/blog/</span>
+                <span>/articles/</span>
                 <input
                   value={form.slug}
                   onChange={(event) => {

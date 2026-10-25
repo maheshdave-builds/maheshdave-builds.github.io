@@ -71,7 +71,7 @@ function Hero({ profile, copy, onSection }) {
         </div>
       </div>
 
-      <div className="portrait-stage">
+      <div className={`portrait-stage portrait-section-${profile.profileImageSectionDesign || 'classic-professional'}`}>
         <div className="portrait-backdrop" aria-hidden="true" />
         <figure className={`portrait-frame portrait-design-${profile.profileImageDesign || 'editorial'}`}>
           <img
@@ -355,14 +355,14 @@ function Blog({ posts, copy, sliderIntervalSeconds }) {
   const published = posts.filter((post) => isPostPublic(post))
 
   return (
-    <section id="blog" className="section-wrap blog-section" aria-labelledby="blog-title">
-      <SectionHeading eyebrow="ARTICLES & IDEAS" id="blog-title" title="Articles from the work." description="Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering." />
+    <section id="articles" className="section-wrap blog-section" aria-labelledby="blog-title">
+      <div className="blog-section-heading">
+        <SectionHeading eyebrow="ARTICLES & IDEAS" id="blog-title" title="Articles from the work." description="Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering." />
+        <Link className="blog-view-all-link" to="/articles">View All Articles <ArrowUpRight size={15} aria-hidden="true" /></Link>
+      </div>
 
       {published.length ? (
-        <>
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} getLink={(post) => `/blog/${encodeURIComponent(post.slug)}`} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/blog/${post.slug}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
-        <div className="blog-view-all"><Link className="cinema-link" to="/articles">View all articles <ArrowUpRight size={15}/></Link></div>
-        </>
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} getTitle={(post) => post.title} getImage={(post) => post.cover_image_url} getLink={(post) => `/articles/${encodeURIComponent(post.slug)}`} renderDetails={(post, index, primary) => primary ? <><p className="cinema-summary">{post.excerpt || truncate(toPlainText(post.content), 160)}</p><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p><Link className="cinema-link" to={`/articles/${encodeURIComponent(post.slug)}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
       ) : (
         <div className="blog-empty-state">
           <BookOpen size={22} aria-hidden="true" />

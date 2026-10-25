@@ -9,7 +9,7 @@ import { useSeo } from '../lib/useSeo'
 
 const PAGE_SIZE = 8
 export default function ArticlesPage() {
-  const { posts = [], site } = useContent()
+  const { posts = [], site, status = 'ready', error, reload } = useContent()
   const articles = useMemo(() => sortPosts(posts.filter(isPostPublic)), [posts])
   const [view, setView] = useState('grid')
   const [query, setQuery] = useState('')
@@ -40,12 +40,12 @@ export default function ArticlesPage() {
         <button type="button" className={view === 'list' ? 'active' : ''} aria-pressed={view === 'list'} onClick={() => setView('list')} aria-label="List view" title="List view"><List size={19}/></button>
       </div>
     </div>
-    {shown.length ? <motion.div layout className={`article-list-grid ${view === 'list' ? 'article-list-grid-list' : ''}`}>
+    {status === 'loading' ? <div className="articles-no-results" role="status">Loading published articles…</div> : status === 'error' ? <div className="articles-no-results" role="alert"><h2>Articles could not be loaded</h2><p>{error || 'The published article collection is temporarily unavailable.'}</p><button className="button button-secondary" onClick={reload}>Try again</button></div> : shown.length ? <motion.div layout className={`article-list-grid ${view === 'list' ? 'article-list-grid-list' : ''}`}>
       {shown.map((post, index) => <motion.article layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .32, delay: Math.min(index * .035, .22) }} className="article-list-card" key={post.id || post.slug}>
-        {post.cover_image_url ? <Link to={`/blog/${encodeURIComponent(post.slug)}`}><img src={post.cover_image_url} alt={post.title ? `Cover for ${post.title}` : ''} loading="lazy" /></Link> : <Link className="article-card-placeholder" to={`/blog/${encodeURIComponent(post.slug)}`}><BookOpen size={28}/></Link>}
+        {post.cover_image_url ? <Link to={`/articles/${encodeURIComponent(post.slug)}`}><img src={post.cover_image_url} alt={post.title ? `Cover for ${post.title}` : ''} loading="lazy" /></Link> : <Link className="article-card-placeholder" to={`/articles/${encodeURIComponent(post.slug)}`}><BookOpen size={28}/></Link>}
         <div><p className="cinema-meta">{post.category || 'ENGINEERING NOTES'}{post.published_at ? ` · ${formatDate(post.published_at)}` : ''} · {readingTime(post.content)} min read</p>
-        <h2><Link to={`/blog/${encodeURIComponent(post.slug)}`}>{post.title}</Link></h2><p>{post.excerpt || truncate(toPlainText(post.content), 180)}</p>
-        <Link className="cinema-link" to={`/blog/${encodeURIComponent(post.slug)}`}>Read article <ArrowUpRight size={15}/></Link></div>
+        <h2><Link to={`/articles/${encodeURIComponent(post.slug)}`}>{post.title}</Link></h2><p>{post.excerpt || truncate(toPlainText(post.content), 180)}</p>
+        <Link className="cinema-link" to={`/articles/${encodeURIComponent(post.slug)}`}>Read article <ArrowUpRight size={15}/></Link></div>
       </motion.article>)}
     </motion.div> : <div className="articles-no-results"><BookOpen size={24}/><h2>{query ? 'No matching articles' : 'Articles coming soon'}</h2><p>{query ? 'Try another keyword. Search includes the full article text, not only titles.' : 'Articles appear here as soon as they are published from the admin dashboard.'}</p>{query ? <button className="button button-secondary" onClick={() => setQuery('')}>Clear search</button> : null}</div>}
     {shown.length < filtered.length ? <div className="articles-load-more"><button className="button button-primary" onClick={() => setVisibleCount(n => n + PAGE_SIZE)}>Load more articles <ArrowUpRight size={16}/></button><span>Showing {shown.length} of {filtered.length}</span></div> : filtered.length > 0 ? <p className="articles-results-count">Showing all {filtered.length} articles</p> : null}

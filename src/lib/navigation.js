@@ -8,7 +8,7 @@ export const NAV_ITEMS = [
   { label: 'Certifications', href: '#certifications' },
   { label: 'Toolkit', href: '#expertise' },
   { label: 'Education', href: '#education' },
-  { label: 'Articles', href: '#blog' },
+  { label: 'Articles', href: '#articles' },
   { label: 'Contact', href: '#contact' },
 ]
 

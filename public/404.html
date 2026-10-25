@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="robots" content="noindex">
-  <title>Redirecting…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opening page…</title>
   <script>
     (function () {
-      var path = window.location.pathname + window.location.search + window.location.hash;
-      window.location.replace('/?/' + path.replace(/^\/+/, ''));
+      var requested = window.location.pathname + window.location.search + window.location.hash;
+      try { sessionStorage.setItem('portfolio-gh-pages-requested-path', requested); } catch (e) {}
+      window.location.replace('/?__ghp=' + encodeURIComponent(requested));
     })();
   </script>
 </head>
-<body></body>
+<body><p>Opening page…</p></body>
 </html>

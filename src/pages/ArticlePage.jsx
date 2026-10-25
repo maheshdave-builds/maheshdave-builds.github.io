@@ -108,7 +108,7 @@ export default function ArticlePage({ slug }) {
     playNext()
   }
   const stopSpeech = () => { window.speechSynthesis?.cancel(); speechQueueRef.current = []; speechIndexRef.current = 0; setSpeaking(false); setSpeechBusy(false); setSpeechMessage('Stopped') }
-  const articleUrl = typeof window !== 'undefined' ? window.location.href : ''
+  const articleUrl = visible?.slug ? absoluteUrl(`/articles/${encodeURIComponent(visible.slug)}`) : ''
   const shareOn = (platform) => {
     const encodedUrl = encodeURIComponent(articleUrl); const encodedTitle = encodeURIComponent(visible?.title || '')
     const urls = { x: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`, linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` }
@@ -139,55 +139,64 @@ export default function ArticlePage({ slug }) {
       if (!succeeded) throw new Error('Clipboard copy was rejected')
     }
 
-    root.querySelectorAll('pre, blockquote').forEach((block) => {
-      // Put the control outside <pre>: its horizontal overflow can otherwise
-      // clip/scroll the button along with the code on narrow screens.
-      let wrapper = block.parentElement
-      if (!wrapper?.classList.contains('article-copy-wrapper')) {
-        wrapper = document.createElement('div')
-        wrapper.className = 'article-copy-wrapper'
-        block.parentNode.insertBefore(wrapper, block)
-        wrapper.appendChild(block)
-      }
-      if (wrapper.querySelector('.article-copy-control')) return
-      // Re-apply wrapper styling after CMS HTML updates; code blocks can be nested in markdown wrappers.
-      wrapper.classList.add('article-copy-wrapper')
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.className = 'article-copy-control'
-      button.setAttribute('aria-label', block.tagName === 'PRE' ? 'Copy code' : 'Copy quote')
-      button.title = button.getAttribute('aria-label')
-      button.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>'
-      button.addEventListener('click', async () => {
-        const code = block.tagName === 'PRE' ? (block.querySelector('code')?.textContent ?? block.textContent ?? '') : (block.innerText || block.textContent || '')
-        try {
-          await copyText(code)
-          button.classList.add('is-copied')
-          button.title = 'Copied!'
-          button.setAttribute('aria-label', 'Copied!')
-          button.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>'
-          window.setTimeout(() => {
-            if (!button.isConnected) return
-            button.classList.remove('is-copied')
-            button.title = block.tagName === 'PRE' ? 'Copy code' : 'Copy quote'
-            button.setAttribute('aria-label', button.title)
-            button.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>'
-          }, 1800)
-        } catch {
-          button.title = 'Copy failed — select the code and copy manually'
-          button.setAttribute('aria-label', button.title)
-          button.classList.add('copy-failed')
-          window.setTimeout(() => button.classList.remove('copy-failed'), 2400)
+    const addCopyControls = () => {
+        root.querySelectorAll('pre, blockquote').forEach((block) => {
+        // Put the control outside <pre>: its horizontal overflow can otherwise
+        // clip/scroll the button along with the code on narrow screens.
+        let wrapper = block.parentElement
+        if (!wrapper?.classList.contains('article-copy-wrapper')) {
+          wrapper = document.createElement('div')
+          wrapper.className = 'article-copy-wrapper'
+          block.parentNode.insertBefore(wrapper, block)
+          wrapper.appendChild(block)
         }
-      })
-      wrapper.appendChild(button)
-    })
+        if (wrapper.querySelector('.article-copy-control')) return
+        // Re-apply wrapper styling after CMS HTML updates; code blocks can be nested in markdown wrappers.
+        wrapper.classList.add('article-copy-wrapper')
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'article-copy-control'
+        button.setAttribute('aria-label', block.tagName === 'PRE' ? 'Copy code' : 'Copy quote')
+        button.title = button.getAttribute('aria-label')
+        button.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>'
+        button.addEventListener('click', async () => {
+          const code = block.tagName === 'PRE' ? (block.querySelector('code')?.textContent ?? block.textContent ?? '') : (block.innerText || block.textContent || '')
+          try {
+            await copyText(code)
+            button.classList.add('is-copied')
+            button.title = 'Copied!'
+            button.setAttribute('aria-label', 'Copied!')
+            button.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>'
+            window.setTimeout(() => {
+              if (!button.isConnected) return
+              button.classList.remove('is-copied')
+              button.title = block.tagName === 'PRE' ? 'Copy code' : 'Copy quote'
+              button.setAttribute('aria-label', button.title)
+              button.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>'
+            }, 1800)
+          } catch {
+            button.title = 'Copy failed — select the code and copy manually'
+            button.setAttribute('aria-label', button.title)
+            button.classList.add('copy-failed')
+            window.setTimeout(() => button.classList.remove('copy-failed'), 2400)
+          }
+        })
+        wrapper.appendChild(button)
+        })
+      }
+
+
+    // Initialize existing code blocks and keep controls attached if article HTML
+    // is replaced or inserted after the initial render (e.g. CMS-rendered content).
+    addCopyControls()
+    const contentObserver = new MutationObserver(() => addCopyControls())
+    contentObserver.observe(root, { childList: true, subtree: true })
 
     root.querySelectorAll('a[href]').forEach((link) => {
       if (link.querySelector('.article-external-icon') || !/^https?:/i.test(link.href)) return
       const icon = document.createElement('span'); icon.className = 'article-external-icon'; icon.setAttribute('aria-hidden', 'true'); icon.innerHTML = ' ↗'; link.appendChild(icon)
     })
-    return undefined
+    return () => contentObserver.disconnect()
   }, [html, visible?.slug])
 
   const related = useMemo(() => {
@@ -203,7 +212,7 @@ export default function ArticlePage({ slug }) {
       visible?.seo_description ||
       (visible ? truncate(visible.excerpt || toPlainText(visible.content), 155) : 'This article could not be found.'),
     image: visible?.cover_image_url || '/social-share.png',
-    canonicalPath: visible?.canonical_url || `/blog/${slug}`,
+    canonicalPath: visible?.canonical_url ? visible.canonical_url.replace('https://maheshdave-builds.github.io/blog/', 'https://maheshdave-builds.github.io/articles/').replace(/^\/blog\//, '/articles/') : `/articles/${encodeURIComponent(slug)}`,
     type: 'article',
     noindex: !visible,
     jsonLd: visible
@@ -216,7 +225,7 @@ export default function ArticlePage({ slug }) {
           dateModified: visible.updated_at || visible.published_at,
           author: { '@type': 'Person', name: visible.author || 'Mahesh Dave' },
           publisher: { '@type': 'Person', name: 'Mahesh Dave', url: SITE_ORIGIN },
-          mainEntityOfPage: absoluteUrl(`/blog/${visible.slug}`),
+          mainEntityOfPage: absoluteUrl(`/articles/${visible.slug}`),
           image: visible.cover_image_url ? absoluteUrl(visible.cover_image_url) : undefined,
           keywords: visible.tags?.join(', '),
         }
@@ -225,7 +234,7 @@ export default function ArticlePage({ slug }) {
   })
 
   const share = async () => {
-    const url = window.location.href
+    const url = articleUrl || absoluteUrl(`/articles/${encodeURIComponent(slug)}`)
     try {
       if (navigator.share) {
         await navigator.share({ title: visible?.title, url })
@@ -339,10 +348,10 @@ export default function ArticlePage({ slug }) {
               <article className="blog-card" key={item.id}>
                 <p className="eyebrow">{item.category || 'ENGINEERING NOTES'}</p>
                 <h3>
-                  <Link to={`/blog/${item.slug}`}>{item.title}</Link>
+                  <Link to={`/articles/${encodeURIComponent(item.slug)}`}>{item.title}</Link>
                 </h3>
                 <p>{item.excerpt || truncate(toPlainText(item.content), 140)}</p>
-                <TextLink to={`/blog/${item.slug}`} icon={ArrowUpRight}>
+                <TextLink to={`/articles/${encodeURIComponent(item.slug)}`} icon={ArrowUpRight}>
                   Read article
                 </TextLink>
               </article>

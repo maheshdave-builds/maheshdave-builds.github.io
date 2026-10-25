@@ -154,11 +154,10 @@ export async function publishStagedContent() {
 async function flushSharedContent() { /* writes are staged; publish is explicit */ }
 function updateLocalContent(updater) { return writeLocalContent(updater(readLocalContent())) }
 async function readSharedContent() {
-  try { return await gatewayRequest('', { method: 'GET', cache: 'no-store' }) }
-  catch (error) {
-    if (/not initialized|404|content file/i.test(error.message)) return readLocalContent()
-    throw error
-  }
+  // Published reads must come from the published JSON. Falling back to this
+  // browser's local CMS after a production 404 silently showed stale/default
+  // content and made one browser disagree with every other visitor.
+  return gatewayRequest('', { method: 'GET', cache: 'no-store' })
 }
 export function exportLocalContent() { return JSON.stringify(readLocalContent(), null, 2) }
 export function importLocalContent(json) {
@@ -172,6 +171,24 @@ export function importLocalContent(json) {
 /* ------------------------------------------------------------- normalizers */
 
 const asArray = (value) => (Array.isArray(value) ? value : [])
+
+// Older admin builds wrote articles under `articles` or `blogPosts`. Merge
+// these legacy collections by slug/id, with canonical `posts` winning on
+// duplicates. This prevents an empty or partial `posts` array from hiding
+// published records that are still present in a legacy field.
+function sharedPostRows(source = {}) {
+  const byKey = new Map()
+  for (const key of ['articles', 'blogPosts', 'posts']) {
+    for (const row of asArray(source[key])) {
+      if (!row || typeof row !== 'object') continue
+      const slug = String(row.slug || '').trim().toLowerCase()
+      const identity = slug || String(row.id || '').trim()
+      if (!identity) continue
+      byKey.set(identity, { ...(byKey.get(identity) || {}), ...row })
+    }
+  }
+  return [...byKey.values()]
+}
 
 function normalizeProject(row) {
   return {
@@ -333,7 +350,7 @@ function getLocalPreviewContent() {
 
 export async function fetchPublicContent() {
   if (isLocalPreviewMode()) return getLocalPreviewContent()
-  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(shared.posts || shared.articles || shared.blogPosts).map(normalizePost).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
+  if (useGithubGateway) { const shared = await readSharedContent(); return { ...shared, ...fallbackContent, ...shared, projects: asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), certifications: asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false), experience: asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false), education: asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false), posts: sortPosts(sharedPostRows(shared).map(normalizePost).filter(isPostPublic)), theme: shared.themePublished || shared.theme || DEFAULT_THEME } }
   if (!supabase) { const local = readLocalContent(); return { ...local, projects: asArray(local.projects).filter((x) => x.is_published !== false), certifications: asArray(local.certifications).filter((x) => x.is_published !== false), experience: asArray(local.experience).filter((x) => x.is_published !== false), education: asArray(local.education).filter((x) => x.is_published !== false), posts: sortPosts(asArray(local.posts).filter(isPostPublic)), theme: local.themePublished || local.theme || DEFAULT_THEME } }
 
   const nowIso = new Date().toISOString()
@@ -366,7 +383,7 @@ export async function fetchPublicContent() {
     experience: asArray(settled(experience, [])).map(normalizeExperience),
     education: asArray(settled(education, [])).map(normalizeEducation),
     posts: sortPosts(asArray(settled(posts, [])).map(normalizePost)),
-    profile: { ...normalizeProfile(settled(profileResult, null)), profileImageDesign: Object.fromEntries(settingRows.map((row) => [row.key, row.value])).profile_image_design || 'editorial' },
+    profile: { ...normalizeProfile(settled(profileResult, null)), profileImageDesign: Object.fromEntries(settingRows.map((row) => [row.key, row.value])).profile_image_design || 'editorial', profileImageSectionDesign: Object.fromEntries(settingRows.map((row) => [row.key, row.value])).profile_image_section_design || 'classic-professional' },
     site: mergeSiteSettings(settingRows),
     theme: themeFromSettings(settingRows),
   }
@@ -379,7 +396,7 @@ export async function fetchPublicContent() {
  */
 export async function fetchPostBySlug(slug) {
   if (isLocalPreviewMode()) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug) || null
-  if (useGithubGateway) { const shared = await readSharedContent(); return asArray(shared.posts || shared.articles || shared.blogPosts).map(normalizePost).find((post) => decodeURIComponent(String(post.slug || '')) === decodeURIComponent(String(slug || '')) && isPostPublic(post)) || null }
+  if (useGithubGateway) { const shared = await readSharedContent(); return sharedPostRows(shared).map(normalizePost).find((post) => decodeURIComponent(String(post.slug || '')) === decodeURIComponent(String(slug || '')) && isPostPublic(post)) || null }
   if (!supabase) return asArray(readLocalContent().posts).map(normalizePost).find((post) => post.slug === slug && isPostPublic(post)) || null
   if (supabase) {
     const { data, error } = await supabase
@@ -409,7 +426,7 @@ export async function fetchAdminContent() {
     // rows by stable ID so a reload never discards a newly-created or edited
     // article just because the published GitHub JSON still has the old version.
     const mergeRows = (key) => {
-      const publishedRows = asArray(shared[key])
+      const publishedRows = key === 'posts' ? sharedPostRows(shared) : asArray(shared[key])
       const stagedRows = asArray(local[key])
       const byId = new Map(publishedRows.map((row, index) => [String(row.id ?? `${key}-published-${index}`), row]))
       stagedRows.forEach((row, index) => {
@@ -461,7 +478,7 @@ export async function fetchAdminContent() {
   const map = Object.fromEntries(settingRows.map((row) => [row.key, row.value]))
 
   return {
-    profile: { ...normalizeProfile(value(profileResult)), profileImageDesign: map.profile_image_design || 'editorial' },
+    profile: { ...normalizeProfile(value(profileResult)), profileImageDesign: map.profile_image_design || 'editorial', profileImageSectionDesign: map.profile_image_section_design || 'classic-professional' },
     profileRow: value(profileResult),
     projects: asArray(value(projects)).map(normalizeProject),
     certifications: asArray(value(certifications)).map(normalizeCertification),
@@ -623,7 +640,7 @@ export async function saveProfile(profile) {
 
 /** Upsert one key of `site_settings`. Used for copy, stats, branding and theme. */
 export async function saveSetting(key, value) {
-  if (!supabase) { updateLocalContent((state) => { const next = { ...state }; if (key === 'theme_draft') next.themeDraft = value; else if (key === 'theme_published') { next.themePublished = value; next.theme = value } else if (key === 'copy') next.site = { ...next.site, copy: value }; else if (key === 'stats') next.site = { ...next.site, stats: value }; else if (key === 'tech_stack') next.site = { ...next.site, techStack: value }; else if (key === 'site_structure') next.site = { ...next.site, ...value }; else if (key === 'site_title') next.site = { ...next.site, siteTitle: value.title || next.site.siteTitle, siteDescription: value.description || next.site.siteDescription }; else if (key === 'branding') next.site = { ...next.site, siteLogo: value.logo || '', contactEmail: value.contact_email || next.site.contactEmail, showClientProjects: value.show_client_projects !== false }; next.settingsRows = [...asArray(next.settingsRows).filter((row) => row.key !== key), { key, value }]; return next }); await flushSharedContent(); return }
+  if (!supabase) { updateLocalContent((state) => { const next = { ...state }; if (key === 'theme_draft') next.themeDraft = value; else if (key === 'theme_published') { next.themePublished = value; next.theme = value } else if (key === 'copy') next.site = { ...next.site, copy: value }; else if (key === 'stats') next.site = { ...next.site, stats: value }; else if (key === 'tech_stack') next.site = { ...next.site, techStack: value }; else if (key === 'site_structure') next.site = { ...next.site, ...value }; else if (key === 'site_title') next.site = { ...next.site, siteTitle: value.title || next.site.siteTitle, siteDescription: value.description || next.site.siteDescription }; else if (key === 'branding') next.site = { ...next.site, siteLogo: value.logo || '', contactEmail: value.contact_email || next.site.contactEmail, showClientProjects: value.show_client_projects !== false }; else if (key === 'profile_image_section_design') next.profile = { ...next.profile, profileImageSectionDesign: value }; next.settingsRows = [...asArray(next.settingsRows).filter((row) => row.key !== key), { key, value }]; return next }); await flushSharedContent(); return }
   const { error } = await supabase
     .from('site_settings')
     .upsert({ key, value, updated_at: new Date().toISOString() })

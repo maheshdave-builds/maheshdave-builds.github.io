@@ -39,7 +39,7 @@ export default function SiteHeader({ activeSection }) {
 
   const close = () => setOpen(false)
   const socials = profile.social_urls || {}
-  const navLinks = (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_LINKS).map((item) => ['notes', 'noted'].includes(String(item.label || '').trim().toLowerCase()) && String(item.href || '').includes('#blog') ? { ...item, label: 'Articles' } : item).filter((item) => item.visible !== false)
+  const navLinks = (Array.isArray(site.navigationLinks) ? site.navigationLinks : NAV_LINKS).map((item) => { const href = String(item.href || ''); const label = String(item.label || '').trim().toLowerCase(); const pointsToArticles = href === '#blog' || href === '/#blog' || href.endsWith('#blog'); return pointsToArticles ? { ...item, label: ['blog', 'notes', 'noted'].includes(label) ? 'Articles' : item.label, href: href.replace(/#blog$/, '#articles') } : item }).filter((item) => item.visible !== false)
   const navTarget = (href) => String(href || '#home').startsWith('http') || String(href || '').startsWith('/') ? href : `/${href}`
 
   return (

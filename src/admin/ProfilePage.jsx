@@ -75,6 +75,7 @@ export default function ProfilePage() {
     try {
       await saveProfile(draft)
       await saveSetting('profile_image_design', draft.profileImageDesign || 'editorial')
+      await saveSetting('profile_image_section_design', draft.profileImageSectionDesign || 'classic-professional')
       await reload()
       setNotice('Profile updated. The public site reflects this immediately.')
     } catch (saveError) {
@@ -190,11 +191,37 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className={`portrait-preview portrait-design-${draft.profileImageDesign || 'editorial'}`}>
+          <div className={`portrait-preview portrait-section-preview portrait-section-${draft.profileImageSectionDesign || 'classic-professional'}`}>
+            <div className="portrait-backdrop" aria-hidden="true" />
             {draft.profileImage ? (
-              <img src={draft.profileImage} alt="Profile photo preview" onError={(event) => { event.currentTarget.style.display = 'none' }} />
+              <figure className={`portrait-frame portrait-design-${draft.profileImageDesign || 'editorial'}`}>
+                <img src={draft.profileImage} alt="Profile photo preview" onError={(event) => { event.currentTarget.style.display = 'none' }} />
+              </figure>
             ) : <span>No photo selected</span>}
           </div>
+          <div className="profile-section-designs">
+            <h3>Profile Image Section Design</h3>
+            <p className="field-hint">Choose the overall portrait composition independently of the frame preset above.</p>
+            <div className="profile-section-design-grid" role="radiogroup" aria-label="Profile image section design">
+              {[
+                ['classic-professional', 'Classic Professional', 'Balanced frame and calm backdrop'],
+                ['modern-executive', 'Modern Executive', 'Layered shapes and accent color'],
+                ['editorial-portrait', 'Editorial Portrait', 'Asymmetric editorial composition'],
+                ['minimalist', 'Minimalist', 'Clean space and restrained styling'],
+                ['geometric-modern', 'Geometric Modern', 'Structured geometric accents'],
+                ['soft-gradient', 'Soft Gradient', 'Subtle gradient atmosphere'],
+                ['premium-portfolio', 'Premium Portfolio', 'Refined layered frame and shadow'],
+                ['creative-architect', 'Creative Architect', 'Technical, architectural composition'],
+              ].map(([id, label, detail]) => (
+                <button type="button" key={id} role="radio" aria-checked={(draft.profileImageSectionDesign || 'classic-professional') === id} className={`profile-section-design-option ${draft.profileImageSectionDesign === id ? 'is-selected' : ''}`} onClick={() => set('profileImageSectionDesign', id)}>
+                  <span className={`profile-section-design-thumb portrait-section-${id}`}><img src={draft.profileImage || '/profile.jpg'} alt="" /></span>
+                  <span><strong>{label}</strong><small>{detail}</small></span>
+                  {(draft.profileImageSectionDesign || 'classic-professional') === id ? <Check size={16} aria-hidden="true" /> : null}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="portrait-design-picker" role="radiogroup" aria-label="Profile image design">
             <p className="field-hint">Choose a display style. It will be applied to the public portrait when you save and publish.</p>
             {[

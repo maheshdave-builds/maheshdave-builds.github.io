@@ -21,7 +21,7 @@ export default function NotFoundPage() {
         <Link className="button button-primary" to="/">
           <ArrowLeft size={16} aria-hidden="true" /> Back to portfolio
         </Link>
-        <Link className="button button-secondary" to="/#blog">
+        <Link className="button button-secondary" to="/#articles">
           Read the notes
         </Link>
       </div>
