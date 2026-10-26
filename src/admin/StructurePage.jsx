@@ -55,7 +55,7 @@ export default function StructurePage() {
       const nextSite = { ...site, menuStyle, structure: { order: migrateStructureOrder(order), hidden: [...new Set(hidden.map((id) => (id === 'blog' ? 'articles' : id)))] }, navigationLinks: menu.filter((item) => item.label.trim() && item.href.trim()), customSections }
       await saveSetting('site_structure', { structure: nextSite.structure, navigationLinks: nextSite.navigationLinks, customSections: nextSite.customSections, menuStyle: nextSite.menuStyle })
       setSite(nextSite)
-      setNotice('Page structure and navigation saved.')
+      setNotice('Page structure saved. Click Publish in the header to update the live site.')
     } catch (saveError) { setError(saveError.message || 'Could not save page structure.') }
     finally { setBusy(false) }
   }

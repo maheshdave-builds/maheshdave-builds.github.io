@@ -82,6 +82,71 @@ async function getGitHubFile(endpoint, token) {
   return result
 }
 
+function jsonFileBytes(value) {
+  return new TextEncoder().encode(JSON.stringify(value, null, 2) + '\n')
+}
+
+async function createBlob(token, bytes) {
+  const response = await fetch(`${API}/repos/${OWNER}/${REPO}/git/blobs`, {
+    method: 'POST',
+    headers: { ...headers(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: encodeBase64(bytes), encoding: 'base64' }),
+  })
+  const result = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(result.message || `Could not create Git blob (${response.status}).`)
+  return result.sha
+}
+
+/** One commit for all content files so Publish triggers a single Pages deploy. */
+async function commitContentFiles(token, message, files) {
+  const refResponse = await fetch(`${API}/repos/${OWNER}/${REPO}/git/ref/heads/${BRANCH}`, { headers: headers(token), cache: 'no-store' })
+  const refData = await refResponse.json().catch(() => ({}))
+  if (!refResponse.ok) throw new Error(refData.message || `Could not read ${BRANCH} ref (${refResponse.status}).`)
+
+  const parentSha = refData.object?.sha
+  if (!parentSha) throw new Error('Could not resolve the current branch commit.')
+
+  const parentCommitResponse = await fetch(`${API}/repos/${OWNER}/${REPO}/git/commits/${parentSha}`, { headers: headers(token), cache: 'no-store' })
+  const parentCommit = await parentCommitResponse.json().catch(() => ({}))
+  if (!parentCommitResponse.ok) throw new Error(parentCommit.message || `Could not read parent commit (${parentCommitResponse.status}).`)
+
+  const treeItems = []
+  for (const file of files) {
+    const sha = await createBlob(token, jsonFileBytes(file.content))
+    treeItems.push({ path: file.path, mode: '100644', type: 'blob', sha })
+  }
+
+  const treeResponse = await fetch(`${API}/repos/${OWNER}/${REPO}/git/trees`, {
+    method: 'POST',
+    headers: { ...headers(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ base_tree: parentCommit.tree.sha, tree: treeItems }),
+  })
+  const tree = await treeResponse.json().catch(() => ({}))
+  if (!treeResponse.ok) throw new Error(tree.message || `Could not build Git tree (${treeResponse.status}).`)
+
+  const commitResponse = await fetch(`${API}/repos/${OWNER}/${REPO}/git/commits`, {
+    method: 'POST',
+    headers: { ...headers(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, tree: tree.sha, parents: [parentSha] }),
+  })
+  const commit = await commitResponse.json().catch(() => ({}))
+  if (!commitResponse.ok) throw new Error(commit.message || `Could not create commit (${commitResponse.status}).`)
+
+  const updateRef = async () => fetch(`${API}/repos/${OWNER}/${REPO}/git/refs/heads/${BRANCH}`, {
+    method: 'PATCH',
+    headers: { ...headers(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sha: commit.sha, force: false }),
+  })
+
+  let refUpdate = await updateRef()
+  if (refUpdate.status === 422 || refUpdate.status === 409) {
+    refUpdate = await updateRef()
+  }
+  const refResult = await refUpdate.json().catch(() => ({}))
+  if (!refUpdate.ok) throw new Error(refResult.message || `Could not update ${BRANCH} (${refUpdate.status}).`)
+  return commit
+}
+
 function encodeBase64(bytes) {
   let binary = ''
   const chunkSize = 0x8000
@@ -139,24 +204,12 @@ export async function gatewayRequest(path = '', options = {}) {
     return Number.isFinite(publishedAt) && publishedAt <= now
   })
   const { articles: _stagedArticles, articleLikes, ...portfolio } = payload
-  async function writeFile(path, value) {
-    const endpoint = `${API}/repos/${OWNER}/${REPO}/contents/${path}`
-    const content = encodeBase64(new TextEncoder().encode(JSON.stringify(value, null, 2) + '\n'))
-    let lastError
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const current = await getGitHubFile(endpoint, token)
-      const response = await fetch(endpoint, { method: 'PUT', headers: { ...headers(token), 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Publish ${path} ${new Date().toISOString()}`, content, branch: BRANCH, ...(current.sha ? { sha: current.sha } : {}) }) })
-      const result = await response.json().catch(() => ({}))
-      if (response.ok) return result
-      lastError = new Error(result.message || `GitHub rejected ${path} (${response.status}).`)
-      if (attempt === 0 && (response.status === 409 || response.status === 422) && /sha|conflict|does not match|already exists/i.test(result.message || '')) continue
-      throw lastError
-    }
-    throw lastError || new Error(`Could not publish ${path}.`)
-  }
-  // Both files are committed independently; surface failures rather than falsely reporting publication.
-  await writeFile(ARTICLES_PATH, { articles })
-  const result = await writeFile(CONTENT_PATH, portfolio)
-  if (articleLikes) await writeFile(ARTICLE_LIKES_PATH, articleLikes)
-  return { ok: true, commit: result.commit?.sha, updated_at: result.commit?.committer?.date || new Date().toISOString() }
+  const files = [
+    { path: ARTICLES_PATH, content: { articles } },
+    { path: CONTENT_PATH, content: portfolio },
+  ]
+  if (articleLikes) files.push({ path: ARTICLE_LIKES_PATH, content: articleLikes })
+
+  const commit = await commitContentFiles(token, `Publish site content ${new Date().toISOString()}`, files)
+  return { ok: true, commit: commit.sha, updated_at: commit.committer?.date || new Date().toISOString() }
 }

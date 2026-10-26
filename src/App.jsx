@@ -172,7 +172,7 @@ function PublicRoute({ preview }) {
 
 function Routes() {
   const { pathname, navigate } = useRouter()
-  const { theme, status, error, reload } = useContent()
+  const { theme } = useContent()
   useEffect(() => {
     if (pathname === '/admin' || pathname.startsWith('/admin/')) navigate(pathname.replace(/^\/admin/, '/mdadmin'), { replace: true })
   }, [pathname, navigate])
@@ -189,10 +189,6 @@ function Routes() {
     )
   }
 
-  // Do not flash bundled seed content while the published source is still loading.
-  // A failed request is distinct from a successfully loaded empty collection.
-  if (status === 'loading') return <main className="content-load-state" role="status" aria-live="polite"><span className="content-load-spinner" aria-hidden="true" /><p>Loading the latest published content…</p></main>
-  if (status === 'error') return <main className="content-load-state content-load-error" role="alert"><h1>Content could not be loaded</h1><p>{error || 'The published site data is temporarily unavailable.'}</p><button type="button" className="button button-primary" onClick={reload}>Try again</button></main>
   if (pathname === '/preview') return <PublicRoute preview />
   return <PublicRoute />
 }

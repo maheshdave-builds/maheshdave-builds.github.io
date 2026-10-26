@@ -25,6 +25,7 @@ import { useSeo, SITE_ORIGIN } from '../lib/useSeo'
 import { formatDate, isArticlePublic, readingTime, truncate } from '../lib/format'
 import { getArticleCoverImage } from '../lib/articleImages'
 import { toPlainText } from '../lib/sanitize'
+import { migrateStructureOrder } from '../lib/content'
 
 function SectionHeading({ eyebrow, title, description, id }) {
   return (
@@ -462,7 +463,8 @@ export default function HomePage({ onSection }) {
   const customSections = site.customSections || []
   const customMap = Object.fromEntries(customSections.map((section) => [section.id, section]))
   const defaultOrder = ['home', 'about', 'projects', 'experience', 'certifications', 'education', 'expertise', 'articles', 'contact']
-  const order = [...new Set([...(site.structure?.order || defaultOrder), ...defaultOrder, ...customSections.map((section) => section.id)])]
+  const configuredOrder = migrateStructureOrder(site.structure?.order || defaultOrder)
+  const order = [...new Set([...configuredOrder, ...defaultOrder.filter((id) => !configuredOrder.includes(id)), ...customSections.map((section) => section.id)])]
   const hidden = site.structure?.hidden || []
 
   return (
