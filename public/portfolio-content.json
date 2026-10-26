@@ -711,8 +711,8 @@
   ],
   "site": {
     "siteTitle": "Mahesh Dave · Adobe Commerce Engineering",
-    "siteDescription": "Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
-    "siteLogo": "",
+    "siteDescription": "Mahesh Dave · Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
+    "siteLogo": "/uploads/branding/1793042375792-onsuqy.jpg",
     "copy": {
       "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
       "heroHeadline": "Engineering commerce that works harder.",
@@ -1031,64 +1031,5 @@
       "gradientTo": "#426f6c"
     }
   },
-  "settingsRows": [
-    {
-      "key": "site_structure",
-      "value": {
-        "structure": {
-          "order": [
-            "home",
-            "about",
-            "articles",
-            "projects",
-            "certifications",
-            "experience",
-            "education",
-            "expertise",
-            "contact"
-          ],
-          "hidden": [
-            "expertise"
-          ]
-        },
-        "navigationLinks": [
-          {
-            "label": "About",
-            "href": "#about"
-          },
-          {
-            "label": "Articles",
-            "href": "#articles"
-          },
-          {
-            "label": "Projects",
-            "href": "#projects"
-          },
-          {
-            "label": "Certifications",
-            "href": "#certifications"
-          },
-          {
-            "label": "Experience",
-            "href": "#experience"
-          },
-          {
-            "label": "Toolkit",
-            "href": "#expertise",
-            "visible": false
-          },
-          {
-            "label": "Education",
-            "href": "#education"
-          },
-          {
-            "label": "Contact",
-            "href": "#contact"
-          }
-        ],
-        "customSections": [],
-        "menuStyle": "underline"
-      }
-    }
-  ]
+  "settingsRows": []
 }
