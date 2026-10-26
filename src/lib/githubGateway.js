@@ -5,6 +5,7 @@ const REPO = 'maheshdave-builds.github.io'
 const BRANCH = 'main'
 const CONTENT_PATH = 'public/portfolio-content.json'
 const ARTICLES_PATH = 'public/articles-content.json'
+const ARTICLE_LIKES_PATH = 'public/article-likes.json'
 const SESSION_KEY = 'portfolio-github-admin-session'
 const API = 'https://api.github.com'
 const RAW_CONTENT_URL = '/portfolio-content.json'
@@ -12,6 +13,7 @@ const RAW_ARTICLES_URL = '/articles-content.json'
 const LOCAL_DEV = ['localhost', '127.0.0.1'].includes(window.location.hostname)
 const LOCAL_DEV_KEY = 'portfolio-content-local-preview'
 const LOCAL_DEV_ARTICLES_KEY = 'portfolio-articles-local-preview'
+const LOCAL_DEV_LIKES_KEY = 'portfolio-article-likes-local-preview'
 
 export function githubGatewayConfigured() { return true }
 export function getGatewayPassword() { try { return sessionStorage.getItem(SESSION_KEY) || '' } catch { return '' } }
@@ -111,6 +113,7 @@ export async function gatewayRequest(path = '', options = {}) {
     const { articles: _articles, ...portfolio } = payload
     localStorage.setItem(LOCAL_DEV_KEY, JSON.stringify(portfolio))
     localStorage.setItem(LOCAL_DEV_ARTICLES_KEY, JSON.stringify({ articles }))
+    if (payload.articleLikes) localStorage.setItem(LOCAL_DEV_LIKES_KEY, JSON.stringify(payload.articleLikes))
     window.dispatchEvent(new Event('portfolio-local-content-updated'))
     return { ok: true, localPreview: true, updated_at: new Date().toISOString() }
   }
@@ -128,7 +131,7 @@ export async function gatewayRequest(path = '', options = {}) {
     const publishedAt = Date.parse(article.published_at)
     return Number.isFinite(publishedAt) && publishedAt <= now
   })
-  const { articles: _stagedArticles, ...portfolio } = payload
+  const { articles: _stagedArticles, articleLikes, ...portfolio } = payload
   async function writeFile(path, value) {
     const endpoint = `${API}/repos/${OWNER}/${REPO}/contents/${path}`
     const content = encodeBase64(new TextEncoder().encode(JSON.stringify(value, null, 2) + '\n'))
@@ -147,5 +150,6 @@ export async function gatewayRequest(path = '', options = {}) {
   // Both files are committed independently; surface failures rather than falsely reporting publication.
   await writeFile(ARTICLES_PATH, { articles })
   const result = await writeFile(CONTENT_PATH, portfolio)
+  if (articleLikes) await writeFile(ARTICLE_LIKES_PATH, articleLikes)
   return { ok: true, commit: result.commit?.sha, updated_at: result.commit?.committer?.date || new Date().toISOString() }
 }

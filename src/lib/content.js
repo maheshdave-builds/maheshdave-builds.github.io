@@ -6,6 +6,7 @@ const supabase = !useGithubGateway && isConfigured ? remoteSupabase : null
 import { fallbackContent, seedSite, seedProfile, DEFAULT_COPY, DEFAULT_STATS } from './seed'
 import { DEFAULT_THEME, validateTheme } from './theme'
 import { isArticlePublic, sortArticles } from './format'
+import { clearPendingLikeCounts, mergeArticleLikesForPublish } from './articleLikes'
 
 // Data access for the portfolio. Every public read is subject to RLS: the anon
 // role only ever sees published rows and a whitelist of site_settings keys, so
@@ -154,8 +155,10 @@ export async function publishStagedContent() {
     experience: dedupeCollectionRows(staged.experience, 'experience'),
     education: dedupeCollectionRows(staged.education, 'education'),
     articles: dedupeCollectionRows(staged.articles, 'articles'),
+    articleLikes: await mergeArticleLikesForPublish(),
   }
   await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+  clearPendingLikeCounts()
   try { localStorage.removeItem(STAGED_CONTENT_KEY) } catch {}
   window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
   return true

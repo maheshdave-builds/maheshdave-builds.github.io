@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, Check, GripVertical, Loader2, Plus, RotateCcw, Save, Trash2, Volume2, ImagePlus } from 'lucide-react'
+import { AlertTriangle, Check, GripVertical, Heart, Loader2, Plus, RotateCcw, Save, Trash2, Volume2, ImagePlus } from 'lucide-react'
 import { useAdminContent } from '../contexts/hooks'
 import { saveSetting, uploadImage } from '../lib/content'
 import { DEFAULT_COPY, DEFAULT_STATS } from '../lib/seed'
@@ -159,7 +159,11 @@ export default function PageContentPage() {
                 <input type="checkbox" checked={copy.articleListenEnabled !== false} onChange={(event) => setCopy((current) => ({ ...current, articleListenEnabled: event.target.checked }))} />
                 <Volume2 size={17} /> Enable “Listen to Article” on public article pages
               </label>
-              <p className="field-hint">This setting is saved with Page content when you click Save changes.</p>
+              <label>
+                <input type="checkbox" checked={copy.articleLikesEnabled !== false} onChange={(event) => setCopy((current) => ({ ...current, articleLikesEnabled: event.target.checked }))} />
+                <Heart size={17} /> Enable article likes on public article detail pages
+              </label>
+              <p className="field-hint">These settings are saved with Page content when you click Save changes.</p>
             </div>
             {bannerCropFile ? (
               <ImageCropDialog

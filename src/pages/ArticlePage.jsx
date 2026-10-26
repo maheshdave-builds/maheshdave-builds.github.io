@@ -9,6 +9,7 @@ import { formatDate, isArticlePublic, readingTime, sortArticles, truncate } from
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
 import { fetchArticleBySlug, contentSource } from '../lib/content'
 import { getArticleCoverImage } from '../lib/articleImages'
+import ArticleLikeButton from '../components/ArticleLikeButton'
 
 function useArticle(slug) {
   const { articles, status } = useContent()
@@ -312,6 +313,7 @@ export default function ArticlePage({ slug }) {
               {listenExpanded ? <div className="article-listen-controls"><button type="button" className="button button-primary" onClick={speak}>{speaking ? <Pause size={16}/> : <Play size={16}/>} {speaking ? 'Pause' : window.speechSynthesis?.paused ? 'Resume' : 'Play'}</button><button type="button" className="button button-secondary" onClick={stopSpeech}><Square size={14}/> Stop</button><label>Language / voice<select value={voiceName} onChange={e => setVoiceName(e.target.value)}>{voices.map(voice => <option key={`${voice.name}-${voice.lang}`} value={voice.name}>{voice.lang} — {voice.name}</option>)}</select></label><label>Speed<select value={speechRate} onChange={e => setSpeechRate(Number(e.target.value))}>{[0.75,1,1.25,1.5,2].map(rate => <option key={rate} value={rate}>{rate}×</option>)}</select></label>{!voices.length ? <p className="field-hint" role="status">No system voices are available. Enable a voice in your device or browser settings, then reload this page.</p> : null}</div> : null}
             </section> : <div className="article-listen-disabled-spacer" />}
             <div className="article-actions" aria-label="Article sharing">
+              {site.copy?.articleLikesEnabled !== false ? <ArticleLikeButton slug={visible.slug} /> : null}
               <button type="button" className="subtle-button article-share" onClick={() => shareOn('x')} aria-label="Share on X" title="Share on X"><span aria-hidden="true" className="x-share-icon">𝕏</span></button>
               <button type="button" className="subtle-button article-share" onClick={() => shareOn('linkedin')} aria-label="Share on LinkedIn" title="Share on LinkedIn"><Linkedin size={17}/></button>
               <button type="button" className="subtle-button article-share" onClick={() => shareOn('facebook')} aria-label="Share on Facebook" title="Share on Facebook"><Facebook size={17}/></button>
@@ -354,6 +356,7 @@ export default function ArticlePage({ slug }) {
             intervalSeconds={site.sliderIntervalSeconds ?? 5}
             label="More Articles"
             items={moreArticles}
+            imageFit="contain"
             getTitle={(article) => article.title}
             getImage={getArticleCoverImage}
             getLink={(article) => `/articles/${encodeURIComponent(article.slug)}`}

@@ -231,6 +231,7 @@ export const DEFAULT_COPY = {
   articlesPageDescription: 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
   articlesPageBannerImage: '',
   articleListenEnabled: true,
+  articleLikesEnabled: true,
   contactTitle: 'Good work starts with a conversation.',
   contactDescription:
     'Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect.',
