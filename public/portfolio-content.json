@@ -846,12 +846,12 @@
       "order": [
         "home",
         "about",
+        "articles",
         "projects",
-        "experience",
         "certifications",
+        "experience",
         "education",
         "expertise",
-        "articles",
         "contact"
       ],
       "hidden": [
@@ -864,16 +864,20 @@
         "href": "#about"
       },
       {
+        "label": "Articles",
+        "href": "#articles"
+      },
+      {
         "label": "Projects",
         "href": "#projects"
       },
       {
-        "label": "Experience",
-        "href": "#experience"
-      },
-      {
         "label": "Certifications",
         "href": "#certifications"
+      },
+      {
+        "label": "Experience",
+        "href": "#experience"
       },
       {
         "label": "Toolkit",
@@ -883,10 +887,6 @@
       {
         "label": "Education",
         "href": "#education"
-      },
-      {
-        "label": "Articles",
-        "href": "#articles"
       },
       {
         "label": "Contact",
@@ -1129,64 +1129,6 @@
       }
     },
     {
-      "key": "site_structure",
-      "value": {
-        "structure": {
-          "order": [
-            "home",
-            "about",
-            "projects",
-            "experience",
-            "certifications",
-            "education",
-            "expertise",
-            "articles",
-            "contact"
-          ],
-          "hidden": [
-            "expertise"
-          ]
-        },
-        "navigationLinks": [
-          {
-            "label": "About",
-            "href": "#about"
-          },
-          {
-            "label": "Projects",
-            "href": "#projects"
-          },
-          {
-            "label": "Experience",
-            "href": "#experience"
-          },
-          {
-            "label": "Certifications",
-            "href": "#certifications"
-          },
-          {
-            "label": "Toolkit",
-            "href": "#expertise",
-            "visible": false
-          },
-          {
-            "label": "Education",
-            "href": "#education"
-          },
-          {
-            "label": "Articles",
-            "href": "#articles"
-          },
-          {
-            "label": "Contact",
-            "href": "#contact"
-          }
-        ],
-        "customSections": [],
-        "menuStyle": "underline"
-      }
-    },
-    {
       "key": "copy",
       "value": {
         "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
@@ -1321,6 +1263,64 @@
           ]
         }
       ]
+    },
+    {
+      "key": "site_structure",
+      "value": {
+        "structure": {
+          "order": [
+            "home",
+            "about",
+            "articles",
+            "projects",
+            "certifications",
+            "experience",
+            "education",
+            "expertise",
+            "contact"
+          ],
+          "hidden": [
+            "expertise"
+          ]
+        },
+        "navigationLinks": [
+          {
+            "label": "About",
+            "href": "#about"
+          },
+          {
+            "label": "Articles",
+            "href": "#articles"
+          },
+          {
+            "label": "Projects",
+            "href": "#projects"
+          },
+          {
+            "label": "Certifications",
+            "href": "#certifications"
+          },
+          {
+            "label": "Experience",
+            "href": "#experience"
+          },
+          {
+            "label": "Toolkit",
+            "href": "#expertise",
+            "visible": false
+          },
+          {
+            "label": "Education",
+            "href": "#education"
+          },
+          {
+            "label": "Contact",
+            "href": "#contact"
+          }
+        ],
+        "customSections": [],
+        "menuStyle": "underline"
+      }
     }
   ]
 }
