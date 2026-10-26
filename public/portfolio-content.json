@@ -88,28 +88,29 @@
       ],
       "url": "https://rev-a-shelf.com/",
       "linkLabel": "Visit project",
-      "image": "",
+      "image": "/uploads/projects/1793022145465-rxx1t3.jpg",
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 10
     },
     {
       "id": "seed-client-1",
       "title": "Who Has It?",
       "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "description": "WhoHasIt is an online gifting and shopping platform offering curated gift boxes, snacks, beverages, health and beauty products, and branded merchandise. It also provides corporate gifting solutions for businesses and special occasions.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
       ],
       "url": "https://whohasit.co/",
       "linkLabel": "Visit project",
-      "image": "",
+      "image": "/uploads/projects/1793032216762-b3kn36.jpg",
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 20,
+      "updated_at": "2026-10-26T16:31:03.304Z"
     },
     {
       "id": "seed-client-10",
@@ -126,7 +127,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 30
     },
     {
       "id": "seed-client-11",
@@ -143,7 +144,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 40
     },
     {
       "id": "seed-client-12",
@@ -160,7 +161,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 50
     },
     {
       "id": "seed-client-13",
@@ -177,7 +178,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 60
     },
     {
       "id": "seed-client-14",
@@ -194,7 +195,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 70
     },
     {
       "id": "seed-client-2",
@@ -211,7 +212,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 80
     },
     {
       "id": "seed-client-3",
@@ -228,7 +229,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 90
     },
     {
       "id": "seed-client-4",
@@ -245,7 +246,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 100
     },
     {
       "id": "seed-client-5",
@@ -262,7 +263,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 110
     },
     {
       "id": "seed-client-6",
@@ -279,7 +280,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 120
     },
     {
       "id": "seed-client-7",
@@ -296,7 +297,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 130
     },
     {
       "id": "seed-client-8",
@@ -313,7 +314,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 140
     },
     {
       "id": "seed-client-9",
@@ -330,7 +331,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 150
     },
     {
       "id": "seed-community",
@@ -348,7 +349,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 160
     },
     {
       "id": "seed-innovation-0",
@@ -366,7 +367,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 170
     },
     {
       "id": "seed-innovation-1",
@@ -384,7 +385,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 180
     },
     {
       "id": "seed-innovation-2",
@@ -402,7 +403,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 190
     },
     {
       "id": "seed-innovation-3",
@@ -420,7 +421,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 200
     },
     {
       "id": "seed-innovation-4",
@@ -438,7 +439,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 210
     },
     {
       "id": "seed-integration-0",
@@ -456,7 +457,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 220
     },
     {
       "id": "seed-integration-1",
@@ -474,7 +475,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 230
     },
     {
       "id": "seed-integration-2",
@@ -493,7 +494,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 240
     },
     {
       "id": "seed-project-0",
@@ -512,7 +513,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 250
     },
     {
       "id": "seed-project-1",
@@ -530,7 +531,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 260
     },
     {
       "id": "seed-project-2",
@@ -549,7 +550,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 270
     },
     {
       "id": "seed-resume-2026",
@@ -567,7 +568,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 0
+      "sort_order": 280
     }
   ],
   "certifications": [
@@ -711,28 +712,28 @@
   ],
   "site": {
     "siteTitle": "Mahesh Dave · Adobe Commerce Engineering",
-    "siteDescription": "Mahesh Dave · Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
-    "siteLogo": "/uploads/branding/1793024368618-ya5qvz.jpg",
+    "siteDescription": "Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
+    "siteLogo": "",
     "copy": {
       "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
-      "heroHeadline": "Leading engineering. Enabling business growth.",
-      "aboutTitle": "Engineering solutions. Leading innovation.",
+      "heroHeadline": "Engineering commerce that works harder.",
+      "aboutTitle": "Technical depth. People-first delivery.",
       "aboutDescription": "Connecting architecture, engineering execution, and team growth to build commerce platforms that last.",
-      "experienceTitle": "From Code to Commerce Strategy.",
-      "experienceDescription": "Combining deep development expertise with architectural thinking and technical leadership to build high-performing digital commerce platforms.",
-      "projectsTitle": "Commerce in Action",
-      "projectsDescription": "eCommerce projects and digital storefronts built for real-world business needs.",
+      "experienceTitle": "Experience built in production.",
+      "experienceDescription": "A progression from hands-on Magento development to technical leadership and solution architecture.",
+      "projectsTitle": "Commerce work with real-world impact.",
+      "projectsDescription": "Selected commerce implementations, integrations, and client storefronts.",
       "certificationsTitle": "Credentials that back the craft.",
       "certificationsDescription": "Adobe credentials and product foundations, with verification links where available.",
       "educationTitle": "The foundation behind the practice.",
       "educationDescription": "Academic background and qualifications.",
       "toolkitTitle": "A practical, modern toolkit.",
       "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
-      "articlesTitle": "Articles & Insights",
-      "articlesDescription": "Insights on Adobe Commerce, integrations, performance, and AI engineering.",
-      "articlesPageTitle": "Articles & Insights",
-      "articlesPageDescription": "Insights on Adobe Commerce, integrations, performance, and AI engineering.",
-      "articlesPageBannerImage": "/uploads/article-banner/1793024052272-myqlbd.jpg",
+      "articlesTitle": "Articles from the work.",
+      "articlesDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
+      "articlesPageTitle": "Articles from the work.",
+      "articlesPageDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
+      "articlesPageBannerImage": "",
       "articleListenEnabled": true,
       "articleLikesEnabled": true,
       "contactTitle": "Good work starts with a conversation.",
@@ -846,12 +847,12 @@
       "order": [
         "home",
         "about",
-        "articles",
         "projects",
-        "certifications",
         "experience",
+        "certifications",
         "education",
         "expertise",
+        "articles",
         "contact"
       ],
       "hidden": [
@@ -864,20 +865,16 @@
         "href": "#about"
       },
       {
-        "label": "Articles",
-        "href": "#articles"
-      },
-      {
         "label": "Projects",
         "href": "#projects"
       },
       {
-        "label": "Certifications",
-        "href": "#certifications"
-      },
-      {
         "label": "Experience",
         "href": "#experience"
+      },
+      {
+        "label": "Certifications",
+        "href": "#certifications"
       },
       {
         "label": "Toolkit",
@@ -887,6 +884,10 @@
       {
         "label": "Education",
         "href": "#education"
+      },
+      {
+        "label": "Articles",
+        "href": "#articles"
       },
       {
         "label": "Contact",
@@ -1131,29 +1132,26 @@
     {
       "key": "copy",
       "value": {
-        "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
+        "heroEyebrow": "ADOBE COMMERCE ENGINEERING · TECHNICAL LEADERSHIP",
         "heroHeadline": "Leading engineering. Enabling business growth.",
-        "aboutTitle": "Engineering solutions. Leading innovation.",
-        "aboutDescription": "Connecting architecture, engineering execution, and team growth to build commerce platforms that last.",
-        "experienceTitle": "From Code to Commerce Strategy.",
-        "experienceDescription": "Combining deep development expertise with architectural thinking and technical leadership to build high-performing digital commerce platforms.",
-        "projectsTitle": "Commerce in Action",
-        "projectsDescription": "eCommerce projects and digital storefronts built for real-world business needs.",
+        "aboutTitle": "Technical excellence. Strategic leadership.",
+        "aboutDescription": "Bridging solution architecture, engineering execution, and team leadership to deliver scalable, resilient commerce platforms that create lasting business value.",
+        "experienceTitle": "Built through experience. Driven by impact.",
+        "experienceDescription": "A journey from hands-on Magento development to solution architecture and technical leadership, delivering scalable commerce platforms and guiding engineering teams through complex challenges.",
+        "projectsTitle": "Commerce work with real-world impact.",
+        "projectsDescription": "Selected commerce implementations, integrations, and client storefronts.",
         "certificationsTitle": "Credentials that back the craft.",
         "certificationsDescription": "Adobe credentials and product foundations, with verification links where available.",
         "educationTitle": "The foundation behind the practice.",
         "educationDescription": "Academic background and qualifications.",
         "toolkitTitle": "A practical, modern toolkit.",
         "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery.",
-        "articlesTitle": "Articles & Insights",
-        "articlesDescription": "Insights on Adobe Commerce, integrations, performance, and AI engineering.",
-        "articlesPageTitle": "Articles & Insights",
-        "articlesPageDescription": "Insights on Adobe Commerce, integrations, performance, and AI engineering.",
-        "articlesPageBannerImage": "/uploads/article-banner/1793024052272-myqlbd.jpg",
-        "articleListenEnabled": true,
-        "articleLikesEnabled": true,
+        "articlesPageTitle": "Articles from the work.",
+        "articlesPageDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering.",
         "contactTitle": "Good work starts with a conversation.",
-        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
+        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect.",
+        "articlesTitle": "Articles from the work.",
+        "articlesDescription": "Adobe Commerce, architecture, performance, and AI-driven engineering."
       }
     },
     {
@@ -1271,12 +1269,12 @@
           "order": [
             "home",
             "about",
-            "articles",
             "projects",
-            "certifications",
             "experience",
+            "certifications",
             "education",
             "expertise",
+            "articles",
             "contact"
           ],
           "hidden": [
@@ -1289,20 +1287,16 @@
             "href": "#about"
           },
           {
-            "label": "Articles",
-            "href": "#articles"
-          },
-          {
             "label": "Projects",
             "href": "#projects"
           },
           {
-            "label": "Certifications",
-            "href": "#certifications"
-          },
-          {
             "label": "Experience",
             "href": "#experience"
+          },
+          {
+            "label": "Certifications",
+            "href": "#certifications"
           },
           {
             "label": "Toolkit",
@@ -1312,6 +1306,10 @@
           {
             "label": "Education",
             "href": "#education"
+          },
+          {
+            "label": "Articles",
+            "href": "#articles"
           },
           {
             "label": "Contact",
