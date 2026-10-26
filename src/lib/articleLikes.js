@@ -2,6 +2,8 @@ const USER_LIKES_KEY = 'portfolio-article-user-likes-v1'
 const PENDING_LIKES_KEY = 'portfolio-article-like-pending-v1'
 const LIKES_JSON_URL = '/article-likes.json'
 const LOCAL_DEV_LIKES_KEY = 'portfolio-article-likes-local-preview'
+const COUNTER_NAMESPACE = 'maheshdave-portfolio-articles'
+const COUNTER_API = 'https://abacus.jasoncameron.dev'
 const LOCAL_DEV = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)
 
 function readJson(key, fallback) {
@@ -30,6 +32,10 @@ function readUserLikes() {
 function readPendingLikes() {
   const map = readJson(PENDING_LIKES_KEY, {})
   return map && typeof map === 'object' ? map : {}
+}
+
+function counterKey(slug) {
+  return encodeURIComponent(String(slug || '').trim())
 }
 
 /** Whether this browser has already liked the article (one like per device). */
@@ -77,23 +83,42 @@ function mergeLikeCount(slug, published = {}, pending = readPendingLikes()) {
   return Number(published[key] || 0) + Number(pending[key] || 0)
 }
 
-/** Load the public like count for an article slug (published JSON + this browser's pending likes). */
+async function fetchCounterValue(slug, hit = false) {
+  const key = counterKey(slug)
+  if (!key) return 0
+  const action = hit ? 'hit' : 'get'
+  const response = await fetch(`${COUNTER_API}/${action}/${COUNTER_NAMESPACE}/${key}`, { cache: 'no-store' })
+  const payload = await response.json().catch(() => ({}))
+  if (Number.isFinite(Number(payload?.value))) return Number(payload.value)
+  if (!hit && payload?.error) return 0
+  if (!response.ok) throw new Error('Like counter service unavailable.')
+  return 0
+}
+
+async function fetchFallbackLikeCount(slug) {
+  try {
+    const published = await fetchPublishedLikeCounts()
+    return mergeLikeCount(slug, published)
+  } catch {
+    return mergeLikeCount(slug)
+  }
+}
+
+/** Load the global like count for an article slug. */
 export async function fetchArticleLikeCount(slug) {
   const key = String(slug || '').trim()
   if (!key) return 0
 
   try {
-    const published = await fetchPublishedLikeCounts()
-    return mergeLikeCount(key, published)
+    return await fetchCounterValue(key, false)
   } catch {
-    return mergeLikeCount(key)
+    return fetchFallbackLikeCount(key)
   }
 }
 
 /**
- * Register a like once per browser and return the updated count.
- * Published counts live in public/article-likes.json; pending likes from this
- * browser are merged there the next time an admin clicks Publish.
+ * Register a like once per browser and return the updated global count.
+ * Counts are stored on a public counter service so every visitor sees the same total.
  */
 export async function likeArticle(slug) {
   const key = String(slug || '').trim()
@@ -101,17 +126,16 @@ export async function likeArticle(slug) {
   if (hasUserLikedArticle(key)) return fetchArticleLikeCount(key)
 
   markUserLiked(key)
-  incrementPendingLike(key)
 
   try {
-    const published = await fetchPublishedLikeCounts()
-    return mergeLikeCount(key, published)
+    return await fetchCounterValue(key, true)
   } catch {
-    return mergeLikeCount(key)
+    incrementPendingLike(key)
+    return fetchFallbackLikeCount(key)
   }
 }
 
-/** Merge pending browser likes into a publish payload for GitHub. */
+/** Merge pending browser likes into a publish payload for GitHub backup. */
 export async function mergeArticleLikesForPublish(existing = null) {
   let published = existing?.likes && typeof existing.likes === 'object' ? { ...existing.likes } : {}
   if (!Object.keys(published).length) {

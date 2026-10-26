@@ -43,17 +43,20 @@ export default function ArticleLikeButton({ slug, className = '' }) {
     : `Like this article (${count} ${count === 1 ? 'like' : 'likes'})`
 
   return (
-    <button
-      type="button"
-      className={`subtle-button article-share article-like ${liked ? 'is-liked' : ''} ${className}`.trim()}
-      onClick={handleLike}
-      disabled={busy || liked}
-      aria-pressed={liked}
-      aria-label={label}
-      title={liked ? 'Thanks for liking this article' : 'Like this article'}
-    >
-      <Heart size={17} aria-hidden="true" fill={liked ? 'var(--primary)' : 'none'} stroke="var(--primary)" />
-      <span className="article-like-count">{count}</span>
-    </button>
+    <section className={`article-like-section ${className}`.trim()} aria-label="Article likes">
+      <button
+        type="button"
+        className={`button button-primary article-like-btn ${liked ? 'is-liked' : ''}`.trim()}
+        onClick={handleLike}
+        disabled={busy || liked}
+        aria-pressed={liked}
+        aria-label={label}
+      >
+        <Heart size={18} aria-hidden="true" fill={liked ? 'currentColor' : 'none'} />
+        <span>{liked ? 'Thanks for liking' : 'Like this article'}</span>
+        <span className="article-like-count">{count}</span>
+      </button>
+      {!liked ? <p className="article-like-note">One like per browser. The total is shared with every visitor.</p> : null}
+    </section>
   )
 }
