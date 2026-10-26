@@ -27,6 +27,7 @@ import { Link } from '../lib/RouterLink'
 import { useRouter } from '../lib/routerCore'
 import { ADMIN_NAV } from '../lib/navigation'
 import { hasStagedContent, publishStagedContent } from '../lib/content'
+import { useAdminContent } from '../contexts/hooks'
 
 // Navigation entries are data (paths and labels); icons are presentation and
 // live here so the nav model stays serialisable.
@@ -47,6 +48,7 @@ const NAV_ICONS = {
 
 export function AdminLayout({ title, eyebrow, children, actions, counts }) {
   const { signOut, user } = useAuth()
+  const { reload } = useAdminContent()
   const { pathname, navigate } = useRouter()
   const [navOpen, setNavOpen] = useState(false)
   const [staged, setStaged] = useState(() => hasStagedContent())
@@ -66,7 +68,12 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
 
   const handlePublish = async () => {
     setPublishing(true); setPublishMessage('')
-    try { await publishStagedContent(); setStaged(false); setPublishMessage('Published successfully') }
+    try {
+      await publishStagedContent()
+      await reload()
+      setStaged(false)
+      setPublishMessage('Published successfully')
+    }
     catch (error) { setPublishMessage(error?.message || 'Publish failed') }
     finally { setPublishing(false) }
   }

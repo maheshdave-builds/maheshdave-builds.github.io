@@ -56,7 +56,6 @@ export default function ArticleLikeButton({ slug, className = '' }) {
         <span>{liked ? 'Thanks for liking' : 'Like this article'}</span>
         <span className="article-like-count">{count}</span>
       </button>
-      {!liked ? <p className="article-like-note">One like per browser. The total is shared with every visitor.</p> : null}
     </section>
   )
 }

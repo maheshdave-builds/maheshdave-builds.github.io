@@ -10,6 +10,9 @@ const SESSION_KEY = 'portfolio-github-admin-session'
 const API = 'https://api.github.com'
 const RAW_CONTENT_URL = '/portfolio-content.json'
 const RAW_ARTICLES_URL = '/articles-content.json'
+const RAW_GITHUB_BASE = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/public`
+const RAW_CONTENT_GITHUB = `${RAW_GITHUB_BASE}/portfolio-content.json`
+const RAW_ARTICLES_GITHUB = `${RAW_GITHUB_BASE}/articles-content.json`
 const LOCAL_DEV = ['localhost', '127.0.0.1'].includes(window.location.hostname)
 const LOCAL_DEV_KEY = 'portfolio-content-local-preview'
 const LOCAL_DEV_ARTICLES_KEY = 'portfolio-articles-local-preview'
@@ -39,9 +42,13 @@ function mergeArticlePayload(portfolio, articlePayload) {
 
 async function readPublicContent() {
   const version = Date.now()
+  // Production reads the committed JSON on main, not the last Pages build artifact.
+  // Admin publish updates main immediately; waiting for CI left visitors on stale data.
+  const portfolioUrl = LOCAL_DEV ? `${RAW_CONTENT_URL}?v=${version}` : `${RAW_CONTENT_GITHUB}?v=${version}`
+  const articlesUrl = LOCAL_DEV ? `${RAW_ARTICLES_URL}?v=${version}` : `${RAW_ARTICLES_GITHUB}?v=${version}`
   const [portfolioResponse, articlesResponse] = await Promise.all([
-    fetch(`${RAW_CONTENT_URL}?v=${version}`, { cache: 'no-store' }),
-    fetch(`${RAW_ARTICLES_URL}?v=${version}`, { cache: 'no-store' }),
+    fetch(portfolioUrl, { cache: 'no-store' }),
+    fetch(articlesUrl, { cache: 'no-store' }),
   ])
   if (!portfolioResponse.ok) throw new Error(`Could not load published portfolio content (${portfolioResponse.status}).`)
   if (!articlesResponse.ok) throw new Error(`Could not load published articles (${articlesResponse.status}).`)

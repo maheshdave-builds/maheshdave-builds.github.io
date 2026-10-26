@@ -160,7 +160,16 @@ export async function publishStagedContent() {
   await gatewayRequest('', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
   clearPendingLikeCounts()
   try { localStorage.removeItem(STAGED_CONTENT_KEY) } catch {}
+  const { articleLikes: _likes, ...publishedSnapshot } = payload
+  try {
+    localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify({
+      ...publishedSnapshot,
+      themePublished: publishedSnapshot.themePublished || publishedSnapshot.theme,
+      themeDraft: publishedSnapshot.themeDraft || publishedSnapshot.themePublished || publishedSnapshot.theme,
+    }))
+  } catch { /* keep published snapshot in memory only */ }
   window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
+  window.dispatchEvent(new CustomEvent('portfolio-published'))
   return true
 }
 async function flushSharedContent() { /* writes are staged; publish is explicit */ }
@@ -558,38 +567,41 @@ export async function fetchAdminContent() {
   if (useGithubGateway) {
     const shared = await readSharedContent()
     const local = readLocalContent()
-    // Admin edits are staged in localStorage until Publish. Merge collection
-    // rows by stable ID so a reload never discards a newly-created or edited
-    // article just because the published GitHub JSON still has the old version.
-    const mergeRows = (key) => {
-      const publishedRows = key === 'articles' ? sharedArticleRows(shared) : asArray(shared[key])
-      const stagedRows = asArray(local[key])
-      // While staged, absence means a deliberate deletion. Without staging, deployed
-      // published rows are authoritative; only browser-local drafts are added for admin editing.
-      if (key === 'articles') {
-        if (hasStagedContent()) return stagedRows
-        const localDrafts = stagedRows.filter((article) => String(article.status || '').toLowerCase() !== 'published')
-        const byId = new Map(publishedRows.map((article) => [String(article.id), article]))
-        localDrafts.forEach((article) => byId.set(String(article.id), article))
-        return [...byId.values()]
+    const staged = hasStagedContent()
+
+    // Unpublished admin edits live in localStorage until Publish. After publish,
+    // GitHub main is the single source of truth — stale browser copies must not win.
+    if (staged) {
+      return {
+        ...local,
+        projects: dedupeCollectionRows(sortCollectionRows(asArray(local.projects)).map(normalizeProject), 'projects'),
+        certifications: sortCollectionRows(asArray(local.certifications).map(normalizeCertification)),
+        experience: sortCollectionRows(asArray(local.experience).map(normalizeExperience)),
+        education: sortCollectionRows(asArray(local.education).map(normalizeEducation)),
+        articles: asArray(local.articles).map(normalizeArticle),
+        site: normalizeSite(local.site),
       }
-      const byId = new Map(publishedRows.map((row, index) => [String(row.id ?? `${key}-published-${index}`), row]))
-      stagedRows.forEach((row, index) => {
-        const id = String(row.id ?? `${key}-local-${index}`)
-        byId.set(id, { ...(byId.get(id) || {}), ...row })
-      })
-      return dedupeCollectionRows(sortCollectionRows([...byId.values()]), key)
     }
+
+    const publishedArticles = sharedArticleRows(shared).map(normalizeArticle)
+    const publishedIds = new Set(publishedArticles.map((article) => String(article.id)))
+    const localDraftArticles = asArray(local.articles)
+      .filter((article) => String(article.status || '').toLowerCase() !== 'published')
+      .filter((article) => !publishedIds.has(String(article.id)))
+      .map(normalizeArticle)
+
     const merged = {
-      ...local,
-      ...shared,
-      projects: mergeRows('projects').map(normalizeProject),
-      certifications: mergeRows('certifications').map(normalizeCertification),
-      experience: mergeRows('experience').map(normalizeExperience),
-      education: mergeRows('education').map(normalizeEducation),
-      articles: mergeRows('articles').map(normalizeArticle),
-      profile: { ...(shared.profile || {}), ...(local.profile || {}) },
-      site: normalizeSite({ ...(shared.site || {}), ...(local.site || {}), copy: { ...(shared.site?.copy || {}), ...(local.site?.copy || {}) } }),
+      profile: shared.profile || {},
+      projects: dedupeCollectionRows(sortCollectionRows(asArray(shared.projects)).map(normalizeProject), 'projects'),
+      certifications: sortCollectionRows(asArray(shared.certifications).map(normalizeCertification)),
+      experience: sortCollectionRows(asArray(shared.experience).map(normalizeExperience)),
+      education: sortCollectionRows(asArray(shared.education).map(normalizeEducation)),
+      articles: [...publishedArticles, ...localDraftArticles],
+      site: normalizeSite(shared.site),
+      theme: shared.themePublished || shared.theme || DEFAULT_THEME,
+      themePublished: shared.themePublished || shared.theme || DEFAULT_THEME,
+      themeDraft: shared.themePublished || shared.theme || DEFAULT_THEME,
+      settingsRows: [],
     }
     try { localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(merged)) } catch { /* keep the in-memory merged state */ }
     return merged

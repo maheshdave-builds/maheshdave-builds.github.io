@@ -25,7 +25,17 @@ export function ContentProvider({ children }) {
       try { const next = await fetchPublicContent(); if (active) { setContent(next); setStatus(contentSource === 'local' ? 'local' : 'ready'); setError('') } }
       catch (loadError) { if (active) { setError(loadError?.message || 'Content could not be loaded.'); setStatus('error') } }
     }
-    if (contentSource === 'local' || contentSource === 'github') { loadLocal(); const onUpdate = () => loadLocal(); window.addEventListener('portfolio-local-content-updated', onUpdate); return () => { active = false; window.removeEventListener('portfolio-local-content-updated', onUpdate) } }
+    if (contentSource === 'local' || contentSource === 'github') {
+      loadLocal()
+      const onUpdate = () => loadLocal()
+      window.addEventListener('portfolio-local-content-updated', onUpdate)
+      window.addEventListener('portfolio-published', onUpdate)
+      return () => {
+        active = false
+        window.removeEventListener('portfolio-local-content-updated', onUpdate)
+        window.removeEventListener('portfolio-published', onUpdate)
+      }
+    }
 
     ;(async () => {
       try {
