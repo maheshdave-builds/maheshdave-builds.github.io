@@ -82,7 +82,7 @@
       "id": "seed-client-0",
       "title": "Rev-A-Shelf",
       "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "description": "An online store for cabinet organization, kitchen storage, closet accessories, waste containers, and home storage solutions.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
@@ -99,7 +99,7 @@
       "id": "seed-client-1",
       "title": "Who Has It?",
       "category": "Adobe Commerce Cloud",
-      "description": "WhoHasIt is an online gifting and shopping platform offering curated gift boxes, snacks, beverages, health and beauty products, and branded merchandise. It also provides corporate gifting solutions for businesses and special occasions.",
+      "description": "An online gifting and shopping platform offering curated gift boxes, snacks, beverages, beauty products, branded merchandise, and corporate gifting solutions.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
@@ -116,7 +116,7 @@
       "id": "seed-client-4",
       "title": "Melissa",
       "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "description": "An online store for fashionable jelly shoes, sandals, flats, heels, bags, and children's footwear in Singapore.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
@@ -133,7 +133,7 @@
       "id": "seed-client-2",
       "title": "Midas Furniture",
       "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "description": "An online furniture store offering home and office furnishings, including desks, workspace furniture, and meeting room solutions.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
@@ -150,7 +150,7 @@
       "id": "seed-client-6",
       "title": "Okapius — Hyvä Storefront",
       "category": "Headless & Storefronts",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "description": "A Hyvä storefront project focused on delivering a modern, streamlined e-commerce shopping experience.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
@@ -167,7 +167,7 @@
       "id": "seed-client-3",
       "title": "American Lighting",
       "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "description": "An online lighting catalog featuring LED tape lights, undercabinet lighting, downlights, smart lighting, and residential and commercial lighting solutions.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
@@ -184,7 +184,7 @@
       "id": "seed-client-8",
       "title": "TDot Performance",
       "category": "Adobe Commerce Enterprise",
-      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "description": "An automotive e-commerce store offering performance parts, replacement components, and accessories for cars and trucks.",
       "techStack": [
         "Adobe Commerce Enterprise",
         "Magento 2"
@@ -201,7 +201,7 @@
       "id": "seed-client-7",
       "title": "Tent and Table",
       "category": "Adobe Commerce Enterprise",
-      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "description": "An online store for event and party supplies, including tents, tables, chairs, inflatables, staging, and commercial event equipment.",
       "techStack": [
         "Adobe Commerce Enterprise",
         "Magento 2"
@@ -218,7 +218,7 @@
       "id": "seed-client-9",
       "title": "RP Tech India",
       "category": "Adobe Commerce Enterprise",
-      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "description": "An IT distribution platform providing technology products and enterprise IT solutions to businesses and channel partners.",
       "techStack": [
         "Adobe Commerce Enterprise",
         "Magento 2"
@@ -235,7 +235,7 @@
       "id": "seed-client-5",
       "title": "RAK Ceramics",
       "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "description": "An online store for ceramic and porcelain tiles, bathroom fixtures, sanitaryware, faucets, and interior surface solutions.",
       "techStack": [
         "Adobe Commerce Cloud",
         "Magento 2"
@@ -252,7 +252,7 @@
       "id": "seed-client-14",
       "title": "Deadwood Knives",
       "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "description": "An online knife store featuring knives and cutting tools for collectors, outdoor enthusiasts, and everyday use.",
       "techStack": [
         "Magento 2 Open Source",
         "Adobe Commerce"
@@ -269,7 +269,7 @@
       "id": "seed-client-11",
       "title": "Noctua",
       "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "description": "An online product catalog for premium PC cooling fans, CPU coolers, thermal pastes, and quiet cooling solutions.",
       "techStack": [
         "Magento 2 Open Source",
         "Adobe Commerce"
@@ -286,7 +286,7 @@
       "id": "seed-client-12",
       "title": "Bokacha",
       "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "description": "An e-commerce project whose product range and business purpose require confirmation from the current website.",
       "techStack": [
         "Magento 2 Open Source",
         "Adobe Commerce"
@@ -303,7 +303,7 @@
       "id": "seed-client-13",
       "title": "Pool Spot",
       "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "description": "An Australian online store for swimming pool equipment, robotic cleaners, pumps, heating systems, and maintenance supplies.",
       "techStack": [
         "Magento 2 Open Source",
         "Adobe Commerce"
@@ -320,7 +320,7 @@
       "id": "seed-client-10",
       "title": "Tools Plus",
       "category": "Adobe Commerce Enterprise",
-      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "description": "An online tool retailer offering power tools, hand tools, workshop equipment, accessories, and supplies for professional and DIY projects.",
       "techStack": [
         "Adobe Commerce Enterprise",
         "Magento 2"
@@ -337,7 +337,7 @@
       "id": "seed-integration-0",
       "title": "Adobe App Builder — Odoo Connector",
       "category": "Integrations & APIs",
-      "description": "Real-time Adobe Commerce and Odoo ERP integration using event-driven flows with Adobe I/O Events. Published on Adobe Exchange with monitoring and logging.",
+      "description": "An Adobe Commerce and Odoo ERP integration that synchronizes business data through event-driven workflows with monitoring and logging.",
       "techStack": [
         "Adobe App Builder",
         "Odoo ERP",
@@ -355,7 +355,7 @@
       "id": "seed-project-0",
       "title": "ACE Configurator — American Lighting",
       "category": "Headless & Storefronts",
-      "description": "Headless commerce experience on Adobe Commerce Cloud using React and GraphQL for dynamic product configuration, pricing, and product data. Optimized API interactions and rendering to reduce network requests.",
+      "description": "An interactive lighting configurator that helps users select compatible components for custom linear lighting installations.",
       "techStack": [
         "Adobe Commerce Cloud",
         "React",
@@ -511,33 +511,33 @@
     }
   ],
   "site": {
-    "siteTitle": "Mahesh Dave · Adobe Commerce Engineering",
+    "siteTitle": "Mahesh Dave · Adobe Commerce Team Lead",
     "siteDescription": "Mahesh Dave · Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
     "siteLogo": "/uploads/branding/1793042375792-onsuqy.jpg",
-    "copy": {
-      "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
-      "heroHeadline": "Commerce Engineered for Growth.",
-      "aboutTitle": "Technical depth. People-first delivery.",
-      "aboutDescription": "Connecting architecture, engineering execution, and team growth to build commerce platforms that last.",
-      "experienceTitle": "Experience built in production.",
-      "experienceDescription": "A progression from hands-on Magento development to technical leadership and solution architecture.",
-      "projectsTitle": "Commerce work with real-world impact.",
-      "projectsDescription": "Selected commerce implementations, integrations, and client storefronts.",
-      "certificationsTitle": "Credentials that back the craft.",
-      "certificationsDescription": "Adobe credentials and product foundations, with verification links where available.",
-      "educationTitle": "The foundation behind the practice.",
-      "educationDescription": "Academic background and qualifications.",
-      "toolkitTitle": "A practical, modern toolkit.",
-      "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery. ",
-      "articlesTitle": "Articles from the work.",
-      "articlesDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
-      "articlesPageTitle": "Articles from the work.",
-      "articlesPageDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
-      "articlesPageBannerImage": "",
-      "articleListenEnabled": true,
-      "articleLikesEnabled": true,
-      "contactTitle": "Good work starts with a conversation.",
-      "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
+      "copy": {
+        "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
+        "heroHeadline": "Engineering Commerce for Growth.",
+        "aboutTitle": "Technical expertise. People-first leadership.",
+        "aboutDescription": "Building scalable commerce solutions through architecture, engineering, and team leadership.",
+        "experienceTitle": "Experience shaped by delivery.",
+        "experienceDescription": "From Magento development to technical leadership and solution architecture.",
+        "projectsTitle": "Commerce solutions that deliver.",
+        "projectsDescription": "Selected commerce projects, storefronts, and integrations.",
+        "certificationsTitle": "Credentials that demonstrate expertise.",
+        "certificationsDescription": "Adobe certifications and professional credentials.",
+        "educationTitle": "A strong technical foundation.",
+        "educationDescription": "Academic qualifications and educational background.",
+        "toolkitTitle": "Tools behind the solutions.",
+        "toolkitDescription": "Technologies and tools powering commerce development and delivery.",
+        "articlesTitle": "Technical Insights",
+        "articlesDescription": "Insights on Adobe Commerce, architecture, performance, and AI.",
+        "articlesPageTitle": "Technical Insights",
+        "articlesPageDescription": "Practical insights into commerce engineering, integrations, and performance.",
+        "articlesPageBannerImage": "",
+        "articleListenEnabled": true,
+        "articleLikesEnabled": true,
+        "contactTitle": "Good work starts with a conversation.",
+        "contactDescription": "Let's discuss your next commerce or engineering challenge."
     },
     "stats": [
       {
