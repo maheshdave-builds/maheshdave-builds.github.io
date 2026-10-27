@@ -48,7 +48,8 @@ const NAV_ICONS = {
 
 export function AdminLayout({ title, eyebrow, children, actions, counts }) {
   const { signOut, user } = useAuth()
-  const { reload } = useAdminContent()
+  const admin = useAdminContent()
+  const { reload } = admin
   const { pathname, navigate } = useRouter()
   const [navOpen, setNavOpen] = useState(false)
   const [staged, setStaged] = useState(() => hasStagedContent())
@@ -69,7 +70,19 @@ export function AdminLayout({ title, eyebrow, children, actions, counts }) {
   const handlePublish = async () => {
     setPublishing(true); setPublishMessage('')
     try {
-      await publishStagedContent()
+      await publishStagedContent({
+        snapshot: {
+          profile: admin.profile,
+          projects: admin.projects,
+          certifications: admin.certifications,
+          experience: admin.experience,
+          education: admin.education,
+          articles: admin.articles,
+          site: admin.site,
+          themeDraft: admin.themeDraft,
+          themePublished: admin.themePublished,
+        },
+      })
       await reload()
       setStaged(false)
       setPublishMessage('Published successfully')

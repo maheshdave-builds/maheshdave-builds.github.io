@@ -97,8 +97,7 @@ async function createBlob(token, bytes) {
   return result.sha
 }
 
-/** One commit for all content files so Publish triggers a single Pages deploy. */
-async function commitContentFiles(token, message, files) {
+async function commitContentFilesOnce(token, message, files) {
   const refResponse = await fetch(`${API}/repos/${OWNER}/${REPO}/git/ref/heads/${BRANCH}`, { headers: headers(token), cache: 'no-store' })
   const refData = await refResponse.json().catch(() => ({}))
   if (!refResponse.ok) throw new Error(refData.message || `Could not read ${BRANCH} ref (${refResponse.status}).`)
@@ -132,19 +131,29 @@ async function commitContentFiles(token, message, files) {
   const commit = await commitResponse.json().catch(() => ({}))
   if (!commitResponse.ok) throw new Error(commit.message || `Could not create commit (${commitResponse.status}).`)
 
-  const updateRef = async () => fetch(`${API}/repos/${OWNER}/${REPO}/git/refs/heads/${BRANCH}`, {
+  const refUpdate = await fetch(`${API}/repos/${OWNER}/${REPO}/git/refs/heads/${BRANCH}`, {
     method: 'PATCH',
     headers: { ...headers(token), 'Content-Type': 'application/json' },
     body: JSON.stringify({ sha: commit.sha, force: false }),
   })
-
-  let refUpdate = await updateRef()
-  if (refUpdate.status === 422 || refUpdate.status === 409) {
-    refUpdate = await updateRef()
-  }
   const refResult = await refUpdate.json().catch(() => ({}))
   if (!refUpdate.ok) throw new Error(refResult.message || `Could not update ${BRANCH} (${refUpdate.status}).`)
   return commit
+}
+
+/** One commit for all content files so Publish triggers a single Pages deploy. */
+async function commitContentFiles(token, message, files) {
+  let lastError
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await commitContentFilesOnce(token, message, files)
+    } catch (error) {
+      lastError = error
+      const retryable = /422|409|fast.?forward|update/i.test(String(error?.message || ''))
+      if (!retryable || attempt === 2) break
+    }
+  }
+  throw lastError || new Error('Could not publish content to GitHub.')
 }
 
 function encodeBase64(bytes) {

@@ -1,15 +1,33 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { fetchPublicContent, contentSource } from '../lib/content'
-import { fallbackContent } from '../lib/seed'
+import { contentSource, fetchPublicContent, readPublicContentCache, writePublicContentCache } from '../lib/content'
+import { fallbackContent, seedProfile, seedSite } from '../lib/seed'
 import { DEFAULT_THEME, validateTheme } from '../lib/theme'
 import { ContentContext } from './contexts'
 
+function emptyPublicShell() {
+  return {
+    profile: seedProfile,
+    site: seedSite,
+    projects: [],
+    certifications: [],
+    experience: [],
+    education: [],
+    articles: [],
+    theme: DEFAULT_THEME,
+  }
+}
+
+function initialPublicContent() {
+  if (contentSource === 'local') return { ...fallbackContent, theme: DEFAULT_THEME }
+  return readPublicContentCache() || emptyPublicShell()
+}
+
 /**
- * Public content provider. Renders immediately with bundled defaults, then
- * swaps in published JSON when it arrives so visitors never see a blocking loader.
+ * Public content provider. Uses the last published snapshot immediately, then
+ * refreshes from GitHub main without a blocking loader.
  */
 export function ContentProvider({ children }) {
-  const [content, setContent] = useState(() => ({ ...fallbackContent, theme: DEFAULT_THEME }))
+  const [content, setContent] = useState(initialPublicContent)
   const [status, setStatus] = useState(contentSource === 'local' ? 'local' : 'ready')
   const [error, setError] = useState('')
   const [nonce, setNonce] = useState(0)
@@ -21,8 +39,8 @@ export function ContentProvider({ children }) {
       try {
         const next = await fetchPublicContent()
         if (!active) return
-        const hasContent = next.projects.length || next.experience.length || next.certifications.length
-        setContent(hasContent ? next : { ...fallbackContent, theme: next.theme, site: next.site })
+        setContent(next)
+        writePublicContentCache(next)
         setError('')
         setStatus(contentSource === 'local' ? 'local' : 'ready')
       } catch (loadError) {

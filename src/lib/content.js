@@ -138,10 +138,75 @@ function writeLocalContent(next) {
 export function hasStagedContent() {
   try { return Boolean(localStorage.getItem(STAGED_CONTENT_KEY)) } catch { return false }
 }
-export async function publishStagedContent() {
-  let staged
-  try { staged = JSON.parse(localStorage.getItem(STAGED_CONTENT_KEY) || 'null') } catch { staged = null }
-  if (!staged) throw new Error('There are no staged changes to publish.')
+
+export const PUBLIC_CONTENT_CACHE_KEY = 'portfolio-public-content-cache-v1'
+
+export function readPublicContentCache() {
+  try {
+    const raw = sessionStorage.getItem(PUBLIC_CONTENT_CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return parsed?.data && typeof parsed.data === 'object' ? parsed.data : null
+  } catch {
+    return null
+  }
+}
+
+export function writePublicContentCache(data) {
+  try {
+    sessionStorage.setItem(PUBLIC_CONTENT_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }))
+  } catch { /* ignore quota errors */ }
+}
+
+function readStagedOrLocalContent() {
+  try {
+    const staged = JSON.parse(localStorage.getItem(STAGED_CONTENT_KEY) || 'null')
+    if (staged && typeof staged === 'object') return staged
+  } catch { /* fall through */ }
+  return readLocalContent()
+}
+
+function sanitizePortfolioForPublish(staged) {
+  const {
+    articles: _articles,
+    articleLikes: _likes,
+    settingsRows: _settingsRows,
+    themeDraft: _themeDraft,
+    ...portfolio
+  } = staged || {}
+  const themePublished = portfolio.themePublished || portfolio.theme || DEFAULT_THEME
+  return {
+    ...portfolio,
+    site: normalizeSite(portfolio.site),
+    themePublished,
+    theme: themePublished,
+  }
+}
+
+/** Persist the current admin editor state into browser staging before Publish. */
+export function stageAdminSnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== 'object') throw new Error('Nothing to stage for publish.')
+  const current = readLocalContent()
+  const next = {
+    ...current,
+    profile: snapshot.profile ?? current.profile,
+    projects: asArray(snapshot.projects ?? current.projects),
+    certifications: asArray(snapshot.certifications ?? current.certifications),
+    experience: asArray(snapshot.experience ?? current.experience),
+    education: asArray(snapshot.education ?? current.education),
+    articles: asArray(snapshot.articles ?? current.articles),
+    site: normalizeSite(snapshot.site ?? current.site),
+    themeDraft: snapshot.themeDraft ?? current.themeDraft,
+    themePublished: snapshot.themePublished ?? current.themePublished ?? current.theme,
+    theme: snapshot.themePublished ?? snapshot.theme ?? current.themePublished ?? current.theme,
+  }
+  return writeLocalContent(next)
+}
+
+export async function publishStagedContent(options = {}) {
+  if (options.snapshot) stageAdminSnapshot(options.snapshot)
+  const staged = readStagedOrLocalContent()
+  if (!staged || typeof staged !== 'object') throw new Error('There are no staged changes to publish.')
   // Do not report a successful publish or discard the staging copy unless the
   // configured publisher confirms that the shared public content was updated.
   // Browser-local storage is suitable for preview, but cannot update GitHub Pages.
@@ -149,7 +214,7 @@ export async function publishStagedContent() {
     throw new Error('These changes are saved in this browser and available in local preview, but live publishing is not configured. Configure the GitHub content publisher before publishing; your staged changes have been kept.')
   }
   const payload = {
-    ...staged,
+    ...sanitizePortfolioForPublish(staged),
     projects: dedupeCollectionRows(staged.projects, 'projects'),
     certifications: dedupeCollectionRows(staged.certifications, 'certifications'),
     experience: dedupeCollectionRows(staged.experience, 'experience'),
@@ -171,6 +236,7 @@ export async function publishStagedContent() {
       themeDraft: publishedSnapshot.themeDraft || publishedSnapshot.themePublished || publishedSnapshot.theme,
     }))
   } catch { /* keep published snapshot in memory only */ }
+  try { sessionStorage.removeItem(PUBLIC_CONTENT_CACHE_KEY) } catch { /* force fresh public fetch */ }
   window.dispatchEvent(new CustomEvent('portfolio-staging-updated'))
   window.dispatchEvent(new CustomEvent('portfolio-published'))
   return true
@@ -475,18 +541,18 @@ export async function fetchPublicContent() {
   if (isLocalPreviewMode()) return getLocalPreviewContent()
   if (useGithubGateway) {
     const shared = await readSharedContent()
-    return {
-      ...shared,
-      ...fallbackContent,
-      ...shared,
+    const publicContent = {
+      profile: normalizeProfile(shared.profile),
       site: normalizeSite(shared.site),
-      projects: dedupeCollectionRows(asArray(shared.projects || fallbackContent.projects).filter((x) => x.is_published !== false), 'projects').map(normalizeProject),
-      certifications: sortCollectionRows(asArray(shared.certifications || fallbackContent.certifications).filter((x) => x.is_published !== false).map(normalizeCertification)),
-      experience: sortCollectionRows(asArray(shared.experience || fallbackContent.experience).filter((x) => x.is_published !== false)),
-      education: sortCollectionRows(asArray(shared.education || fallbackContent.education).filter((x) => x.is_published !== false)),
+      projects: dedupeCollectionRows(asArray(shared.projects).filter((x) => x.is_published !== false), 'projects').map(normalizeProject),
+      certifications: sortCollectionRows(asArray(shared.certifications).filter((x) => x.is_published !== false).map(normalizeCertification)),
+      experience: sortCollectionRows(asArray(shared.experience).filter((x) => x.is_published !== false)),
+      education: sortCollectionRows(asArray(shared.education).filter((x) => x.is_published !== false)),
       articles: sortArticles(sharedArticleRows(shared).map(normalizeArticle).filter((article) => isArticlePublic(article))),
       theme: shared.themePublished || shared.theme || DEFAULT_THEME,
     }
+    writePublicContentCache(publicContent)
+    return publicContent
   }
   if (!supabase) {
     const local = readLocalContent()
@@ -730,8 +796,6 @@ export function toDbRow(collection, record) {
 export async function saveRecord(collection, record) {
   if (!supabase) {
     if (!['projects', 'certifications', 'experience', 'education', 'articles'].includes(collection)) throw new Error(`Unknown collection: ${collection}`)
-    const current = readLocalContent()
-    const rows = asArray(current[collection])
     // Keep bundled seed IDs in place for GitHub/local CMS edits. Replacing them
     // created duplicate rows so image uploads appeared to vanish after save.
     const saved = {
@@ -741,6 +805,7 @@ export async function saveRecord(collection, record) {
     }
     if (collection === 'articles' && (!saved.title || !saved.slug)) throw new Error('An article needs a title and slug.')
     updateLocalContent((state) => {
+      const rows = asArray(state[collection])
       const index = record.id ? rows.findIndex((row) => String(row.id) === String(record.id)) : -1
       const nextRows = [...rows]
       if (index >= 0) nextRows[index] = { ...rows[index], ...saved }
