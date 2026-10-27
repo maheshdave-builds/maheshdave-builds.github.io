@@ -113,89 +113,21 @@
       "sort_order": 20
     },
     {
-      "id": "seed-client-10",
-      "title": "Tools Plus",
-      "category": "Adobe Commerce Enterprise",
-      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "id": "seed-client-4",
+      "title": "Melissa",
+      "category": "Adobe Commerce Cloud",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
       "techStack": [
-        "Adobe Commerce Enterprise",
+        "Adobe Commerce Cloud",
         "Magento 2"
       ],
-      "url": "https://www.toolsplus.com/",
+      "url": "https://melissa.com.sg/",
       "linkLabel": "Visit project",
       "image": "",
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
       "sort_order": 30
-    },
-    {
-      "id": "seed-client-11",
-      "title": "Noctua",
-      "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
-      "techStack": [
-        "Magento 2 Open Source",
-        "Adobe Commerce"
-      ],
-      "url": "https://noctua.at/",
-      "linkLabel": "Visit project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 40
-    },
-    {
-      "id": "seed-client-12",
-      "title": "Bokacha",
-      "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
-      "techStack": [
-        "Magento 2 Open Source",
-        "Adobe Commerce"
-      ],
-      "url": "https://www.bokacha.com/",
-      "linkLabel": "Visit project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 50
-    },
-    {
-      "id": "seed-client-13",
-      "title": "Pool Spot",
-      "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
-      "techStack": [
-        "Magento 2 Open Source",
-        "Adobe Commerce"
-      ],
-      "url": "https://www.poolspot.com.au/",
-      "linkLabel": "Visit project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 60
-    },
-    {
-      "id": "seed-client-14",
-      "title": "Deadwood Knives",
-      "category": "Magento Open Source",
-      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
-      "techStack": [
-        "Magento 2 Open Source",
-        "Adobe Commerce"
-      ],
-      "url": "https://deadwoodknives.com/",
-      "linkLabel": "Visit project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 70
     },
     {
       "id": "seed-client-2",
@@ -212,58 +144,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 80
-    },
-    {
-      "id": "seed-client-3",
-      "title": "American Lighting",
-      "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "url": "https://ace.americanlighting.com/",
-      "linkLabel": "Visit project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 90
-    },
-    {
-      "id": "seed-client-4",
-      "title": "Melissa",
-      "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "url": "https://melissa.com.sg/",
-      "linkLabel": "Visit project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 100
-    },
-    {
-      "id": "seed-client-5",
-      "title": "RAK Ceramics",
-      "category": "Adobe Commerce Cloud",
-      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
-      "techStack": [
-        "Adobe Commerce Cloud",
-        "Magento 2"
-      ],
-      "url": "https://onlineshop.rakceramics.com/",
-      "linkLabel": "Visit project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 110
+      "sort_order": 40
     },
     {
       "id": "seed-client-6",
@@ -280,24 +161,24 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 120
+      "sort_order": 50
     },
     {
-      "id": "seed-client-7",
-      "title": "Tent and Table",
-      "category": "Adobe Commerce Enterprise",
-      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "id": "seed-client-3",
+      "title": "American Lighting",
+      "category": "Adobe Commerce Cloud",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
       "techStack": [
-        "Adobe Commerce Enterprise",
+        "Adobe Commerce Cloud",
         "Magento 2"
       ],
-      "url": "https://tentandtable.net/",
+      "url": "https://ace.americanlighting.com/",
       "linkLabel": "Visit project",
       "image": "",
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 130
+      "sort_order": 60
     },
     {
       "id": "seed-client-8",
@@ -314,7 +195,24 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 140
+      "sort_order": 70
+    },
+    {
+      "id": "seed-client-7",
+      "title": "Tent and Table",
+      "category": "Adobe Commerce Enterprise",
+      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Enterprise",
+        "Magento 2"
+      ],
+      "url": "https://tentandtable.net/",
+      "linkLabel": "Visit project",
+      "image": "",
+      "clientLogo": "",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 80
     },
     {
       "id": "seed-client-9",
@@ -331,115 +229,109 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
+      "sort_order": 90
+    },
+    {
+      "id": "seed-client-5",
+      "title": "RAK Ceramics",
+      "category": "Adobe Commerce Cloud",
+      "description": "Adobe Commerce Cloud implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Cloud",
+        "Magento 2"
+      ],
+      "url": "https://onlineshop.rakceramics.com/",
+      "linkLabel": "Visit project",
+      "image": "",
+      "clientLogo": "",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 100
+    },
+    {
+      "id": "seed-client-14",
+      "title": "Deadwood Knives",
+      "category": "Magento Open Source",
+      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "techStack": [
+        "Magento 2 Open Source",
+        "Adobe Commerce"
+      ],
+      "url": "https://deadwoodknives.com/",
+      "linkLabel": "Visit project",
+      "image": "",
+      "clientLogo": "",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 110
+    },
+    {
+      "id": "seed-client-11",
+      "title": "Noctua",
+      "category": "Magento Open Source",
+      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "techStack": [
+        "Magento 2 Open Source",
+        "Adobe Commerce"
+      ],
+      "url": "https://noctua.at/",
+      "linkLabel": "Visit project",
+      "image": "",
+      "clientLogo": "",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 120
+    },
+    {
+      "id": "seed-client-12",
+      "title": "Bokacha",
+      "category": "Magento Open Source",
+      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "techStack": [
+        "Magento 2 Open Source",
+        "Adobe Commerce"
+      ],
+      "url": "https://www.bokacha.com/",
+      "linkLabel": "Visit project",
+      "image": "",
+      "clientLogo": "",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 130
+    },
+    {
+      "id": "seed-client-13",
+      "title": "Pool Spot",
+      "category": "Magento Open Source",
+      "description": "Magento 2 Open Source implementation listed in the 2026 resume.",
+      "techStack": [
+        "Magento 2 Open Source",
+        "Adobe Commerce"
+      ],
+      "url": "https://www.poolspot.com.au/",
+      "linkLabel": "Visit project",
+      "image": "",
+      "clientLogo": "",
+      "clientLinks": [],
+      "is_published": true,
+      "sort_order": 140
+    },
+    {
+      "id": "seed-client-10",
+      "title": "Tools Plus",
+      "category": "Adobe Commerce Enterprise",
+      "description": "Adobe Commerce Enterprise implementation listed in the 2026 resume.",
+      "techStack": [
+        "Adobe Commerce Enterprise",
+        "Magento 2"
+      ],
+      "url": "https://www.toolsplus.com/",
+      "linkLabel": "Visit project",
+      "image": "",
+      "clientLogo": "",
+      "clientLinks": [],
+      "is_published": true,
       "sort_order": 150
-    },
-    {
-      "id": "seed-community",
-      "title": "Magento Community & Knowledge Sharing",
-      "category": "Community & Knowledge",
-      "description": "Community participation and technical knowledge sharing through the Magento Stack Exchange profile.",
-      "techStack": [
-        "Magento",
-        "Technical Q&A",
-        "Knowledge sharing"
-      ],
-      "url": "https://magento.stackexchange.com/users/70881/mahesh-dave",
-      "linkLabel": "View community profile",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 160
-    },
-    {
-      "id": "seed-innovation-0",
-      "title": "AI-Assisted Engineering Workflow",
-      "category": "AI & Innovation",
-      "description": "Introduced AI pair-programming and LLM-assisted code-review workflows with a curated internal prompt library and review checklists to improve delivery consistency.",
-      "techStack": [
-        "GitHub Copilot",
-        "LLM workflows",
-        "Code review"
-      ],
-      "url": "",
-      "linkLabel": "Project details",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 170
-    },
-    {
-      "id": "seed-innovation-1",
-      "title": "AI-Driven Catalog Enrichment",
-      "category": "AI & Innovation",
-      "description": "Built LLM-powered tooling to help generate product descriptions, SEO metadata, and image alt text for large product catalogs.",
-      "techStack": [
-        "LLM APIs",
-        "Catalog enrichment",
-        "SEO"
-      ],
-      "url": "",
-      "linkLabel": "Project details",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 180
-    },
-    {
-      "id": "seed-innovation-2",
-      "title": "Adobe Sensei & Live Search",
-      "category": "AI & Innovation",
-      "description": "Worked with AI-powered product recommendations and Live Search capabilities to support product discovery.",
-      "techStack": [
-        "Adobe Sensei",
-        "Live Search",
-        "Product discovery"
-      ],
-      "url": "",
-      "linkLabel": "Project details",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 190
-    },
-    {
-      "id": "seed-innovation-3",
-      "title": "Conversational Commerce",
-      "category": "AI & Innovation",
-      "description": "Explored LLM-backed support experiences connected to commerce order and catalog APIs for order-status and FAQ assistance.",
-      "techStack": [
-        "LLM integration",
-        "Commerce APIs",
-        "Customer support"
-      ],
-      "url": "",
-      "linkLabel": "Project details",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 200
-    },
-    {
-      "id": "seed-innovation-4",
-      "title": "MCP & Developer Tooling",
-      "category": "AI & Innovation",
-      "description": "Explored Model Context Protocol servers connecting AI assistants with Adobe Commerce environments, developer workflows, and logs.",
-      "techStack": [
-        "MCP",
-        "Developer tooling",
-        "AI assistants"
-      ],
-      "url": "",
-      "linkLabel": "Project details",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 210
     },
     {
       "id": "seed-integration-0",
@@ -457,44 +349,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 220
-    },
-    {
-      "id": "seed-integration-1",
-      "title": "Adobe Commerce — Salesforce Integration",
-      "category": "Integrations & APIs",
-      "description": "Bi-directional synchronization of customer, order, and product data using Jitterbit; the resume reports a 99% improvement in data accuracy and elimination of manual entry.",
-      "techStack": [
-        "Adobe Commerce",
-        "Salesforce",
-        "Jitterbit"
-      ],
-      "url": "",
-      "linkLabel": "View project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 230
-    },
-    {
-      "id": "seed-integration-2",
-      "title": "Magento–Odoo Connector",
-      "category": "Integrations & APIs",
-      "description": "Implemented Magento–Odoo connector functionality for product, inventory, and order synchronization.",
-      "techStack": [
-        "Magento",
-        "Odoo ERP",
-        "Product sync",
-        "Inventory sync"
-      ],
-      "url": "",
-      "linkLabel": "View project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 240
+      "sort_order": 160
     },
     {
       "id": "seed-project-0",
@@ -513,62 +368,7 @@
       "clientLogo": "",
       "clientLinks": [],
       "is_published": true,
-      "sort_order": 250
-    },
-    {
-      "id": "seed-project-1",
-      "title": "Adobe Commerce Optimizer",
-      "category": "Adobe Commerce Platform",
-      "description": "Configured an evaluation storefront and demo environment with live catalog synchronization, validating product-data consistency and supporting deployment.",
-      "techStack": [
-        "Adobe Commerce Optimizer",
-        "Catalog Sync",
-        "Storefront"
-      ],
-      "url": "",
-      "linkLabel": "View project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 260
-    },
-    {
-      "id": "seed-project-2",
-      "title": "Hyvä Storefront Implementations",
-      "category": "Headless & Storefronts",
-      "description": "Delivered lightweight storefronts using Hyvä, Tailwind CSS, and Alpine.js, including a Store Locator module refactor for Hyvä compatibility.",
-      "techStack": [
-        "Hyvä",
-        "Tailwind CSS",
-        "Alpine.js",
-        "Magento 2"
-      ],
-      "url": "",
-      "linkLabel": "View project",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 270
-    },
-    {
-      "id": "seed-resume-2026",
-      "title": "Mahesh Dave — Resume 2026",
-      "category": "Professional Resources",
-      "description": "Download the 2026 resume covering Adobe Commerce experience, integrations, AI initiatives, certifications, and education.",
-      "techStack": [
-        "Resume PDF",
-        "Adobe Commerce",
-        "Engineering Leadership"
-      ],
-      "url": "/Mahesh_Dave_Resume_2026.pdf",
-      "linkLabel": "View resume PDF",
-      "image": "",
-      "clientLogo": "",
-      "clientLinks": [],
-      "is_published": true,
-      "sort_order": 280
+      "sort_order": 170
     }
   ],
   "certifications": [
@@ -986,188 +786,5 @@
       "gradientFrom": "#1d3937",
       "gradientTo": "#426f6c"
     }
-  },
-  "themeDraft": {
-    "version": 1,
-    "mode": "light",
-    "fontFamily": "editorial",
-    "scale": "comfortable",
-    "radius": 16,
-    "shadow": 1,
-    "motion": 1,
-    "light": {
-      "bg": "#f5f8f7",
-      "surface": "#ffffff",
-      "surfaceSoft": "#eaf1f0",
-      "headerBg": "#f5f8f7",
-      "footerBg": "#f5f8f7",
-      "text": "#1b302f",
-      "muted": "#617775",
-      "line": "#d9e5e3",
-      "primary": "#628f8c",
-      "primaryDark": "#426f6c",
-      "secondary": "#98b7b3",
-      "accent": "#c49a70",
-      "onPrimary": "#ffffff",
-      "link": "#426f6c",
-      "gradientFrom": "#345f5c",
-      "gradientTo": "#83aaa6"
-    },
-    "dark": {
-      "bg": "#101c1c",
-      "surface": "#182827",
-      "surfaceSoft": "#213735",
-      "headerBg": "#101c1c",
-      "footerBg": "#101c1c",
-      "text": "#eef6f4",
-      "muted": "#b1c5c2",
-      "line": "#304946",
-      "primary": "#98c2bd",
-      "primaryDark": "#b7d8d4",
-      "secondary": "#628f8c",
-      "accent": "#dfb38a",
-      "onPrimary": "#10201f",
-      "link": "#a8d0cb",
-      "gradientFrom": "#1d3937",
-      "gradientTo": "#426f6c"
-    }
-  },
-  "settingsRows": [
-    {
-      "key": "copy",
-      "value": {
-        "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
-        "heroHeadline": "Commerce Engineered for Growth.",
-        "aboutTitle": "Technical depth. People-first delivery.",
-        "aboutDescription": "Connecting architecture, engineering execution, and team growth to build commerce platforms that last.",
-        "experienceTitle": "Experience built in production.",
-        "experienceDescription": "A progression from hands-on Magento development to technical leadership and solution architecture.",
-        "projectsTitle": "Commerce work with real-world impact.",
-        "projectsDescription": "Selected commerce implementations, integrations, and client storefronts.",
-        "certificationsTitle": "Credentials that back the craft.",
-        "certificationsDescription": "Adobe credentials and product foundations, with verification links where available.",
-        "educationTitle": "The foundation behind the practice.",
-        "educationDescription": "Academic background and qualifications.",
-        "toolkitTitle": "A practical, modern toolkit.",
-        "toolkitDescription": "Platforms, patterns, and tools used across commerce, integrations, frontend, infrastructure, and delivery. ",
-        "articlesTitle": "Articles from the work.",
-        "articlesDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
-        "articlesPageTitle": "Articles from the work.",
-        "articlesPageDescription": "Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.",
-        "articlesPageBannerImage": "",
-        "articleListenEnabled": true,
-        "articleLikesEnabled": true,
-        "contactTitle": "Good work starts with a conversation.",
-        "contactDescription": "Have a commerce challenge, integration idea, or engineering question? I’d be glad to connect."
-      }
-    },
-    {
-      "key": "stats",
-      "value": [
-        {
-          "value": "9+",
-          "label": "Years in commerce engineering"
-        },
-        {
-          "value": "8+",
-          "label": "People led across delivery teams"
-        },
-        {
-          "value": "99%",
-          "label": "Data accuracy improvement reported on Salesforce integration"
-        },
-        {
-          "value": "35%",
-          "label": "Faster PR turnaround after AI workflow adoption"
-        }
-      ]
-    },
-    {
-      "key": "tech_stack",
-      "value": [
-        {
-          "category": "Commerce",
-          "items": [
-            "Adobe Commerce Cloud",
-            "Adobe Commerce Enterprise",
-            "Magento 2",
-            "Magento 1",
-            "Hyvä",
-            "Adobe Commerce Optimizer",
-            "Adobe App Builder"
-          ]
-        },
-        {
-          "category": "Backend & APIs",
-          "items": [
-            "PHP 8.x",
-            "Magento Framework",
-            "Laravel",
-            "Node.js",
-            "GraphQL",
-            "REST",
-            "SOAP",
-            "Webhooks",
-            "OAuth 2.0"
-          ]
-        },
-        {
-          "category": "Integration & AI",
-          "items": [
-            "Odoo ERP",
-            "Salesforce CRM",
-            "Jitterbit",
-            "Adobe I/O Events",
-            "LLM APIs",
-            "MCP",
-            "Adobe Sensei",
-            "Live Search"
-          ]
-        },
-        {
-          "category": "Frontend",
-          "items": [
-            "JavaScript",
-            "React",
-            "Alpine.js",
-            "Tailwind CSS",
-            "Knockout.js",
-            "RequireJS",
-            "jQuery",
-            "HTML5",
-            "CSS3",
-            "LESS"
-          ]
-        },
-        {
-          "category": "Data & infrastructure",
-          "items": [
-            "MySQL",
-            "MariaDB",
-            "Elasticsearch",
-            "OpenSearch",
-            "Redis",
-            "Docker",
-            "Azure",
-            "Jenkins",
-            "GitLab CI",
-            "RabbitMQ",
-            "Varnish"
-          ]
-        },
-        {
-          "category": "Quality & delivery",
-          "items": [
-            "SonarQube",
-            "PHP_CodeSniffer",
-            "Magento Coding Standards",
-            "PHPUnit",
-            "New Relic",
-            "Core Web Vitals",
-            "Agile/Scrum"
-          ]
-        }
-      ]
-    }
-  ]
+  }
 }
