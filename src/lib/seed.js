@@ -229,7 +229,7 @@ export const DEFAULT_COPY = {
     'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
   articlesPageTitle: 'Articles from the work.',
   articlesPageDescription: 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.',
-  articlesPageBannerImage: '',
+  articlesPageBannerImage: '/images/maheshdave-articles-banner.jpg',
   articleListenEnabled: true,
   articleLikesEnabled: true,
   contactTitle: 'Good work starts with a conversation.',

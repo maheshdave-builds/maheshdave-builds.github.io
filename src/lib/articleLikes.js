@@ -109,10 +109,12 @@ export async function fetchArticleLikeCount(slug) {
   const key = String(slug || '').trim()
   if (!key) return 0
 
+  const fallback = await fetchFallbackLikeCount(key)
   try {
-    return await fetchCounterValue(key, false)
+    const remote = await fetchCounterValue(key, false)
+    return Math.max(fallback, remote)
   } catch {
-    return fetchFallbackLikeCount(key)
+    return fallback
   }
 }
 
@@ -128,7 +130,9 @@ export async function likeArticle(slug) {
   markUserLiked(key)
 
   try {
-    return await fetchCounterValue(key, true)
+    const remote = await fetchCounterValue(key, true)
+    const fallback = await fetchFallbackLikeCount(key)
+    return Math.max(fallback, remote)
   } catch {
     incrementPendingLike(key)
     return fetchFallbackLikeCount(key)

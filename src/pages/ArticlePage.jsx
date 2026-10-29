@@ -8,7 +8,8 @@ import { absoluteUrl, useSeo, SITE_ORIGIN } from '../lib/useSeo'
 import { formatDate, isArticlePublic, readingTime, sortArticles, truncate } from '../lib/format'
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
 import { fetchArticleBySlug, contentSource } from '../lib/content'
-import { getArticleCoverImage } from '../lib/articleImages'
+import ArticleCoverMedia from '../components/ArticleCoverMedia'
+import { articleHasUploadedCover, getArticleCoverImage } from '../lib/articleImages'
 import ArticleLikeButton from '../components/ArticleLikeButton'
 
 function useArticle(slug) {
@@ -321,10 +322,10 @@ export default function ArticlePage({ slug }) {
           </div>
         </header>
 
-        <img
+        <ArticleCoverMedia
           className="article-cover"
-          src={getArticleCoverImage(visible)}
-          alt=""
+          article={visible}
+          alt={visible.title ? `Cover for ${visible.title}` : ''}
           width="1200"
           height="630"
           decoding="async"
@@ -360,6 +361,7 @@ export default function ArticlePage({ slug }) {
             imageFit="contain"
             getTitle={(article) => article.title}
             getImage={getArticleCoverImage}
+            renderSlideImage={(article, url) => (articleHasUploadedCover(article) ? <img src={url} alt="" loading="lazy" /> : <ArticleCoverMedia article={article} placeholderClassName="article-cover-placeholder cinema-cover-placeholder" alt="" />)}
             getLink={(article) => `/articles/${encodeURIComponent(article.slug)}`}
             renderDetails={(article, _index, primary) => primary ? (
               <>

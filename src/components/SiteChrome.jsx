@@ -44,14 +44,16 @@ export default function SiteHeader({ activeSection, onSectionSelect }) {
 
   return (
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
-      <Link className={`brand brand-style-${site.brandStyle || 'classic'}`} to="/#home" onClick={close}>
-        {site?.siteLogo ? (
-          <img className="brand-image" src={site.siteLogo} alt="" width="44" height="44" />
-        ) : (
-          <span className="brand-mark" aria-hidden="true">
-            MD
-          </span>
-        )}
+      <Link className={`brand brand-live brand-style-${site.brandStyle || 'classic'}`} to="/#home" onClick={close}>
+        <span className="brand-icon-shell">
+          {site?.siteLogo ? (
+            <img className="brand-image" src={site.siteLogo} alt="" width="52" height="52" />
+          ) : (
+            <span className="brand-mark" aria-hidden="true">
+              MD
+            </span>
+          )}
+        </span>
         <span className="brand-text">
           {site.brandName || profile.shortName || profile.name}
           <small>{site.brandTagline || profile.title?.split('·')[0]?.trim() || 'Adobe Commerce'}</small>
@@ -161,12 +163,14 @@ export function SiteFooter() {
       <div className="footer-orb footer-orb-two" aria-hidden="true" />
       <div className="site-footer-inner">
         <div className="footer-brand">
-          <Link className={`brand brand-style-${site.brandStyle || 'classic'}`} to="/#home">
-            {site?.siteLogo ? (
-              <img className="brand-image" src={site.siteLogo} alt="" width="48" height="48" />
-            ) : (
-              <span className="brand-mark" aria-hidden="true">MD</span>
-            )}
+          <Link className={`brand brand-live brand-style-${site.brandStyle || 'classic'}`} to="/#home">
+            <span className="brand-icon-shell">
+              {site?.siteLogo ? (
+                <img className="brand-image" src={site.siteLogo} alt="" width="52" height="52" />
+              ) : (
+                <span className="brand-mark" aria-hidden="true">MD</span>
+              )}
+            </span>
             <span className="brand-text">
               {site.brandName || profile.shortName || profile.name}
               <small>{site.brandTagline || profile.title?.split('·')[0]?.trim() || 'Adobe Commerce'}</small>

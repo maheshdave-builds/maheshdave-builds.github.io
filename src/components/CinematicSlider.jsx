@@ -11,7 +11,7 @@ const palettes = [
 ]
 
 /** Cinematic, vertical image-rail carousel inspired by the user's video reference. */
-export default function CinematicSlider({ items = [], label, getTitle, getImage, getLink, renderDetails, intervalSeconds = 5, imageFit = 'cover' }) {
+export default function CinematicSlider({ items = [], label, getTitle, getImage, renderSlideImage, getLink, renderDetails, intervalSeconds = 5, imageFit = 'cover' }) {
   const [active, setActive] = useState(0)
   const reduceMotion = useReducedMotion()
   useEffect(() => {
@@ -61,9 +61,17 @@ export default function CinematicSlider({ items = [], label, getTitle, getImage,
           const index = (safeActive + offset + items.length) % items.length
           const slide = items[index]
           const slideImage = getImage?.(slide)
-          return <motion.button type="button" key={items.length > 2 ? (slide.id || slide.slug || slide.title || index) : `${index}-${offset}`} className={`cinema-image cinema-image-${offset === 0 ? 'active' : offset < 0 ? 'previous' : 'next'}`} onClick={() => setActive(index)} aria-label={`Show ${getTitle?.(slide) || slide.title || slide.name || `item ${index + 1}`}`} initial={false} animate={{ x: offset * 185, y: offset === 0 ? 0 : 10, rotate: offset * -3, scale: offset === 0 ? .96 : .78, opacity: offset === 0 ? 1 : .86, filter: offset === 0 ? 'blur(0px)' : 'blur(.15px)' }} transition={{ duration: reduceMotion ? 0 : .72, ease: [.22, .68, .24, 1] }}>
-            {slideImage ? <img src={slideImage} alt="" loading="lazy" /> : <span className="cinema-image-placeholder">{(getTitle?.(slide) || slide.title || slide.name || 'MD').split(/\s+/).slice(0, 2).map((part) => part[0]).join('')}</span>}
-            {offset === 0 && <span className="cinema-image-caption">{getTitle?.(slide) || slide.title || slide.name}</span>}
+          const slideKey = items.length > 2 ? (slide.id || slide.slug || slide.title || index) : `${index}-${offset}`
+          const imageNode = typeof renderSlideImage === 'function'
+            ? renderSlideImage(slide, slideImage, offset === 0)
+            : slideImage
+              ? <img src={slideImage} alt="" loading="lazy" />
+              : <span className="cinema-image-placeholder">{(getTitle?.(slide) || slide.title || slide.name || 'MD').split(/\s+/).slice(0, 2).map((part) => part[0]).join('')}</span>
+          return <motion.button type="button" key={slideKey} className={`cinema-image cinema-image-${offset === 0 ? 'active' : offset < 0 ? 'previous' : 'next'}`} onClick={() => setActive(index)} aria-label={`Show ${getTitle?.(slide) || slide.title || slide.name || `item ${index + 1}`}`} initial={false} animate={{ x: offset * 185, y: offset === 0 ? 0 : 10, rotate: offset * -3, scale: offset === 0 ? .96 : .78, opacity: offset === 0 ? 1 : .86, filter: offset === 0 ? 'blur(0px)' : 'blur(.15px)' }} transition={{ duration: reduceMotion ? 0 : .72, ease: [.22, .68, .24, 1] }}>
+            <div className={`cinema-image-shell${offset === 0 ? ' is-live' : ''}`}>
+              {imageNode}
+              {offset === 0 && !reduceMotion ? <span className="cinema-image-shimmer" aria-hidden="true" /> : null}
+            </div>
           </motion.button>
         })}
       </motion.div>

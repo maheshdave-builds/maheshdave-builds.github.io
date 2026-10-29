@@ -20,6 +20,45 @@
   object-fit: cover;
 }
 
+.article-cover-placeholder,
+.article-cover-placeholder svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.article-list-card-media .article-cover-placeholder {
+  min-height: 100%;
+}
+
+.article-cover.article-cover-placeholder,
+.article-cover.is-animated-cover {
+  width: 100%;
+  max-height: 620px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #234845;
+}
+
+.cinema-image .cinema-cover-placeholder,
+.cinema-image .cinema-cover-placeholder svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cinema-image .cinema-cover-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.cinematic-slider.fit-contain .cinema-image .cinema-cover-placeholder svg {
+  object-fit: contain;
+  object-position: center center;
+}
+
 .article-list-card-media.is-uploaded img {
   object-fit: contain;
   background: var(--surface-soft, #f3f6f6);
