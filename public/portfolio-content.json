@@ -549,12 +549,12 @@
         "label": "People led across delivery teams"
       },
       {
-        "value": "99%",
-        "label": "Data accuracy improvement reported on Salesforce integration"
+        "value": "End-to-end",
+        "label": "Architecture, integrations, and delivery"
       },
       {
-        "value": "35%",
-        "label": "Faster PR turnaround after AI workflow adoption"
+        "value": "AI-assisted",
+        "label": "Modern engineering workflows"
       }
     ],
     "techStack": [
