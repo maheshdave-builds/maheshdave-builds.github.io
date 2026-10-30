@@ -6396,3 +6396,65 @@ body::-webkit-scrollbar-thumb:hover { background: var(--green-dark); }
   }
 }
 
+/* Same rounded float as the footer ring, clipped to the header bar. */
+.header-round-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.header-round {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  top: -178px;
+  right: max(calc((100vw - var(--container)) / 2 - 70px), -20px);
+  left: auto;
+  border: 1px solid color-mix(in srgb, var(--green) 28%, transparent);
+  border-radius: 44% 56% 62% 38%;
+  box-shadow:
+    0 0 0 16px color-mix(in srgb, var(--green) 5%, transparent),
+    0 0 0 34px color-mix(in srgb, var(--green) 3%, transparent);
+  animation: footerFloat 18s ease-in-out infinite alternate;
+}
+.site-header > .brand,
+.site-header > .header-actions {
+  position: relative;
+  z-index: 1;
+}
+.site-header > .main-nav { z-index: 2; }
+
+/* Header links borrow the footer's slow green wash. Desktop only, so the mobile menu stays plain. */
+@media (min-width: 901px) {
+  .site-header .main-nav {
+    position: relative;
+    isolation: isolate;
+  }
+  .site-header .main-nav::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 32%, color-mix(in srgb, var(--green) 16%, transparent) 50%, transparent 68%);
+    background-size: 220% 100%;
+    animation: footer-gradient-flow 9s ease-in-out infinite alternate;
+  }
+  .site-header .main-nav a {
+    z-index: 1;
+  }
+  .hero {
+    grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.72fr);
+    gap: clamp(20px, 2.4vw, 40px);
+  }
+  .hero-intro {
+    max-width: 68ch;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header .main-nav::before,
+  .header-round { animation: none !important; }
+}
+

@@ -45,6 +45,9 @@ export default function SiteHeader({ activeSection, onSectionSelect }) {
 
   return (
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
+      <div className="header-round-clip" aria-hidden="true">
+        <span className="header-round" />
+      </div>
       <Link className={`brand brand-live brand-style-${site.brandStyle || 'classic'}`} to="/#home" onClick={close}>
         <span className="brand-icon-shell">
           {site?.siteLogo ? (
