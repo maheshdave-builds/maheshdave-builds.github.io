@@ -5,7 +5,7 @@
   justify-content: flex-end;
   width: min(var(--container), calc(100% - (var(--gutter) * 2)));
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: 0;
   transform: translateY(50%);
   pointer-events: none;
 }

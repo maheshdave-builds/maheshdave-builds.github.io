@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/hooks'
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
 import { Button } from './Button'
+import NavArticleSearch from './NavArticleSearch'
 import { NAV_ITEMS } from '../lib/navigation'
 
 const NAV_LINKS = NAV_ITEMS
@@ -87,6 +88,7 @@ export default function SiteHeader({ activeSection, onSectionSelect }) {
       </nav>
 
       <div className="header-actions">
+        <NavArticleSearch menuOpen={open} onInteract={close} />
         <button
           type="button"
           className="theme-toggle"

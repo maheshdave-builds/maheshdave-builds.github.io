@@ -64,9 +64,42 @@
   background: var(--surface-soft, #f3f6f6);
 }
 
-/* Grid view: full-width banner */
+/* Grid view: equal-height cards with a stable image frame */
+.article-list-card:not(.article-list-card-list) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .article-list-card:not(.article-list-card-list) .article-list-card-media {
   width: 100%;
+}
+
+.article-list-card:not(.article-list-card-list) .article-list-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.article-list-card:not(.article-list-card-list) h2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: 2.7em;
+}
+
+.article-list-card:not(.article-list-card-list) .article-list-card-body > p:not(.cinema-meta) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  min-height: calc(1.7em * 3);
+}
+
+.article-list-card:not(.article-list-card-list) .cinema-link {
+  margin-top: auto;
+  padding-top: 0.85rem;
 }
 
 /* List view: fixed-width banner, same 16:9 ratio (never stretch with card height) */

@@ -1,26 +1,42 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowUpRight, BookOpen, CircleX, Grid2X2, List, Search, SlidersHorizontal } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useContent } from '../contexts/hooks'
 import { Link } from '../lib/RouterLink'
+import { useRouter } from '../lib/routerCore'
 import { formatDate, isArticlePublic, readingTime, sortArticles, truncate } from '../lib/format'
 import { toPlainText } from '../lib/sanitize'
 import { useSeo } from '../lib/useSeo'
 import { articleHasUploadedCover } from '../lib/articleImages'
 import { resolveArticlesPageBannerImage } from '../lib/articleBanner'
+import { articleMatchesQuery, articlesPathWithQuery, readArticleQuery } from '../lib/articleSearch'
 import ArticleCoverMedia from '../components/ArticleCoverMedia'
 
-const PAGE_SIZE = 8
+const PAGE_SIZE = 9
 export default function ArticlesPage() {
   const { articles: sourceArticles = [], site, status = 'ready', error, reload } = useContent()
+  const { search, navigate } = useRouter()
+  const urlQuery = useMemo(() => readArticleQuery(search), [search])
   const articles = useMemo(() => sortArticles(sourceArticles.filter((article) => isArticlePublic(article))), [sourceArticles])
   const [view, setView] = useState('grid')
-  const [query, setQuery] = useState('')
   const [sort, setSort] = useState('newest')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [visibleQuery, setVisibleQuery] = useState(urlQuery)
+  const sentinelRef = useRef(null)
+  const query = urlQuery
+
+  if (visibleQuery !== urlQuery) {
+    setVisibleQuery(urlQuery)
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  const applyQuery = (value) => {
+    const next = articlesPathWithQuery(value, search)
+    if (`/articles${search || ''}` !== next) navigate(next, { replace: true })
+  }
+
   const filtered = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase()
-    const matched = articles.filter((article) => !needle || [article.title, article.excerpt, article.content, article.category, article.author, ...(article.tags || [])].join(' ').replace(/<[^>]*>/g, ' ').toLocaleLowerCase().includes(needle))
+    const matched = articles.filter((article) => articleMatchesQuery(article, query))
     return matched.sort((a, b) => {
       if (sort === 'oldest') return new Date(a.published_at || a.created_at || 0) - new Date(b.published_at || b.created_at || 0)
       if (sort === 'az') return String(a.title).localeCompare(String(b.title))
@@ -31,10 +47,19 @@ export default function ArticlesPage() {
   const shown = filtered.slice(0, visibleCount)
   const hasSearchQuery = Boolean(query.trim())
 
-  const clearSearch = () => {
-    setQuery('')
-    setVisibleCount(PAGE_SIZE)
-  }
+  useEffect(() => {
+    const node = sentinelRef.current
+    if (!node) return undefined
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setVisibleCount((count) => count + PAGE_SIZE)
+      }
+    }, { rootMargin: '280px 0px' })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [shown.length, filtered.length])
+
+  const clearSearch = () => applyQuery('')
 
   const bannerImage = resolveArticlesPageBannerImage(site.copy)
 
@@ -57,10 +82,7 @@ export default function ArticlesPage() {
         <Search size={18} className="articles-search-icon" aria-hidden="true" />
         <input
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value)
-            setVisibleCount(PAGE_SIZE)
-          }}
+          onChange={(e) => applyQuery(e.target.value)}
           placeholder="Search titles, content, tags…"
           aria-label="Search all article content"
         />
@@ -109,6 +131,6 @@ export default function ArticlesPage() {
         </motion.article>
       ))}
     </motion.div> : <div className="articles-no-results"><BookOpen size={24}/><h2>{query ? 'No matching articles' : 'Articles coming soon'}</h2><p>{query ? 'Try another keyword. Search includes the full article text, not only titles.' : 'Articles appear here as soon as they are published from the admin dashboard.'}</p>{query ? <button type="button" className="button button-secondary" onClick={clearSearch}>Clear search</button> : null}</div>}
-    {shown.length < filtered.length ? <div className="articles-load-more"><button className="button button-primary" onClick={() => setVisibleCount(n => n + PAGE_SIZE)}>Load more articles <ArrowUpRight size={16}/></button><span>Showing {shown.length} of {filtered.length}</span></div> : filtered.length > 0 ? <p className="articles-results-count">Showing all {filtered.length} articles</p> : null}
+    {shown.length < filtered.length ? <div className="articles-load-more" ref={sentinelRef} role="status">Showing {shown.length} of {filtered.length}</div> : filtered.length > 0 ? <p className="articles-results-count">Showing all {filtered.length} articles</p> : null}
   </main>
 }
