@@ -700,7 +700,7 @@
   "theme": {
     "version": 1,
     "mode": "light",
-    "fontFamily": "editorial",
+    "fontFamily": "serif",
     "scale": "comfortable",
     "radius": 16,
     "shadow": 1,
@@ -745,7 +745,7 @@
   "themePublished": {
     "version": 1,
     "mode": "light",
-    "fontFamily": "editorial",
+    "fontFamily": "serif",
     "scale": "comfortable",
     "radius": 16,
     "shadow": 1,
