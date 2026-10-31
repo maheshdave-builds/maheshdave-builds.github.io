@@ -695,7 +695,8 @@
       }
     ],
     "customSections": [],
-    "menuStyle": "underline"
+    "menuStyle": "underline",
+    "sliderIntervalSeconds": 7
   },
   "theme": {
     "version": 1,
