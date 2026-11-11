@@ -23,6 +23,22 @@ const urls = [
     priority: '0.7',
   })),
 ]
-const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((url) => `  <url><loc>${url.loc.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</loc>${url.lastmod && !Number.isNaN(Date.parse(url.lastmod)) ? `<lastmod>${new Date(url.lastmod).toISOString().slice(0, 10)}</lastmod>` : ''}<changefreq>${url.changefreq}</changefreq><priority>${url.priority}</priority></url>`).join('\n')}\n</urlset>\n`
+const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+  .map(
+    (url) => `  <url>
+    <loc>${url.loc.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</loc>${
+      url.lastmod && !Number.isNaN(Date.parse(url.lastmod))
+        ? `\n    <lastmod>${new Date(url.lastmod).toISOString().slice(0, 10)}</lastmod>`
+        : ''
+    }
+    <changefreq>${url.changefreq}</changefreq>
+    <priority>${url.priority}</priority>
+  </url>`,
+  )
+  .join('\n')}
+</urlset>
+`
 await writeFile(new URL('../public/sitemap.xml', import.meta.url), xml)
 console.log(`Generated sitemap with ${urls.length} public URLs (${publicArticles.length} articles).`)
