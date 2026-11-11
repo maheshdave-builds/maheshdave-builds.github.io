@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Heart } from 'lucide-react'
-import { fetchArticleLikeCount, hasUserLikedArticle, likeArticle } from '../lib/articleLikes'
+import { fetchArticleLikeCount, getInitialArticleLikeCount, hasUserLikedArticle, likeArticle } from '../lib/articleLikes'
 
-export default function ArticleLikeButton({ slug, className = '' }) {
-  const [count, setCount] = useState(0)
+export default function ArticleLikeButton({ slug, className = '', initialCount }) {
+  const baseCount = Number.isFinite(Number(initialCount)) ? Number(initialCount) : getInitialArticleLikeCount(slug)
+  const [count, setCount] = useState(baseCount)
   const [liked, setLiked] = useState(() => hasUserLikedArticle(slug))
   const [busy, setBusy] = useState(false)
 
@@ -15,12 +16,12 @@ export default function ArticleLikeButton({ slug, className = '' }) {
         if (active) setCount(value)
       })
       .catch(() => {
-        if (active) setCount(0)
+        if (active) setCount((current) => Math.max(current, baseCount))
       })
     return () => {
       active = false
     }
-  }, [slug])
+  }, [slug, baseCount])
 
   const handleLike = async () => {
     if (busy || liked) return

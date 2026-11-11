@@ -208,7 +208,7 @@ export const seedProfile = {
 
 export const DEFAULT_COPY = {
   heroEyebrow: 'ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP',
-  heroHeadline: 'Engineering commerce that works harder.',
+  heroHeadline: 'Engineering Commerce for Growth.',
   aboutTitle: 'Technical depth. People-first delivery.',
   aboutDescription:
     'Connecting architecture, engineering execution, and team growth to build commerce platforms that last.',
@@ -245,10 +245,10 @@ export const DEFAULT_STATS = [
 ]
 
 export const seedSite = {
-  siteTitle: 'Mahesh Dave · Adobe Commerce Engineering',
+  siteTitle: 'Mahesh Dave · Adobe Commerce Team Lead',
   siteDescription:
     'Mahesh Dave — Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.',
-  siteLogo: '',
+  siteLogo: '/uploads/branding/1793042375792-onsuqy.jpg',
   copy: DEFAULT_COPY,
   stats: DEFAULT_STATS,
   techStack,

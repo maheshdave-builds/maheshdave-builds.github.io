@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { contentSource, fetchPublicContent, readPublicContentCache, writePublicContentCache } from '../lib/content'
+import { contentSource, fetchPublicContent, writePublicContentCache } from '../lib/content'
 import { fallbackContent, seedProfile, seedSite } from '../lib/seed'
 import { DEFAULT_THEME, validateTheme } from '../lib/theme'
 import { ContentContext } from './contexts'
@@ -13,22 +13,23 @@ function emptyPublicShell() {
     experience: [],
     education: [],
     articles: [],
+    articleLikes: {},
     theme: DEFAULT_THEME,
   }
 }
 
 function initialPublicContent() {
   if (contentSource === 'local') return { ...fallbackContent, theme: DEFAULT_THEME }
-  return readPublicContentCache() || emptyPublicShell()
+  return emptyPublicShell()
 }
 
 /**
- * Public content provider. Uses the last published snapshot immediately, then
- * refreshes from GitHub main without a blocking loader.
+ * Public content provider. Loads content freshly from portfolio-content.json,
+ * articles-content.json, and article-likes.json so visitors only see updated content.
  */
 export function ContentProvider({ children }) {
   const [content, setContent] = useState(initialPublicContent)
-  const [status, setStatus] = useState(contentSource === 'local' ? 'local' : 'ready')
+  const [status, setStatus] = useState(contentSource === 'local' ? 'ready' : 'loading')
   const [error, setError] = useState('')
   const [nonce, setNonce] = useState(0)
 
@@ -42,11 +43,11 @@ export function ContentProvider({ children }) {
         setContent(next)
         writePublicContentCache(next)
         setError('')
-        setStatus(contentSource === 'local' ? 'local' : 'ready')
+        setStatus('ready')
       } catch (loadError) {
         if (!active) return
         setError(loadError?.message || 'Content could not be loaded.')
-        setStatus(contentSource === 'local' ? 'local' : 'ready')
+        setStatus('error')
       }
     }
 

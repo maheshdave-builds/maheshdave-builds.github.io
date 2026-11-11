@@ -1,10 +1,28 @@
 const USER_LIKES_KEY = 'portfolio-article-user-likes-v1'
 const PENDING_LIKES_KEY = 'portfolio-article-like-pending-v1'
 const LIKES_JSON_URL = '/article-likes.json'
+const RAW_GITHUB_BASE = 'https://raw.githubusercontent.com/maheshdave-builds/maheshdave-builds.github.io/main/public'
+const RAW_LIKES_GITHUB = `${RAW_GITHUB_BASE}/article-likes.json`
 const LOCAL_DEV_LIKES_KEY = 'portfolio-article-likes-local-preview'
 const COUNTER_NAMESPACE = 'maheshdave-portfolio-articles'
 const COUNTER_API = 'https://abacus.jasoncameron.dev'
 const LOCAL_DEV = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)
+
+let inMemoryLikes = {}
+
+export function setInitialArticleLikes(likes) {
+  if (likes && typeof likes === 'object') {
+    inMemoryLikes = { ...inMemoryLikes, ...likes }
+  }
+}
+
+export function getInitialArticleLikeCount(slug) {
+  const key = String(slug || '').trim()
+  if (!key) return 0
+  const pending = readPendingLikes()
+  const base = Number(inMemoryLikes[key] || 0)
+  return base + Number(pending[key] || 0)
+}
 
 function readJson(key, fallback) {
   try {
@@ -69,18 +87,44 @@ export function clearPendingLikeCounts() {
 async function fetchPublishedLikeCounts() {
   if (LOCAL_DEV) {
     const staged = readJson(LOCAL_DEV_LIKES_KEY, null)
-    if (staged?.likes && typeof staged.likes === 'object') return staged.likes
+    if (staged?.likes && typeof staged.likes === 'object') {
+      setInitialArticleLikes(staged.likes)
+      return staged.likes
+    }
   }
 
-  const response = await fetch(`${LIKES_JSON_URL}?v=${Date.now()}`, { cache: 'no-store' })
-  if (!response.ok) throw new Error(`Could not load article likes (${response.status}).`)
-  const payload = await response.json()
-  return payload?.likes && typeof payload.likes === 'object' ? payload.likes : {}
+  const version = Date.now()
+  const primaryUrl = LOCAL_DEV ? `${LIKES_JSON_URL}?v=${version}` : `${RAW_LIKES_GITHUB}?v=${version}`
+  const fallbackUrl = `${LIKES_JSON_URL}?v=${version}`
+
+  let response = null
+  try {
+    response = await fetch(primaryUrl, { cache: 'no-store' })
+  } catch {
+    /* fallback to local JSON below */
+  }
+  if (!response || !response.ok) {
+    try {
+      response = await fetch(fallbackUrl, { cache: 'no-store' })
+    } catch {
+      /* ignore fetch error */
+    }
+  }
+
+  if (response && response.ok) {
+    const payload = await response.json().catch(() => ({}))
+    const likes = payload?.likes && typeof payload.likes === 'object' ? payload.likes : {}
+    setInitialArticleLikes(likes)
+    return likes
+  }
+
+  if (Object.keys(inMemoryLikes).length) return inMemoryLikes
+  throw new Error('Could not load article likes.')
 }
 
-function mergeLikeCount(slug, published = {}, pending = readPendingLikes()) {
+function mergeLikeCount(slug, published = inMemoryLikes, pending = readPendingLikes()) {
   const key = String(slug || '').trim()
-  return Number(published[key] || 0) + Number(pending[key] || 0)
+  return Number(published[key] || inMemoryLikes[key] || 0) + Number(pending[key] || 0)
 }
 
 async function fetchCounterValue(slug, hit = false) {

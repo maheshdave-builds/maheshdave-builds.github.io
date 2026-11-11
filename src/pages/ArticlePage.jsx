@@ -48,7 +48,7 @@ function useArticle(slug) {
 }
 
 export default function ArticlePage({ slug }) {
-  const { articles, site } = useContent()
+  const { articles, site, articleLikes = {} } = useContent()
   const { article, loading } = useArticle(slug)
   const [copied, setCopied] = useState(false)
   const [voices, setVoices] = useState([])
@@ -341,7 +341,12 @@ export default function ArticlePage({ slug }) {
           </div>
         ) : null}
 
-        {site.copy?.articleLikesEnabled !== false ? <ArticleLikeButton slug={visible.slug} /> : null}
+        {site.copy?.articleLikesEnabled !== false ? (
+          <ArticleLikeButton
+            slug={visible.slug}
+            initialCount={articleLikes[visible.slug]}
+          />
+        ) : null}
 
         <footer className="article-footer">
           <p>

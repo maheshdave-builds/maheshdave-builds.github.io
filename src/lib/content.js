@@ -6,7 +6,7 @@ const supabase = !useGithubGateway && isConfigured ? remoteSupabase : null
 import { fallbackContent, seedSite, seedProfile, DEFAULT_COPY, DEFAULT_STATS } from './seed'
 import { DEFAULT_THEME, validateTheme } from './theme'
 import { isArticlePublic, sortArticles } from './format'
-import { clearPendingLikeCounts, mergeArticleLikesForPublish, readPendingLikeCounts } from './articleLikes'
+import { clearPendingLikeCounts, mergeArticleLikesForPublish, readPendingLikeCounts, setInitialArticleLikes } from './articleLikes'
 
 // Data access for the portfolio. Every public read is subject to RLS: the anon
 // role only ever sees published rows and a whitelist of site_settings keys, so
@@ -142,14 +142,13 @@ export function hasStagedContent() {
 export const PUBLIC_CONTENT_CACHE_KEY = 'portfolio-public-content-cache-v1'
 
 export function readPublicContentCache() {
+  // Avoid returning stale cached content on boot to prevent flashing old content during load.
   try {
-    const raw = sessionStorage.getItem(PUBLIC_CONTENT_CACHE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw)
-    return parsed?.data && typeof parsed.data === 'object' ? parsed.data : null
+    sessionStorage.removeItem(PUBLIC_CONTENT_CACHE_KEY)
   } catch {
-    return null
+    /* storage unavailable */
   }
+  return null
 }
 
 export function writePublicContentCache(data) {
@@ -541,6 +540,8 @@ export async function fetchPublicContent() {
   if (isLocalPreviewMode()) return getLocalPreviewContent()
   if (useGithubGateway) {
     const shared = await readSharedContent()
+    const articleLikes = shared.articleLikes && typeof shared.articleLikes === 'object' ? shared.articleLikes : {}
+    setInitialArticleLikes(articleLikes)
     const publicContent = {
       profile: normalizeProfile(shared.profile),
       site: normalizeSite(shared.site),
@@ -549,6 +550,7 @@ export async function fetchPublicContent() {
       experience: sortCollectionRows(asArray(shared.experience).filter((x) => x.is_published !== false)),
       education: sortCollectionRows(asArray(shared.education).filter((x) => x.is_published !== false)),
       articles: sortArticles(sharedArticleRows(shared).map(normalizeArticle).filter((article) => isArticlePublic(article))),
+      articleLikes,
       theme: shared.themePublished || shared.theme || DEFAULT_THEME,
     }
     writePublicContentCache(publicContent)

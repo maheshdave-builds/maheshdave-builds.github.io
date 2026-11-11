@@ -172,7 +172,7 @@ function PublicRoute({ preview }) {
 
 function Routes() {
   const { pathname, navigate } = useRouter()
-  const { theme } = useContent()
+  const { theme, status, error, reload } = useContent()
   useEffect(() => {
     if (pathname === '/admin' || pathname.startsWith('/admin/')) navigate(pathname.replace(/^\/admin/, '/mdadmin'), { replace: true })
   }, [pathname, navigate])
@@ -186,6 +186,27 @@ function Routes() {
           <AdminApp />
         </Suspense>
       </ThemeProvider>
+    )
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="boot-screen" role="status" aria-label="Loading content">
+        <span className="spin" style={{ width: 28, height: 28, border: '2px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', display: 'inline-block' }} />
+      </div>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="boot-screen" role="alert">
+        <div style={{ textAlign: 'center', maxWidth: 420 }}>
+          <p style={{ marginBottom: 16 }}>{error || 'Could not load published content.'}</p>
+          <button type="button" className="button button-secondary button-sm" onClick={reload}>
+            Try again
+          </button>
+        </div>
+      </div>
     )
   }
 

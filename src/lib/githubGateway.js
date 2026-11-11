@@ -10,9 +10,11 @@ const SESSION_KEY = 'portfolio-github-admin-session'
 const API = 'https://api.github.com'
 const RAW_CONTENT_URL = '/portfolio-content.json'
 const RAW_ARTICLES_URL = '/articles-content.json'
+const RAW_LIKES_URL = '/article-likes.json'
 const RAW_GITHUB_BASE = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/public`
 const RAW_CONTENT_GITHUB = `${RAW_GITHUB_BASE}/portfolio-content.json`
 const RAW_ARTICLES_GITHUB = `${RAW_GITHUB_BASE}/articles-content.json`
+const RAW_LIKES_GITHUB = `${RAW_GITHUB_BASE}/article-likes.json`
 const LOCAL_DEV = ['localhost', '127.0.0.1'].includes(window.location.hostname)
 const LOCAL_DEV_KEY = 'portfolio-content-local-preview'
 const LOCAL_DEV_ARTICLES_KEY = 'portfolio-articles-local-preview'
@@ -40,24 +42,57 @@ function mergeArticlePayload(portfolio, articlePayload) {
   return { ...rest, articles }
 }
 
+async function fetchJsonWithFallback(primaryUrl, fallbackUrl) {
+  try {
+    const response = await fetch(primaryUrl, { cache: 'no-store' })
+    if (response.ok) return response
+  } catch { /* try fallback */ }
+  if (fallbackUrl && fallbackUrl !== primaryUrl) {
+    try {
+      const response = await fetch(fallbackUrl, { cache: 'no-store' })
+      if (response.ok) return response
+    } catch { /* fail below */ }
+  }
+  return null
+}
+
 async function readPublicContent() {
   const version = Date.now()
-  // Production reads the committed JSON on main, not the last Pages build artifact.
-  // Admin publish updates main immediately; waiting for CI left visitors on stale data.
-  const portfolioUrl = LOCAL_DEV ? `${RAW_CONTENT_URL}?v=${version}` : `${RAW_CONTENT_GITHUB}?v=${version}`
-  const articlesUrl = LOCAL_DEV ? `${RAW_ARTICLES_URL}?v=${version}` : `${RAW_ARTICLES_GITHUB}?v=${version}`
-  const [portfolioResponse, articlesResponse] = await Promise.all([
-    fetch(portfolioUrl, { cache: 'no-store' }),
-    fetch(articlesUrl, { cache: 'no-store' }),
+  // Production reads the committed JSON on main, with fallback to origin JSON.
+  const portfolioPrimary = LOCAL_DEV ? `${RAW_CONTENT_URL}?v=${version}` : `${RAW_CONTENT_GITHUB}?v=${version}`
+  const portfolioFallback = LOCAL_DEV ? null : `${RAW_CONTENT_URL}?v=${version}`
+
+  const articlesPrimary = LOCAL_DEV ? `${RAW_ARTICLES_URL}?v=${version}` : `${RAW_ARTICLES_GITHUB}?v=${version}`
+  const articlesFallback = LOCAL_DEV ? null : `${RAW_ARTICLES_URL}?v=${version}`
+
+  const likesPrimary = LOCAL_DEV ? `${RAW_LIKES_URL}?v=${version}` : `${RAW_LIKES_GITHUB}?v=${version}`
+  const likesFallback = LOCAL_DEV ? null : `${RAW_LIKES_URL}?v=${version}`
+
+  const [portfolioResponse, articlesResponse, likesResponse] = await Promise.all([
+    fetchJsonWithFallback(portfolioPrimary, portfolioFallback),
+    fetchJsonWithFallback(articlesPrimary, articlesFallback),
+    fetchJsonWithFallback(likesPrimary, likesFallback),
   ])
-  if (!portfolioResponse.ok) throw new Error(`Could not load published portfolio content (${portfolioResponse.status}).`)
-  if (!articlesResponse.ok) throw new Error(`Could not load published articles (${articlesResponse.status}).`)
-  const [portfolio, articlePayload] = await Promise.all([portfolioResponse.json(), articlesResponse.json()])
+
+  if (!portfolioResponse || !portfolioResponse.ok) {
+    throw new Error('Could not load published portfolio content.')
+  }
+  if (!articlesResponse || !articlesResponse.ok) {
+    throw new Error('Could not load published articles.')
+  }
+
+  const [portfolio, articlePayload, likesPayload] = await Promise.all([
+    portfolioResponse.json(),
+    articlesResponse.json(),
+    likesResponse && likesResponse.ok ? likesResponse.json().catch(() => ({})) : Promise.resolve({}),
+  ])
+
   if (!portfolio || typeof portfolio !== 'object' || !articlePayload || !Array.isArray(articlePayload.articles)) {
     throw new Error('Published content JSON has an invalid schema.')
   }
 
-  const published = { ...portfolio, articles: articlePayload.articles }
+  const articleLikes = likesPayload?.likes && typeof likesPayload.likes === 'object' ? likesPayload.likes : {}
+  const published = { ...portfolio, articles: articlePayload.articles, articleLikes }
 
   // Local admin preview uses staged Publish output only when both files were written
   // and the staged snapshot actually contains articles. Empty staged copies must not
@@ -66,8 +101,17 @@ async function readPublicContent() {
     try {
       const draft = localStorage.getItem(LOCAL_DEV_KEY)
       const articlesDraft = localStorage.getItem(LOCAL_DEV_ARTICLES_KEY)
+      const likesDraft = localStorage.getItem(LOCAL_DEV_LIKES_KEY)
       if (draft && articlesDraft) {
         const staged = mergeArticlePayload(JSON.parse(draft), JSON.parse(articlesDraft))
+        if (likesDraft) {
+          try {
+            const parsedLikes = JSON.parse(likesDraft)
+            staged.articleLikes = parsedLikes?.likes || parsedLikes
+          } catch {
+            /* ignore invalid likes JSON */
+          }
+        }
         if (Array.isArray(staged.articles) && staged.articles.length) return staged
       }
     } catch { /* keep fetched public files */ }
