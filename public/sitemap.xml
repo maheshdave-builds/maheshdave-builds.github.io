@@ -33,13 +33,13 @@
   <url><loc>https://maheshdave-builds.github.io/articles/configure-new-relic-php-apm-for-magento-2</loc><lastmod>2026-09-04</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/use-new-relic-custom-instrumentation-for-a-slow-service</loc><lastmod>2025-02-11</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/write-nrql-queries-for-checkout-latency-and-errors</loc><lastmod>2026-09-02</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maheshdave-builds.github.io/articles/correlate-magento-logs-with-apm-traces</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maheshdave-builds.github.io/articles/set-actionable-alerts-for-queue-lag-and-failed-jobs</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maheshdave-builds.github.io/articles/correlate-magento-logs-with-apm-traces</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maheshdave-builds.github.io/articles/set-actionable-alerts-for-queue-lag-and-failed-jobs</loc><lastmod>2026-09-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/trace-slow-external-api-calls-from-magento</loc><lastmod>2026-04-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/build-a-queue-consumer-with-retry-safe-processing</loc><lastmod>2025-05-10</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/publish-a-message-to-rabbitmq-through-magento-abstractions</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/make-cron-jobs-observable-bounded-and-idempotent</loc><lastmod>2025-11-11</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maheshdave-builds.github.io/articles/deploy-adobe-commerce-cloud-with-safe-build-and-deploy-hooks</loc><lastmod>2026-10-13</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maheshdave-builds.github.io/articles/deploy-adobe-commerce-cloud-with-safe-build-and-deploy-hooks</loc><lastmod>2026-09-13</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/troubleshoot-fastly-cache-misses-and-stale-content</loc><lastmod>2026-07-05</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/secure-web-api-integrations-with-least-privilege-tokens</loc><lastmod>2025-04-05</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/validate-file-uploads-and-prevent-path-traversal</loc><lastmod>2025-11-23</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -62,13 +62,13 @@
   <url><loc>https://maheshdave-builds.github.io/articles/integrate-an-erp-with-retries-timeouts-and-dead-letter-handling</loc><lastmod>2025-12-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/consume-webhooks-securely-and-prevent-duplicate-processing</loc><lastmod>2026-08-05</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/sync-inventory-across-systems-without-overselling</loc><lastmod>2025-12-25</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maheshdave-builds.github.io/articles/implement-store-scoped-translations-and-phrase-overrides</loc><lastmod>2026-10-04</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maheshdave-builds.github.io/articles/implement-store-scoped-translations-and-phrase-overrides</loc><lastmod>2026-09-04</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/debug-javascript-requirejs-module-load-failures</loc><lastmod>2025-04-16</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/use-graphql-for-storefront-data-without-overfetching</loc><lastmod>2025-07-20</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/build-a-safe-bulk-admin-action-with-per-item-results</loc><lastmod>2026-09-07</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/improve-admin-grid-filtering-and-pagination-performance</loc><lastmod>2025-03-10</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maheshdave-builds.github.io/articles/how-to-remove-a-fastly-vcl-snippet-using-cli</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/design-graphql-resolvers-that-avoid-n-plus-one-catalog-loads</loc><lastmod>2026-06-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/verify-payment-webhooks-with-idempotency-and-signature-checks</loc><lastmod>2026-08-03</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maheshdave-builds.github.io/articles/use-react-server-components-patterns-in-modern-storefront-spas</loc><lastmod>2026-05-22</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maheshdave-builds.github.io/articles/how-to-remove-a-fastly-vcl-snippet-using-cli</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
