@@ -26,7 +26,7 @@ jobs:
       - name: Build site
         run: npm run build
       - name: Verify deployment files
-        run: test -s dist/index.html && test -s dist/404.html && test -s dist/portfolio-content.json && test -s dist/articles-content.json && test -s dist/article-likes.json
+        run: test -s dist/index.html && test -s dist/404.html && test -s dist/sitemap.xml && test -s dist/robots.txt && test -s dist/portfolio-content.json && test -s dist/articles-content.json && test -s dist/article-likes.json && grep -q '<urlset' dist/sitemap.xml
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact

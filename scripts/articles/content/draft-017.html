@@ -1,0 +1,100 @@
+<!--meta {"excerpt": "One block with cacheable=\"false\" made every category page a Fastly pass. The block showed the customer's first name. That data belongs in a customer-data section, and the page stays cacheable.", "seo_title": "The Block That Disables Full-Page Cache", "seo_description": "A cacheable=\"false\" block disables Magento FPC for the whole page. Move customer-specific output into a customer-data section."} -->
+<p>Category TTFB went from tens of milliseconds at Fastly to a full origin render, on every request, after a "small" header change that printed the logged-in customer's first name. The template was fine. The layout node had <code>cacheable="false"</code>. Magento's rule is not "this block is private". It is "if any block in the layout is not cacheable, the page is not cacheable". Fastly then has nothing worth storing, because origin sends the response as uncacheable.</p>
+<p>Find it before rewriting the page. From the Magento root, the layouts you own are the ones to change; core uses the flag for checkout and customer account on purpose.</p>
+<pre><code class="language-bash">rg -n 'cacheable="false"' app/code app/design --glob '*.xml'</code></pre>
+<p>The header block in this case existed only to greet the customer. Everyone else, including guests, paid for an uncached page so that one string could be personal. Customer-specific fragments in Magento are loaded in the browser from <code>/customer/section/load</code> after the cached HTML is served. The page stays public. The section payload is per session.</p>
+
+<h2>The section</h2>
+<p><code>app/code/MaheshDave/Greeting/etc/frontend/sections.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Customer:etc/sections.xsd">
+    <action name="customer/account/loginPost">
+        <section name="maheshdave-greeting"/>
+    </action>
+    <action name="customer/account/logout">
+        <section name="maheshdave-greeting"/>
+    </action>
+</config>
+</code></pre>
+<p>Those actions invalidate the section so the next page load refetches it. A section that is never invalidated shows the previous customer's name after a logout on a page that was sitting in the browser. Login and logout are the minimum.</p>
+
+<p><code>app/code/MaheshDave/Greeting/CustomerData/Greeting.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\Greeting\CustomerData;
+
+use Magento\Customer\CustomerData\SectionSourceInterface;
+use Magento\Customer\Helper\Session\CurrentCustomer;
+
+class Greeting implements SectionSourceInterface
+{
+    public function __construct(
+        private readonly CurrentCustomer $currentCustomer
+    ) {
+    }
+
+    public function getSectionData(): array
+    {
+        if (!$this->currentCustomer->getCustomerId()) {
+            return ['firstname' => ''];
+        }
+
+        return ['firstname' => (string) $this->currentCustomer->getCustomer()->getFirstname()];
+    }
+}
+</code></pre>
+
+<p><code>app/code/MaheshDave/Greeting/etc/frontend/di.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Customer\CustomerData\SectionPoolInterface">
+        <arguments>
+            <argument name="sectionSourceMap" xsi:type="array">
+                <item name="maheshdave-greeting" xsi:type="string">MaheshDave\Greeting\CustomerData\Greeting</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/Greeting/view/frontend/templates/greeting.phtml</code></p>
+<pre><code class="language-php">&lt;span class="maheshdave-greeting" data-bind="scope: 'maheshdave-greeting'"&gt;
+    &lt;!-- ko if: greeting().firstname --&gt;
+    &lt;span data-bind="text: greeting().firstname"&gt;&lt;/span&gt;
+    &lt;!-- /ko --&gt;
+&lt;/span&gt;
+&lt;script type="text/x-magento-init"&gt;
+{
+    "*": {
+        "Magento_Ui/js/core/app": {
+            "components": {
+                "maheshdave-greeting": {
+                    "component": "Magento_Customer/js/view/customer"
+                }
+            }
+        }
+    }
+}
+&lt;/script&gt;
+</code></pre>
+<p>The template above is the shape, and the component name has to be a UI component that reads the section. The stock customer component reads the <code>customer</code> section, not yours. Use a small component that returns the section:</p>
+<p><code>app/code/MaheshDave/Greeting/view/frontend/web/js/greeting.js</code></p>
+<pre><code class="language-javascript">define(['uiComponent', 'Magento_Customer/js/customer-data'], function (Component, customerData) {
+    'use strict';
+
+    return Component.extend({
+        initialize: function () {
+            this._super();
+            this.greeting = customerData.get('maheshdave-greeting');
+            return this;
+        }
+    });
+});
+</code></pre>
+<p>Point the <code>Magento_Ui/js/core/app</code> component at <code>MaheshDave_Greeting/js/greeting</code>. Remove <code>cacheable="false"</code> from the block. The phtml no longer prints the name in PHP, so the cached HTML is the same for every visitor and the name appears after <code>customer-data</code> loads.</p>
+
+<h2>Confirm the page is cacheable again</h2>
+<p>Fetch a category URL twice and read <code>X-Magento-Cache-Debug</code> in developer mode, or Fastly <code>X-Cache</code>. The second response is a HIT. View source on that HIT and confirm the first name is not in the HTML. It should appear only after the section request to <code>/customer/section/load?sections=maheshdave-greeting</code>. If the name is in the HTML of a HIT, the old block is still rendering it and you have two sources. If the page is still a pass, another <code>cacheable="false"</code> remains in the handle. The <code>rg</code> result is the list, not a suggestion.</p>

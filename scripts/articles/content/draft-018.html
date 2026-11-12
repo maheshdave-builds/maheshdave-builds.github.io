@@ -1,0 +1,38 @@
+<!--meta {"excerpt": "Cron and queue consumers showed up in New Relic as one transaction named index.php, so a slow export was invisible next to storefront traffic. Name the transaction after the job.", "seo_title": "Name Cron and Consumers in New Relic", "seo_description": "Magento cron and consumers report as a generic PHP transaction. Name them with the New Relic PHP agent so a slow job is visible."} -->
+<p>The New Relic overview for this service was dominated by <code>WebTransaction/Action/index</code> and a lump of CLI time called something like <code>OtherTransaction/php/bin/magento</code>. A 40-second order export ran every five minutes inside cron and never appeared as its own transaction. Apdex and error rate were storefront numbers. The export could fail all night and the only signal was a queue depth someone happened to query.</p>
+<p>The PHP agent names web transactions from the framework when the framework calls the agent. Magento's web front does that. <code>bin/magento cron:run</code> does not name each job, and a consumer process lives until <code>maxMessages</code>, so one process name covers a hundred different messages. Set the name at the start of the job. The functions are <code>newrelic_name_transaction</code> and <code>newrelic_add_custom_parameter</code>, provided by the New Relic PHP extension. Guard them with <code>function_exists</code> so local DDEV, which has no agent, does not throw.</p>
+
+<p><code>app/code/MaheshDave/DevTools/Model/NewRelic/Transaction.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\DevTools\Model\NewRelic;
+
+class Transaction
+{
+    public function name(string $name, array $parameters = []): void
+    {
+        if (function_exists('newrelic_name_transaction')) {
+            newrelic_name_transaction($name);
+        }
+        if (!function_exists('newrelic_add_custom_parameter')) {
+            return;
+        }
+        foreach ($parameters as $key => $value) {
+            if (is_scalar($value)) {
+                newrelic_add_custom_parameter((string) $key, $value);
+            }
+        }
+    }
+}
+</code></pre>
+<p>Call it before the work, not after. A name set at the end still helps the next segment, but the time already recorded sits on the previous name.</p>
+<pre><code class="language-php">$this->transaction->name('cron/maheshdave_order_export', ['website_id' => $websiteId]);
+</code></pre>
+<p>Inside a consumer, name it once per message and include the topic, not the order id. An order id as a transaction name creates one unique name per order and New Relic drops them as cardinality noise. The order id belongs in a custom parameter only if you accept that it is high cardinality; I put the increment id in the log line and keep the parameter set to the store id.</p>
+<pre><code class="language-php">$this->transaction->name('consumer/maheshdave.order.export', ['store_id' => (int) $order->getStoreId()]);
+</code></pre>
+<p>The module is <code>MaheshDave_DevTools</code> because this is diagnostic instrumentation, not order-export business logic. The export module depends on DevTools or, if you refuse that dependency, duplicate the ten-line class. I depend on it. A consumer that catches exceptions and does not rethrow looks successful to the agent. Call <code>newrelic_notice_error</code> with the exception in that catch, or the error rate stays flat while the log fills up. That function is also part of the agent and needs the same <code>function_exists</code> check.</p>
+
+<h2>What changes in the UI</h2>
+<p>After one cron cycle with the agent installed, Transaction shows <code>cron/maheshdave_order_export</code> with a duration you can compare to the schedule. The consumer name appears as its own row instead of being folded into <code>bin/magento</code>. Filter <code>request.uri</code> or transaction name <code>LIKE 'cron/%'</code> and the storefront disappears. If nothing new shows up, the CLI binary is a different PHP than the one with the extension: <code>php -m | grep newrelic</code> using the same binary cron uses. A web SAPI with the extension and a CLI SAPI without it is the usual split.</p>

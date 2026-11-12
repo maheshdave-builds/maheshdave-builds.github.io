@@ -1,0 +1,24 @@
+<!--meta {"excerpt": "A preview query parameter was added to the cache hash, so every campaign link became its own object. Pass on that one parameter in vcl_recv and strip it from the cache key instead.", "seo_title": "Bypass Fastly for One Query Parameter", "seo_description": "Keep Fastly from caching a unique object per tracking parameter. Pass only for a preview flag, and strip the rest from the hash."} -->
+<p>Marketing appended <code>utm_source</code> to every category URL. Fastly's hit rate on those categories collapsed, because the query string was part of the cache key and each combination was a new object. Someone then added a VCL pass for any request with a query string. Hit rate came back for clean URLs and category filters, which are also a query string, started hitting origin on every request. The requirement was narrower than either change: a <code>preview=1</code> flag used by merchandisers must not be cached, and every other parameter must not multiply objects.</p>
+
+<h2>Two different operations</h2>
+<p>Passing and stripping solve different problems. <code>return(pass)</code> in <code>vcl_recv</code> sends this request to origin and does not store the response. That is correct for <code>preview</code>, because the preview response must not be saved and later served to a shopper. A tracking parameter should be stored, but under a key that does not include it. That is <code>req.url</code> rewritten before the hash, or <code>set req.http.Fastly-Purge</code> is unrelated; the usual Commerce approach is to remove the parameter from the URL that Fastly hashes while leaving the original available to origin if origin needs it. For UTM, origin does not need it to render a category. Remove it from the URL used as the key.</p>
+<p>This is a custom snippet in the Fastly configuration for the Commerce service, type <code>recv</code>, priority after the stock Magento snippets so you do not fight their admin and checkout passes. Upload VCL after saving. A snippet that exists only in the Magento admin and was never uploaded is not running.</p>
+<pre><code class="language-vcl">if (req.url.qs ~ "(^|&)preview=") {
+    set req.http.X-Magento-Preview = "1";
+    return (pass);
+}
+
+if (req.url ~ "\?") {
+    set req.url = querystring.filter(req.url, "utm_source");
+    set req.url = querystring.filter(req.url, "utm_medium");
+    set req.url = querystring.filter(req.url, "utm_campaign");
+    set req.url = querystring.filter(req.url, "utm_content");
+    set req.url = querystring.filter(req.url, "utm_term");
+}
+</code></pre>
+<p><code>querystring.filter</code> is a Fastly VCL function, not part of the Varnish this site runs locally. A snippet that works in a local Varnish 6 file will fail validation on Fastly if it calls that function the other way around, and a failed validation does not activate, so the previous version stays live. That is the safe failure. Validate before activate. The manual Fastly CLI article in this set is the procedure I use when a snippet has to come back out.</p>
+<p><code>return(pass)</code> stops processing of <code>vcl_recv</code>. The filter block must stay below the preview check or preview URLs get stripped and then cached. Do not match <code>req.url.qs ~ "."</code>. That is the "any query string" pass that broke layered navigation.</p>
+
+<h2>What a hit looks like after this</h2>
+<p>Request the category with and without <code>utm_source=newsletter</code>. Both should return the same <code>X-Cache</code> HIT and the same <code>Age</code> growing together. If the ages differ, the parameter is still in the key: the snippet is not on the active VCL version. Request <code>?preview=1</code> twice. Both should be PASS or MISS, never a HIT that grows <code>Age</code>. If preview hits, the condition did not run, often because the parameter was added as <code>?x=1&amp;preview</code> without a value and the regex expected <code>preview=</code>. The pattern above requires the equals sign. Merchandisers were copying a link without it, so I also match <code>(^|&)preview($|&)</code> when the flag is boolean. I keep that second condition in the same <code>if</code>, not in a later snippet, so there is one place that decides to pass.</p>

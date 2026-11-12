@@ -3,38 +3,51 @@ import { readFile, writeFile } from 'node:fs/promises'
 const origin = 'https://maheshdave-builds.github.io'
 const source = JSON.parse(await readFile(new URL('../public/articles-content.json', import.meta.url), 'utf8'))
 const articles = Array.isArray(source.articles) ? source.articles : []
-const now = Date.now()
+const today = new Date().toISOString().slice(0, 10)
+
+function lastmod(value) {
+  if (!value) return ''
+  const parsed = Date.parse(value)
+  if (!Number.isFinite(parsed)) return ''
+  const day = new Date(parsed).toISOString().slice(0, 10)
+  return day > today ? today : day
+}
+
+function escapeXml(value) {
+  return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 const publicArticles = articles.filter((article) => {
-  const status = String(article.status || '').trim().toLowerCase()
-  const published = status === 'published' || false
-  if (!published) return false
-  const timestamp = article.published_at
-  if (!timestamp) return true
-  const parsed = Date.parse(timestamp)
-  return !Number.isFinite(parsed) || parsed <= now
+  if (String(article.status || '').trim().toLowerCase() !== 'published') return false
+  if (!String(article.slug || '').trim()) return false
+  const parsed = Date.parse(article.published_at || '')
+  return !article.published_at || (Number.isFinite(parsed) && parsed <= Date.now())
 })
+
+const articleUrls = publicArticles.map((article) => ({
+  loc: `${origin}/articles/${encodeURIComponent(String(article.slug).trim())}`,
+  lastmod: lastmod(article.updated_at || article.published_at || article.created_at),
+}))
+const newest = articleUrls.map((url) => url.lastmod).filter(Boolean).sort().at(-1) || today
 const urls = [
-  { loc: `${origin}/`, changefreq: 'weekly', priority: '1.0' },
-  { loc: `${origin}/articles`, changefreq: 'weekly', priority: '0.8' },
-  ...publicArticles.filter((article) => article.slug).map((article) => ({
-    loc: `${origin}/articles/${encodeURIComponent(String(article.slug).trim())}`,
-    lastmod: article.updated_at || article.published_at || article.created_at,
-    changefreq: 'monthly',
-    priority: '0.7',
-  })),
+  { loc: `${origin}/`, lastmod: newest },
+  { loc: `${origin}/articles`, lastmod: newest },
+  ...articleUrls,
 ]
+const seen = new Set()
+for (const url of urls) {
+  if (!url.loc.startsWith(`${origin}/`)) throw new Error(`Sitemap URL is off-host: ${url.loc}`)
+  if (seen.has(url.loc)) throw new Error(`Duplicate sitemap URL: ${url.loc}`)
+  seen.add(url.loc)
+}
+
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
     (url) => `  <url>
-    <loc>${url.loc.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</loc>${
-      url.lastmod && !Number.isNaN(Date.parse(url.lastmod))
-        ? `\n    <lastmod>${new Date(url.lastmod).toISOString().slice(0, 10)}</lastmod>`
-        : ''
-    }
-    <changefreq>${url.changefreq}</changefreq>
-    <priority>${url.priority}</priority>
+    <loc>${escapeXml(url.loc)}</loc>
+    <lastmod>${url.lastmod}</lastmod>
   </url>`,
   )
   .join('\n')}

@@ -1,0 +1,196 @@
+<!--meta {"excerpt": "An afterGet plugin that loads one extension attribute is fine for a single order and turns into hundreds of queries on getList(). Here is the batched version, with a query-log check to prove it.", "seo_title": "Batch-Load Extension Attributes in Repository getList()", "seo_description": "Add an order extension attribute that loads in one query for getList() instead of one per order, and verify the query count with Magento's DB query log."} -->
+<p>The usual extension attribute tutorial adds an <code>afterGet()</code> plugin, loads the value, and sets it. Then someone copies the same per-item lookup into <code>afterGetList()</code>, the ERP polls <code>/V1/orders</code> with a page size of 200, and every poll costs 200 extra queries. The response still looks correct, which is why this survives code review.</p>
+<p>This article builds an <code>erp_reference</code> extension attribute on orders, stored in its own table, and loads it for list calls with one query per page.</p>
+
+<h2>Where the value lives</h2>
+<p>Putting a custom column on <code>sales_order</code> is tempting, but it makes the order table wider for every query in the system and it ties your schema to a core table's lifecycle. A side table keyed by <code>order_id</code> keeps the data owned by the module and lets you drop the module cleanly.</p>
+
+<p><code>app/code/MaheshDave/OrderErp/registration.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+use Magento\Framework\Component\ComponentRegistrar;
+
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'MaheshDave_OrderErp', __DIR__);
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderErp/etc/module.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="MaheshDave_OrderErp">
+        <sequence>
+            <module name="Magento_Sales"/>
+        </sequence>
+    </module>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderErp/etc/db_schema.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="maheshdave_order_erp" resource="sales" engine="innodb" comment="ERP references for orders">
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="erp_reference" length="64" nullable="false" comment="ERP document number"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="order_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MAHESHDAVE_ORDER_ERP_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    table="maheshdave_order_erp" column="order_id"
+                    referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+</schema>
+</code></pre>
+<p><code>resource="sales"</code> matters if the project ever uses split databases (Adobe Commerce only, deprecated in 2.4.2 but still present in older installs). On a single database it resolves to the default connection.</p>
+
+<h2>Declaring the attribute</h2>
+<p><code>app/code/MaheshDave/OrderErp/etc/extension_attributes.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
+    <extension_attributes for="Magento\Sales\Api\Data\OrderInterface">
+        <attribute code="erp_reference" type="string"/>
+    </extension_attributes>
+</config>
+</code></pre>
+<p>After <code>setup:di:compile</code>, the generated <code>Magento\Sales\Api\Data\OrderExtension</code> gets <code>getErpReference()</code> and <code>setErpReference()</code>. Those methods do not exist until generation runs, so a stale <code>generated/</code> folder shows up as "Call to undefined method" rather than as a missing value.</p>
+<p>The XSD also supports a <code>&lt;join&gt;</code> child that asks the extension attributes join processor to add the column to collection queries. It only helps when the repository's <code>getList()</code> passes its collection through <code>JoinProcessorInterface::process()</code>, and that varies by repository and version. A plugin is explicit and behaves the same everywhere, so that is what I use for anything a downstream system depends on.</p>
+
+<h2>One query per page</h2>
+<p><code>app/code/MaheshDave/OrderErp/Model/ErpReferenceReader.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderErp\Model;
+
+use Magento\Framework\App\ResourceConnection;
+
+class ErpReferenceReader
+{
+    public function __construct(
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    /**
+     * @param int[] $orderIds
+     * @return array<int, string> order_id => erp_reference
+     */
+    public function getByOrderIds(array $orderIds): array
+    {
+        $orderIds = array_values(array_unique(array_filter(array_map('intval', $orderIds))));
+        if ($orderIds === []) {
+            return [];
+        }
+
+        $connection = $this->resource->getConnection('sales');
+        $select = $connection->select()
+            ->from($this->resource->getTableName('maheshdave_order_erp', 'sales'), ['order_id', 'erp_reference'])
+            ->where('order_id IN (?)', $orderIds);
+
+        $pairs = $connection->fetchPairs($select);
+        $result = [];
+        foreach ($pairs as $orderId => $reference) {
+            $result[(int) $orderId] = (string) $reference;
+        }
+
+        return $result;
+    }
+}
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderErp/Plugin/AddErpReferenceToOrder.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderErp\Plugin;
+
+use Magento\Sales\Api\Data\OrderExtensionFactory;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\Data\OrderSearchResultInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use MaheshDave\OrderErp\Model\ErpReferenceReader;
+
+class AddErpReferenceToOrder
+{
+    public function __construct(
+        private readonly ErpReferenceReader $reader,
+        private readonly OrderExtensionFactory $extensionFactory
+    ) {
+    }
+
+    public function afterGet(OrderRepositoryInterface $subject, OrderInterface $order): OrderInterface
+    {
+        $this->apply([$order]);
+
+        return $order;
+    }
+
+    public function afterGetList(
+        OrderRepositoryInterface $subject,
+        OrderSearchResultInterface $result
+    ): OrderSearchResultInterface {
+        $this->apply($result->getItems());
+
+        return $result;
+    }
+
+    /**
+     * @param OrderInterface[] $orders
+     */
+    private function apply(array $orders): void
+    {
+        $ids = [];
+        foreach ($orders as $order) {
+            $ids[] = (int) $order->getEntityId();
+        }
+
+        $references = $this->reader->getByOrderIds($ids);
+
+        foreach ($orders as $order) {
+            $extension = $order->getExtensionAttributes() ?? $this->extensionFactory->create();
+            $extension->setErpReference($references[(int) $order->getEntityId()] ?? null);
+            $order->setExtensionAttributes($extension);
+        }
+    }
+}
+</code></pre>
+<p>Two details that bite in practice. First, <code>getExtensionAttributes()</code> can return <code>null</code> on orders built outside the repository, so the factory fallback is not optional. Second, the order repository caches loaded orders in an internal registry by ID; <code>afterGet()</code> runs on every call regardless, so the lookup repeats for repeated <code>get()</code> calls in the same request. If a hot path calls <code>get()</code> on the same order repeatedly, memoize in the reader.</p>
+
+<p><code>app/code/MaheshDave/OrderErp/etc/di.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="maheshdave_order_erp_reference" type="MaheshDave\OrderErp\Plugin\AddErpReferenceToOrder"/>
+    </type>
+</config>
+</code></pre>
+<p>Global <code>di.xml</code> rather than <code>webapi_rest/di.xml</code>: admin code, observers, and email templates read orders through the same repository, and a REST-only plugin produces "works in Postman, empty in the PDF" bugs.</p>
+
+<h2>Writing the value</h2>
+<p>Reading is half the contract. If the ERP writes back through <code>POST /V1/orders</code> with the extension attribute set, nothing persists it unless you add a save plugin. Most integrations I have seen write the reference through a dedicated endpoint instead, which keeps the order save path untouched. Whichever you choose, do not let the attribute appear writable in the API schema without a persistence path behind it; clients will send it and assume it stuck.</p>
+
+<h2>Proving the query count</h2>
+<pre><code class="language-bash">bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+bin/magento dev:query-log:enable
+</code></pre>
+<p>Seed a reference for a known order:</p>
+<pre><code class="language-sql">INSERT INTO maheshdave_order_erp (order_id, erp_reference)
+SELECT entity_id, CONCAT('SO-', increment_id) FROM sales_order ORDER BY entity_id DESC LIMIT 50;
+</code></pre>
+<p>Then request a page:</p>
+<pre><code class="language-bash">: > var/debug/db.log
+curl -s -G "https://example.test/rest/V1/orders" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  --data-urlencode "searchCriteria[pageSize]=50" \
+  | jq '.items[] | {increment_id, erp: .extension_attributes.erp_reference}' | head -20
+grep -c "maheshdave_order_erp" var/debug/db.log
+</code></pre>
+<p>The grep should return <code>1</code> for the whole page. If it returns 50, something in the stack is calling <code>get()</code> per item after <code>getList()</code> (third-party plugins on the order repository do this more often than you would expect), and the fix is in that plugin, not yours.</p>
+<pre><code class="language-bash">bin/magento dev:query-log:disable
+</code></pre>
+<p>Leave the query log off outside the test; it writes every statement to disk.</p>

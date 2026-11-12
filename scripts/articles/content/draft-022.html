@@ -1,0 +1,111 @@
+<!--meta {"excerpt": "The ERP retried shipment notifications whenever Magento answered slowly, and each retry created another shipment. Store the event id first, create the shipment second, and return the same result on a replay.", "seo_title": "A Webhook That Survives Retries", "seo_description": "Verify the HMAC, store the webhook id, and make Magento shipment creation idempotent so ERP retries do not ship the order twice."} -->
+<p>The ERP sent a shipment notification, Magento created the shipment, and the connection dropped before the 200 reached the ERP. The ERP retried. Magento created a second shipment for the same items and the order went to a state the warehouse could not reconcile. Timeouts and retries are the normal behavior of the caller. The receiver that is not idempotent is the defect.</p>
+<p>The header I require is <code>X-Event-Id</code>, which the ERP already generates, and <code>X-Signature</code>, an HMAC-SHA256 of the raw body using a shared secret stored in Magento config (encrypted, not in the repo). I reject the request before any write if either is missing or the signature does not match.</p>
+
+<p><code>app/code/MaheshDave/ErpWebhook/Controller/Shipment/Notify.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ErpWebhook\Controller\Shipment;
+
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\JsonFactory;
+use MaheshDave\ErpWebhook\Model\ShipmentNotifier;
+
+class Notify implements HttpPostActionInterface, CsrfAwareActionInterface
+{
+    public function __construct(
+        private readonly RequestInterface $request,
+        private readonly JsonFactory $jsonFactory,
+        private readonly ShipmentNotifier $notifier
+    ) {
+    }
+
+    public function execute()
+    {
+        $result = $this->jsonFactory->create();
+        try {
+            $outcome = $this->notifier->handle(
+                (string) $this->request->getContent(),
+                (string) $this->request->getHeader('X-Event-Id'),
+                (string) $this->request->getHeader('X-Signature')
+            );
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            return $result->setHttpResponseCode(400)->setData(['error' => $e->getMessage()]);
+        }
+
+        return $result->setData($outcome);
+    }
+
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
+    {
+        return null;
+    }
+
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
+    }
+}
+</code></pre>
+<p>CSRF validation has to be skipped because the caller is not a browser with a form key. That is safe only because the signature check is mandatory. A controller that returns true from <code>validateForCsrf</code> and does not verify a signature is an open endpoint.</p>
+
+<p><code>app/code/MaheshDave/ErpWebhook/Model/ShipmentNotifier.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ErpWebhook\Model;
+
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\LocalizedException;
+
+class ShipmentNotifier
+{
+    private const TABLE = 'maheshdave_webhook_event';
+
+    public function __construct(
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    public function handle(string $rawBody, string $eventId, string $signature): array
+    {
+        if ($eventId === '' || $signature === '') {
+            throw new LocalizedException(__('Event id and signature are required.'));
+        }
+        $secret = (string) $this->scopeConfig->getValue('maheshdave_erp/webhook/secret');
+        $expected = hash_hmac('sha256', $rawBody, $secret);
+        if (!hash_equals($expected, $signature)) {
+            throw new LocalizedException(__('Signature does not match.'));
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName(self::TABLE);
+        $inserted = $connection->insertOnDuplicate($table, [
+            'event_id' => $eventId,
+            'payload' => $rawBody,
+        ], []);
+        if ($inserted === 0) {
+            return ['status' => 'duplicate', 'event_id' => $eventId];
+        }
+
+        return ['status' => 'accepted', 'event_id' => $eventId];
+    }
+}
+</code></pre>
+<p><code>insertOnDuplicate</code> with an empty update list still reports a duplicate key as an affected-row count of 0 when the row exists and no column changes. I rely on a primary key on <code>event_id</code>. Insert the event row before creating the shipment. If shipment creation throws, leave the row and return 500 only if you delete the row in the same failure path; otherwise a retry hits the duplicate branch and the shipment is never created. The version I run stores <code>status</code> on the event row (<code>accepted</code>, then <code>processed</code>) and the duplicate branch returns the stored result after retrying the shipment step when status is still <code>accepted</code>. The snippet above is the gate. The shipment call, using <code>Magento\Sales\Api\ShipOrderInterface</code>, sits between the insert and the response, and a unique key on the shipment's ERP document number inside that call is the second lock.</p>
+
+<p><code>db_schema.xml</code> for <code>maheshdave_webhook_event</code> has <code>event_id</code> varchar 64 as the primary key, <code>payload</code> as mediumtext, and <code>received_at</code> timestamp default current. Route the controller at <code>erpwebhook/shipment/notify</code> in <code>etc/frontend/routes.xml</code> only if you want a storefront URL; I put it on <code>webapi.xml</code> as an anonymous route when the signature is the authorization, and I do not also leave a frontend route up.</p>
+
+<h2>Replay the same body</h2>
+<pre><code class="language-bash">BODY='{"order":"000000123","items":[{"sku":"24-MB01","qty":1}]}'
+SIG=$(php -r "echo hash_hmac('sha256', getenv('BODY') ?: '', getenv('SECRET'));")
+curl -s -X POST "https://example.test/rest/V1/maheshdave/shipment-notify" \
+  -H "X-Event-Id: evt-1001" -H "X-Signature: $SIG" -H "Content-Type: application/json" -d "$BODY"
+</code></pre>
+<p>Run it twice. The first body is <code>accepted</code>. The second is <code>duplicate</code>. <code>sales_shipment</code> has one new row, not two. Change one byte of the body without changing the signature and the response is the signature error with no insert.</p>

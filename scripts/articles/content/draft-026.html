@@ -1,0 +1,51 @@
+<!--meta {"excerpt": "A company in pending status could still place an order because checkout only checks that the customer is logged in. Reject place order when CompanyInterface status is not approved.", "seo_title": "Stop Checkout for an Unapproved Company", "seo_description": "Plug into Magento place order and refuse it when the B2B company exists and its status is not approved."} -->
+<p>Company approval was configured, and the company admin saw the pending state in their account. Checkout still placed the order. The approval workflow updates <code>company.status</code>. It does not, by itself, remove the customer's ability to call <code>savePaymentInformationAndPlaceOrder</code>. If the requirement is "no orders until sales approves the company", that check has to sit on the place-order service, because the storefront button is not the only caller. GraphQL <code>placeOrder</code> and a punchout integration hit the same service.</p>
+<p><code>Magento\Company\Api\CompanyManagementInterface::getByCustomerId</code> returns the company for a customer who belongs to one, and null for a retail customer. Retail must keep checking out. A null company is not a rejection. <code>Magento\Company\Api\Data\CompanyInterface::STATUS_APPROVED</code> is the status that is allowed to buy. Pending, rejected, and blocked are not.</p>
+
+<p><code>savePaymentInformationAndPlaceOrder</code> receives a cart id, not a customer id. Load the quote, then the company.</p>
+<p><code>app/code/MaheshDave/CompanyGate/Plugin/RejectUnapprovedCompany.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\CompanyGate\Plugin;
+
+use Magento\Checkout\Api\PaymentInformationManagementInterface;
+use Magento\Company\Api\CompanyManagementInterface;
+use Magento\Company\Api\Data\CompanyInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Quote\Api\CartRepositoryInterface;
+
+class RejectUnapprovedCompany
+{
+    public function __construct(
+        private readonly CompanyManagementInterface $companyManagement,
+        private readonly CartRepositoryInterface $cartRepository
+    ) {
+    }
+
+    public function beforeSavePaymentInformationAndPlaceOrder(
+        PaymentInformationManagementInterface $subject,
+        $cartId,
+        $paymentMethod,
+        $billingAddress = null
+    ): array {
+        $quote = $this->cartRepository->getActive((int) $cartId);
+        $customerId = (int) $quote->getCustomerId();
+        if ($customerId === 0) {
+            return [$cartId, $paymentMethod, $billingAddress];
+        }
+        $company = $this->companyManagement->getByCustomerId($customerId);
+        if ($company !== null && (int) $company->getStatus() !== CompanyInterface::STATUS_APPROVED) {
+            throw new LocalizedException(__('This company is not approved to place orders.'));
+        }
+
+        return [$cartId, $paymentMethod, $billingAddress];
+    }
+}
+</code></pre>
+<p>A <code>before</code> plugin that returns null replaces the arguments with null on some versions. Return the original argument list. Guest checkout has customer id 0; do not look up a company for it. <code>di.xml</code> targets <code>Magento\Checkout\Api\PaymentInformationManagementInterface</code>. GraphQL place order on 2.4 goes through <code>Magento\QuoteGraphQl</code> and the payment method management path, not always this exact method. I verified the call stack on the project version before calling this done, and where GraphQL used <code>Magento\Quote\Api\CartManagementInterface::placeOrder</code> I put the same private check in a second plugin on that method. One plugin on the controller is not enough.</p>
+<p>Company status is an integer column. Comparing it to the string <code>approved</code> never matches, and the plugin would reject every company, including approved ones. Use the constant. Log the status you saw when you throw, so a false reject is debuggable without reproducing the order.</p>
+<p>The module sequence includes <code>Magento_Company</code> and <code>Magento_Checkout</code>. It is an Adobe Commerce B2B module. It will not install on Open Source, and it should not be in an Open Source package.</p>
+
+<h2>The two customers to try</h2>
+<p>A retail customer places an order. It succeeds. A customer whose company is pending gets the localized exception and no row in <code>sales_order</code>. Approve the company in the company admin and the same cart places. If the pending customer succeeds, the request did not pass through the interface you plugged. Turn on the debug log, place again, and see whether the plugin class is in the profiler. A preference on the checkout class that does not extend the interceptor will skip plugins entirely.</p>

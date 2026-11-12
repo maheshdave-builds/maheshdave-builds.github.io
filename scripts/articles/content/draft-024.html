@@ -1,0 +1,63 @@
+<!--meta {"excerpt": "A stock feed saved each SKU through the product repository and fought MSI reservations. SourceItemsSaveInterface updates the source item in bulk and leaves reservations to do their job.", "seo_title": "Bulk MSI Updates from a Stock Feed", "seo_description": "Push an external stock feed through SourceItemsSaveInterface in batches. Per-SKU product saves ignore reservations and time out."} -->
+<p>The warehouse feed is a CSV of SKU, source code, and quantity. The first importer loaded each product and called <code>setStockData</code> and <code>save</code>. On a 50,000-row file it ran for hours, wrote the legacy stock item, and the salable quantity on the storefront did not match the file. MSI was enabled. Salable quantity is source quantity plus reservations. Writing the catalog stock item bypasses sources, and saving the product also fires everything else plugged into product save.</p>
+<p><code>Magento\InventoryApi\Api\SourceItemsSaveInterface</code> is the write API for source items. It accepts an array, so the batch size is yours to choose. I use 200. Larger batches make one failure reject a bigger set; smaller ones spend more time in PHP. Reservations are untouched, which is what you want: an open cart that reserved 2 units still reduces salable quantity after the source quantity is updated.</p>
+
+<p><code>app/code/MaheshDave/StockFeed/Model/SourceItemImporter.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\StockFeed\Model;
+
+use Magento\Framework\Api\DataObjectHelper;
+use Magento\InventoryApi\Api\Data\SourceItemInterface;
+use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
+use Magento\InventoryApi\Api\SourceItemsSaveInterface;
+
+class SourceItemImporter
+{
+    private const BATCH = 200;
+
+    public function __construct(
+        private readonly SourceItemsSaveInterface $sourceItemsSave,
+        private readonly SourceItemInterfaceFactory $sourceItemFactory,
+        private readonly DataObjectHelper $dataObjectHelper
+    ) {
+    }
+
+    /**
+     * @param array<int, array{sku: string, source_code: string, quantity: float}> $rows
+     */
+    public function import(array $rows): int
+    {
+        $saved = 0;
+        foreach (array_chunk($rows, self::BATCH) as $chunk) {
+            $items = [];
+            foreach ($chunk as $row) {
+                $item = $this->sourceItemFactory->create();
+                $this->dataObjectHelper->populateWithArray($item, [
+                    SourceItemInterface::SKU => (string) $row['sku'],
+                    SourceItemInterface::SOURCE_CODE => (string) $row['source_code'],
+                    SourceItemInterface::QUANTITY => (float) $row['quantity'],
+                    SourceItemInterface::STATUS => ((float) $row['quantity']) > 0
+                        ? SourceItemInterface::STATUS_IN_STOCK
+                        : SourceItemInterface::STATUS_OUT_OF_STOCK,
+                ], SourceItemInterface::class);
+                $items[] = $item;
+            }
+            $this->sourceItemsSave->execute($items);
+            $saved += count($items);
+        }
+
+        return $saved;
+    }
+}
+</code></pre>
+<p>Status is derived from quantity because a source item with quantity 0 and status in-stock still participates in odd ways in the salable calculation depending on version, and the feed does not send status. If the warehouse sends status explicitly, use theirs. Do not set quantity to 0 for a SKU that is simply absent from today's file. Absence means "the feed did not mention it", and zeroing those SKUs is how a partial file empties the catalog. The caller passes only the rows that were in the file.</p>
+<p>This module sequences <code>Magento_InventoryApi</code>. It does nothing useful with MSI disabled, and it should not fall back to <code>setStockData</code> silently. If <code>bin/magento module:status Magento_Inventory</code> is disabled, stop and say so.</p>
+<p>Salable quantity is not updated inside <code>execute</code> synchronously in a way you can read from a replica immediately. The inventory indexer runs. After a large import I run <code>bin/magento indexer:reindex inventory</code> if the storefront cannot wait for cron, and I do not run a full <code>indexer:reindex</code> because this change does not require the catalog product index.</p>
+
+<h2>Check source quantity and salable quantity separately</h2>
+<pre><code class="language-sql">SELECT sku, source_code, quantity, status FROM inventory_source_item WHERE sku = '24-MB01';
+SELECT sku, quantity FROM inventory_reservation WHERE sku = '24-MB01';
+</code></pre>
+<p>Source quantity matches the file. Reservations are whatever carts and orders already created; the import did not delete them. Salable quantity on the storefront is source quantity plus those reservation rows (they are stored negative). If you "fixed" a mismatch by deleting reservations, you oversell. If the source row did not change, the source code in the file is not a source Magento knows. <code>inventory_source</code> is the list. Inserting an unknown source code through this API fails the batch, which is preferable to creating a source by accident.</p>

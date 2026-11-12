@@ -1,0 +1,38 @@
+<!--meta {"excerpt": "Average checkout duration hid a store that had slowed down after a tax change. Facet the New Relic transaction by store and by the checkout action, and alert on the facet, not the average.", "seo_title": "NRQL for Checkout Latency by Store", "seo_description": "Break Magento checkout transaction time out by store with NRQL, instead of trusting an average that hides one slow website."} -->
+<p>Checkout "looked fine" in New Relic because the US store is most of the traffic and it was fine. The EU store's payment step had picked up two extra tax requests and moved from about 1.2s to about 4s. The un-faceted average moved by a tenth of a second, inside the noise. The alert on average duration did not fire. Facet by the store custom parameter from the start, or this shape of regression does not exist in the dashboard you are watching.</p>
+<p>The parameter has to be on the transaction before NRQL can facet it. In the checkout module I add it from an observer on <code>controller_action_predispatch_checkout</code>, using the same <code>MaheshDave\DevTools\Model\NewRelic\Transaction</code> helper, with <code>store_id</code> and <code>store_code</code>. Naming the transaction is Magento's job for a front controller; the parameter is the part Magento does not set. I use the store code in NRQL because an id means nothing in an incident channel.</p>
+
+<h2>Queries I actually keep</h2>
+<p>Duration of the payment place-order action, per store, last two hours:</p>
+<pre><code class="language-sql">SELECT average(duration), percentile(duration, 95)
+FROM Transaction
+WHERE appName = 'magento-prod'
+  AND name = 'WebTransaction/Action/checkout_onepage_savePayment'
+FACET store_code
+SINCE 2 hours ago
+</code></pre>
+<p>The transaction name on your account may be the route Magento reported, not this string. Open one slow trace and copy the name. Do not guess it in the alert and then wonder why the alert never matches. <code>percentile</code> is the number I alert on. The average stays on the chart so a single stalled request is visible as a gap between the two.</p>
+<p>Errors that are not storefront 200s with an empty message:</p>
+<pre><code class="language-sql">SELECT count(*)
+FROM TransactionError
+WHERE appName = 'magento-prod'
+  AND request.uri LIKE '%/checkout/%'
+FACET store_code, error.message
+SINCE 1 hour ago
+</code></pre>
+<p>A facet with thousands of distinct messages is an exception that includes the order id in the message. Fix the message. The facet is unusable until you do, and New Relic will cap it.</p>
+<p>Compare this week to last week for one store without trusting memory:</p>
+<pre><code class="language-sql">SELECT average(duration)
+FROM Transaction
+WHERE appName = 'magento-prod'
+  AND name = 'WebTransaction/Action/checkout_onepage_savePayment'
+  AND store_code = 'eu'
+SINCE 7 days ago
+COMPARE WITH 1 week ago
+TIMESERIES 1 day
+</code></pre>
+<p>This is the chart that would have shown the tax change on the day it deployed. I put a deployment marker in New Relic from the pipeline (<code>newrelic entity deployment</code> or the marker API the account already uses) so the timeseries has a vertical line. A line without a marker is a guess about which release did it.</p>
+
+<h2>The alert</h2>
+<p>Alert when <code>percentile(duration, 95) &gt; 3</code> for at least 5 minutes, faceted by <code>store_code</code>, on that transaction name. A single global threshold of 3 seconds never fires if the US store is 0.8s and is 80% of samples, even while EU is at 4s. Facet alerts create one incident per store. That is what you want. Mute it for the store you are load-testing, not for the application.</p>
+<p>If <code>store_code</code> is null on checkout transactions, the observer did not run for that controller. GraphQL checkout (<code>placeOrder</code> mutation) is a different transaction name entirely and will not appear in the web-controller query. Add a second alert on the GraphQL transaction once you have named or parameterized it. One dashboard that only knows about <code>checkout_onepage_savePayment</code> goes green the day you move checkout to GraphQL, which is the worst possible time for it to go green.</p>

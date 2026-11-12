@@ -1,0 +1,99 @@
+<!--meta {"excerpt": "Rename a column in db_schema.xml and Magento drops the old one and creates an empty new one. Remove a column and nothing happens. Both behaviors come from the whitelist file, and both are avoidable.", "seo_title": "Declarative Schema Renames, Drops, and the Whitelist", "seo_description": "Why renaming a db_schema.xml column loses data, why removed columns stay, and how onCreate, the whitelist file, dry-run, and safe mode prevent both."} -->
+<p>Two bug reports that look unrelated have the same cause. In the first, a developer renamed <code>ref_code</code> to <code>external_reference</code> in <code>db_schema.xml</code>; after deployment the column existed, but every value was gone. In the second, a developer deleted an obsolete column from <code>db_schema.xml</code>, ran <code>setup:upgrade</code>, and the column was still there a month later.</p>
+<p>Declarative schema compares the XML to the live database and generates the difference. It cannot see intent. A rename looks exactly like "drop one column, add another", and a removal is only applied if Magento knows your module created that column in the first place. That second piece of knowledge lives in <code>etc/db_schema_whitelist.json</code>.</p>
+
+<h2>What the whitelist does</h2>
+<p>The whitelist records every table, column, index, and constraint the module has declared. During <code>setup:upgrade</code>, Magento only drops elements that appear in the whitelist but no longer appear in <code>db_schema.xml</code>. Anything not in the whitelist is assumed to belong to someone else (a legacy install script, another module, a DBA) and is left alone.</p>
+<p>That explains both reports:</p>
+<ul>
+<li>The removed column was never in the whitelist because the developer never regenerated it, so Magento refused to drop it. Correct, conservative behavior.</li>
+<li>The renamed column <em>was</em> in the whitelist. The new XML no longer mentioned <code>ref_code</code>, so it was dropped, and <code>external_reference</code> was created empty.</li>
+</ul>
+<p>The whitelist must be committed and regenerated whenever the schema changes:</p>
+<pre><code class="language-bash">bin/magento setup:db-declaration:generate-whitelist --module-name=MaheshDave_Loyalty
+</code></pre>
+<p>It is additive: generating it again after a removal keeps the old entry, which is exactly what lets the drop happen on the next upgrade. Do not hand-edit it to "clean up" removed names.</p>
+
+<h2>Renaming a column without losing data</h2>
+<p>The column element accepts an <code>onCreate</code> attribute. <code>migrateDataFrom(old_name)</code> tells Magento to copy values from the old column when it creates the new one, before the old one is dropped.</p>
+
+<p><code>app/code/MaheshDave/Loyalty/etc/db_schema.xml</code> before:</p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="maheshdave_loyalty_member" resource="default" engine="innodb" comment="Loyalty members">
+        <column xsi:type="int" name="member_id" unsigned="true" nullable="false" identity="true" comment="Member ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="varchar" name="ref_code" length="32" nullable="true" comment="External reference"/>
+        <column xsi:type="varchar" name="legacy_tier" length="16" nullable="true" comment="Unused tier code"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="member_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MAHESHDAVE_LOYALTY_MEMBER_CUSTOMER_ID">
+            <column name="customer_id"/>
+        </constraint>
+    </table>
+</schema>
+</code></pre>
+
+<p>After, with the rename and the removal:</p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="maheshdave_loyalty_member" resource="default" engine="innodb" comment="Loyalty members">
+        <column xsi:type="int" name="member_id" unsigned="true" nullable="false" identity="true" comment="Member ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="varchar" name="external_reference" length="64" nullable="true"
+                onCreate="migrateDataFrom(ref_code)" comment="External reference"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="member_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MAHESHDAVE_LOYALTY_MEMBER_CUSTOMER_ID">
+            <column name="customer_id"/>
+        </constraint>
+    </table>
+</schema>
+</code></pre>
+<p>Then regenerate the whitelist so it contains <code>external_reference</code> as well as the old names:</p>
+
+<p><code>app/code/MaheshDave/Loyalty/etc/db_schema_whitelist.json</code> (generated)</p>
+<pre><code class="language-json">{
+    "maheshdave_loyalty_member": {
+        "column": {
+            "member_id": true,
+            "customer_id": true,
+            "ref_code": true,
+            "legacy_tier": true,
+            "external_reference": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MAHESHDAVE_LOYALTY_MEMBER_CUSTOMER_ID": true
+        }
+    }
+}
+</code></pre>
+<p>Leave <code>onCreate</code> in place after release. It only acts when the target column does not exist yet, so it is a no-op on databases that already migrated and still correct on any environment that lags behind, such as a developer restoring an old dump.</p>
+<p>Renaming a whole table works the same way at table level with <code>onCreate="migrateDataFromAnotherTable(old_table_name)"</code>. For very large tables this is a full copy inside the upgrade, so measure it on a production-sized dump before trusting it with a maintenance window.</p>
+
+<h2>Removing something another module declared</h2>
+<p>You cannot drop another module's column by omitting it, because it is not in your whitelist. The supported route is to redeclare the element in your own <code>db_schema.xml</code> with <code>disabled="true"</code>. That applies to columns, indexes, constraints, and whole tables. Use it sparingly: disabling a core index to speed up imports, for example, is something you will have to defend during every upgrade.</p>
+
+<h2>See the SQL before running it</h2>
+<p>Two flags on <code>setup:upgrade</code> make schema changes reviewable and reversible:</p>
+<pre><code class="language-bash">bin/magento setup:upgrade --dry-run=1 --keep-generated
+grep -n "maheshdave_loyalty_member" var/log/dry-run-installation.log
+</code></pre>
+<p>Dry run writes the DDL it would execute to <code>var/log/dry-run-installation.log</code> without touching the database. For the rename above, you should see an <code>ALTER TABLE</code> adding <code>external_reference</code>, an <code>UPDATE</code> copying from <code>ref_code</code>, and the drops of <code>ref_code</code> and <code>legacy_tier</code>. If the <code>UPDATE</code> is missing, the <code>onCreate</code> did not parse; check for a typo in the old column name.</p>
+<pre><code class="language-bash">bin/magento setup:upgrade --safe-mode=1
+</code></pre>
+<p>Safe mode dumps data from columns and tables about to be dropped into CSV files under <code>var/declarative_dumps_csv/</code>. If a drop turns out to be wrong, <code>bin/magento setup:upgrade --data-restore=1</code> restores from those dumps after you put the element back in the XML. It is not a backup strategy, but it is a cheap safety net for a release that removes columns.</p>
+
+<h2>Things that still need a data patch</h2>
+<p>Declarative schema moves data only for the rename cases above. Changing a column type from <code>varchar</code> to <code>int</code>, splitting one column into two, or backfilling a new non-nullable column from logic are data problems. Declare the schema, then write a data patch that transforms values, and make the new column nullable until the patch has run everywhere. Trying to do it in one step produces a failed <code>ALTER</code> on the first row that does not convert.</p>
+
+<h2>Checking the result</h2>
+<pre><code class="language-sql">SHOW COLUMNS FROM maheshdave_loyalty_member;
+SELECT COUNT(*) AS total, COUNT(external_reference) AS with_reference FROM maheshdave_loyalty_member;
+</code></pre>
+<p>Compare <code>with_reference</code> against the count of non-null <code>ref_code</code> values you recorded before the deploy. Recording that number is the step people skip, and it is the only way to prove the migration copied everything.</p>

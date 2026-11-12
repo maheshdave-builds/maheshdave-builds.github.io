@@ -63,7 +63,28 @@ export default function ArticlesPage() {
 
   const bannerImage = resolveArticlesPageBannerImage(site.copy)
 
-  useSeo({ title: `All articles — ${site.siteTitle}`, description: site.copy?.articlesPageDescription || site.copy?.articlesDescription || 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.', canonicalPath: '/articles' })
+  const pageTitle = site.copy?.articlesPageTitle || 'Mahesh Dave Blog'
+  const pageDescription = site.copy?.articlesPageDescription || site.copy?.articlesDescription || 'Mahesh Dave blog: Adobe Commerce and Magento 2 articles on architecture, GraphQL, Fastly, New Relic, and integrations.'
+  useSeo({
+    title: `${pageTitle} — Adobe Commerce and Magento 2 articles`,
+    description: pageDescription,
+    canonicalPath: '/articles',
+    type: 'website',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: 'Mahesh Dave Blog',
+      description: pageDescription,
+      url: 'https://maheshdave-builds.github.io/articles',
+      author: { '@type': 'Person', name: 'Mahesh Dave', url: 'https://maheshdave-builds.github.io/' },
+      blogPost: articles.slice(0, 30).map((article) => ({
+        '@type': 'BlogPosting',
+        headline: article.title,
+        url: `https://maheshdave-builds.github.io/articles/${encodeURIComponent(article.slug)}`,
+        datePublished: article.published_at || undefined,
+      })),
+    },
+  })
   return <main className="section-wrap all-articles-page" id="all-articles">
     <motion.div
       className="articles-page-image-banner is-animated"

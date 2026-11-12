@@ -7,7 +7,6 @@ import {
   BookOpen,
   BriefcaseBusiness,
   ChevronDown,
-  Download,
   ExternalLink,
   Github,
   GraduationCap,
@@ -60,9 +59,6 @@ function Hero({ profile, copy, onSection }) {
           <Button to="/#contact" variant="secondary" icon={ArrowUpRight}>
             Let&rsquo;s connect
           </Button>
-          <a className="resume-link" href={profile.resumeUrl} target="_blank" rel="noreferrer">
-            <Download size={15} aria-hidden="true" /> Resume PDF
-          </a>
         </div>
 
         <div className="hero-meta">

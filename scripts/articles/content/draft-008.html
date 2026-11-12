@@ -1,0 +1,30 @@
+<!--meta {"excerpt": "Apollo POSTs the products query, Fastly never stores it, and the cache-id header from the response is thrown away. GET, the documented cacheable query list, and X-Magento-Cache-Id are the actual levers.", "seo_title": "Why a GraphQL Query Never Hits Fastly", "seo_description": "POST GraphQL is uncacheable. Which queries Magento caches, how X-Magento-Cache-Id is built, and the GET request that should return a Fastly HIT."} -->
+<p>The storefront team reported a Fastly hit rate near zero on <code>/graphql</code> while category HTML sat at 90%. The query was <code>products</code>, which Magento does cache. The client was sending it as an HTTP POST with the query in the body. Fastly's Commerce VCL only considers caching a GraphQL request when it is a GET whose query string contains <code>query=</code>. A POST is a pass, every time, and no Magento header will change that.</p>
+
+<h2>What Magento will cache</h2>
+<p>Adobe's GraphQL caching documentation lists the queries that participate: <code>products</code>, <code>categories</code>, <code>categoryList</code>, <code>cmsBlocks</code>, <code>cmsPage</code>, <code>route</code>, <code>storeConfig</code>, <code>urlResolver</code>, and a short set of metadata queries. It explicitly does not cache <code>cart</code>, <code>customer</code>, <code>customerOrders</code>, <code>wishlist</code>, or customer payment tokens. One uncached root field in an otherwise cacheable document bypasses the cache for the whole request. A persisted "page" query that also asks for <code>customer { firstname }</code> is a permanent miss, and it looks like a Fastly bug.</p>
+<p>A custom root query you add in <code>schema.graphqls</code> is not on that list. I do not add one when the data can be a field of <code>products</code> or <code>categories</code>. Those parents already carry cache tags (<code>X-Magento-Tags</code> in developer mode), so a price change purges the response. A new root query would need its own cache identity wiring, and that wiring is not a documented one-liner; treat a claim that <code>@cache</code> on an arbitrary query "just works" as something to verify on your patch level before you depend on it.</p>
+
+<h2>The cache id is not the URL</h2>
+<p>From 2.4.4, Magento returns <code>X-Magento-Cache-Id</code> on GraphQL GET and POST responses. The value is a SHA-256 of store id, currency, whether the customer is logged in, customer group, customer tax rate, and a salt. Sending that value back on the next request lets Fastly (module 1.2.160 or later, with the current VCL uploaded) serve a different object per context without varying on the <code>Authorization</code> bearer or on cookies. The header is for Varnish and Fastly. The built-in file FPC does not honor it. Mutations do not return it.</p>
+<p>Guest traffic does not need the header for a hit. Logged-in traffic does, because a bearer token would otherwise make every key unique. The client has to store the header from the response and attach it to the following GET. Most Apollo setups never do this, because they POST and never read response headers.</p>
+<p><code>X-Magento-Vary</code> is not used for GraphQL. Store and currency come from the <code>Store</code> and <code>Content-Currency</code> headers. A query with no <code>Store</code> header is cached under the default store, then replayed to a request for another store view if you vary only on the URL. I send <code>Store</code> on every request, including the ones I expect to hit.</p>
+
+<h2>A request that can hit</h2>
+<pre><code class="language-bash">curl -sD - -o /dev/null -G "https://example.test/graphql" \
+  -H "Store: default" \
+  -H "Content-Currency: USD" \
+  --data-urlencode 'query=query{products(filter:{sku:{eq:"24-MB01"}}){items{sku name}}}'
+</code></pre>
+<p>First response: <code>X-Magento-Cache-Debug: MISS</code> when the app is in developer mode, and Fastly's <code>X-Cache</code> contains <code>MISS</code>. Second identical request: <code>HIT</code>. The same call with <code>-X POST</code> and a JSON body stays on <code>MISS</code> or <code>PASS</code>. If the second GET is still a miss, check three things in order: the Fastly module is at least 1.2.160 and the VCL has been uploaded, the query string actually contains the query (a persisted-query POST will not), and the document does not include a field from the uncached list.</p>
+<p>For a logged-in client, read <code>X-Magento-Cache-Id</code> from the first response and send it next time:</p>
+<pre><code class="language-bash">CACHE_ID=$(curl -sD - -o /dev/null -G "https://example.test/graphql" \
+  -H "Store: default" -H "Authorization: Bearer $CUSTOMER_TOKEN" \
+  --data-urlencode 'query=query{products(search:"bag"){items{sku}}}' \
+  | awk -F': ' 'tolower($1)=="x-magento-cache-id"{gsub("\r","",$2); print $2}')
+curl -sD - -o /dev/null -G "https://example.test/graphql" \
+  -H "Store: default" -H "Authorization: Bearer $CUSTOMER_TOKEN" \
+  -H "X-Magento-Cache-Id: $CACHE_ID" \
+  --data-urlencode 'query=query{products(search:"bag"){items{sku}}}'
+</code></pre>
+<p>The customer token still has to be valid; the cache id only stops Fastly from treating that token as part of the cache key. Group and tax rate are already inside the hash. If you add another factor through <code>idFactorProviders</code> on <code>Magento\GraphQlCache\Model\CacheId\CacheIdCalculator</code>, every distinct value multiplies the number of objects. I have used that for a B2B shared-catalog id, and the hit rate fell until the catalog count was small enough that the extra dimension paid for itself. Measure the cardinality before you add a factor, not after the Fastly bill moves.</p>

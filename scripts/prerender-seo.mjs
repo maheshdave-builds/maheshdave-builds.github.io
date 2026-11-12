@@ -50,10 +50,16 @@ async function prerenderRoutes() {
   const articlesDir = path.resolve(distDir, 'articles')
   await mkdir(articlesDir, { recursive: true })
   
+  const hubDescription = 'Mahesh Dave blog: Adobe Commerce and Magento 2 articles on architecture, GraphQL, Fastly, New Relic, and integrations.'
+  const hubList = publicArticles
+    .filter((article) => article.slug && article.title)
+    .map((article) => `<li><a href="${origin}/articles/${encodeURIComponent(String(article.slug).trim())}">${escapeHtml(article.title)}</a></li>`)
+    .join('')
   let hubHtml = template
-    .replace(/<title>.*?<\/title>/i, `<title>Technical Articles &amp; Magento 2 Knowledge Base — Mahesh Dave</title>`)
-    .replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="Practical guides and architectural patterns for Adobe Commerce, Magento 2, headless storefronts, performance, and integrations by Mahesh Dave." />`)
+    .replace(/<title>.*?<\/title>/i, `<title>Mahesh Dave Blog — Adobe Commerce and Magento 2 articles</title>`)
+    .replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHtml(hubDescription)}" />`)
     .replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/articles" />`)
+    .replace('<div id="root"></div>', () => `<div id="root"><main><h1>Mahesh Dave Blog</h1><p>${escapeHtml(hubDescription)}</p><ul>${hubList}</ul></main></div>`)
 
   await writeFile(path.resolve(articlesDir, 'index.html'), hubHtml)
 
@@ -97,8 +103,12 @@ async function prerenderRoutes() {
       keywords: Array.isArray(article.tags) ? article.tags.join(', ') : 'Adobe Commerce, Magento 2',
     }
 
+    const staticBody = String(article.content || '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
     let articleHtml = template
       .replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)} — Mahesh Dave</title>`)
+      .replace('<div id="root"></div>', () => `<div id="root"><article><h1>${escapeHtml(article.title || title)}</h1><p>${escapeHtml(desc)}</p>${staticBody}</article></div>`)
       .replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHtml(desc)}" />`)
       .replace(/<meta property="og:title" content=".*?" \/>/i, `<meta property="og:title" content="${escapeHtml(title)} — Mahesh Dave" />`)
       .replace(/<meta property="og:description" content=".*?" \/>/i, `<meta property="og:description" content="${escapeHtml(desc)}" />`)

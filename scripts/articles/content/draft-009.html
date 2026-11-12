@@ -1,0 +1,163 @@
+<!--meta {"excerpt": "The cron job and the integration both need to mark an order as exported. A controller action only serves HTTP. A service contract is callable from both, and webapi.xml is just the HTTP binding.", "seo_title": "One Service Contract for REST and Cron", "seo_description": "Put order-export state behind a Magento service contract, expose it with webapi.xml and ACL, and call the same class from cron."} -->
+<p>Two features landed in the same sprint: an ERP that POSTs "this order is exported", and a cron that retries orders the ERP never acknowledged. Both were written as separate blocks of SQL. They drifted within a month, and the cron started overwriting a status the API had just set because it did not know about the new column.</p>
+<p>The HTTP route is not the feature. <code>webapi.xml</code> binds a URL to a method on a service interface. Cron, a consumer, and an admin controller can call that method without HTTP. If the only implementation lives in a controller, the cron will grow a second copy.</p>
+
+<h2>The contract</h2>
+<p><code>app/code/MaheshDave/OrderExport/Api/ExportStatusInterface.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Api;
+
+use Magento\Framework\Exception\NoSuchEntityException;
+
+interface ExportStatusInterface
+{
+    /**
+     * @param string $incrementId
+     * @param string $state exported|failed
+     * @return string
+     * @throws NoSuchEntityException
+     */
+    public function setState(string $incrementId, string $state): string;
+}
+</code></pre>
+<p>The docblock types matter. Magento's web API layer reads them to build the REST schema. A PHP native return type alone is not enough on older 2.4 patches; keep the <code>@param</code> and <code>@return</code> lines.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/db_schema.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="maheshdave_order_export_status" resource="sales" engine="innodb" comment="ERP export state">
+        <column xsi:type="varchar" name="increment_id" length="32" nullable="false" comment="Increment ID"/>
+        <column xsi:type="varchar" name="state" length="16" nullable="false" comment="exported or failed"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="increment_id"/>
+        </constraint>
+    </table>
+</schema>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/Model/ExportStatus.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Model;
+
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use MaheshDave\OrderExport\Api\ExportStatusInterface;
+
+class ExportStatus implements ExportStatusInterface
+{
+    private const ALLOWED = ['exported', 'failed'];
+
+    public function __construct(
+        private readonly OrderRepositoryInterface $orderRepository,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    public function setState(string $incrementId, string $state): string
+    {
+        if (!in_array($state, self::ALLOWED, true)) {
+            throw new InputException(__('State must be exported or failed.'));
+        }
+        $criteria = $this->searchCriteriaBuilder
+            ->addFilter('increment_id', $incrementId)
+            ->setPageSize(1)
+            ->create();
+        $orders = $this->orderRepository->getList($criteria)->getItems();
+        if ($orders === []) {
+            throw new NoSuchEntityException(__('Order %1 does not exist.', $incrementId));
+        }
+
+        $connection = $this->resource->getConnection('sales');
+        $connection->insertOnDuplicate(
+            $this->resource->getTableName('maheshdave_order_export_status', 'sales'),
+            ['increment_id' => $incrementId, 'state' => $state],
+            ['state']
+        );
+
+        return $state;
+    }
+}
+</code></pre>
+<p><code>OrderRepositoryInterface::get()</code> takes an entity id, not an increment id. Integrations send increment ids. <code>getList</code> with a filter is the supported lookup. There is no <code>getByIncrementId</code> on the repository interface; a helper with that name in some codebases is a local invention.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/di.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="MaheshDave\OrderExport\Api\ExportStatusInterface" type="MaheshDave\OrderExport\Model\ExportStatus"/>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/webapi.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/maheshdave/order-export/:incrementId" method="PUT">
+        <service class="MaheshDave\OrderExport\Api\ExportStatusInterface" method="setState"/>
+        <resources>
+            <resource ref="MaheshDave_OrderExport::status"/>
+        </resources>
+    </route>
+</routes>
+</code></pre>
+<p>The route parameter name has to match the PHP argument name, <code>incrementId</code>, not <code>increment_id</code>. The second argument comes from the body as <code>{"state":"exported"}</code>. Using <code>anonymous</code> as the resource would publish this to the internet. The ACL resource is declared in <code>etc/acl.xml</code> and granted to the integration in System > Integrations, not to a human admin role, unless a person is going to call it from the admin token.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/acl.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="MaheshDave_OrderExport::status" title="Update order export state" sortOrder="90"/>
+            </resource>
+        </resources>
+    </acl>
+</config>
+</code></pre>
+
+<h2>The cron calls the interface</h2>
+<p><code>app/code/MaheshDave/OrderExport/Cron/RetryFailed.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Cron;
+
+use MaheshDave\OrderExport\Api\ExportStatusInterface;
+
+class RetryFailed
+{
+    public function __construct(
+        private readonly ExportStatusInterface $exportStatus
+    ) {
+    }
+
+    public function execute(): void
+    {
+        $this->exportStatus->setState('000000123', 'failed');
+    }
+}
+</code></pre>
+<p>The hardcoded increment id is the shape of the call, not the selection logic. The selection belongs in a repository of your own; the point is that the cron has no <code>curl</code> back into <code>/rest</code> and no second writer. A cron that HTTP-calls the local REST API pays for auth, area emulation, and a network hop to change a row in the same database.</p>
+
+<h2>Check both callers</h2>
+<pre><code class="language-bash">bin/magento setup:upgrade
+bin/magento setup:di:compile
+curl -s -X PUT "https://example.test/rest/V1/maheshdave/order-export/000000123" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" \
+  -d '{"state":"exported"}'
+</code></pre>
+<p>A token whose role lacks <code>MaheshDave_OrderExport::status</code> gets 401 or 403. A bad state gets a 400 with the input exception message. Then:</p>
+<pre><code class="language-sql">SELECT increment_id, state FROM maheshdave_order_export_status WHERE increment_id = '000000123';
+</code></pre>
+<p><code>state</code> is <code>exported</code>. Run the cron class from a command or from <code>bin/magento cron:run</code> after you point it at a real failed order, and the same row moves to <code>failed</code> with a newer <code>updated_at</code>. Two writers, one row, one method.</p>

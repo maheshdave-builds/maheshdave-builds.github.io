@@ -1,0 +1,74 @@
+<!--meta {"excerpt": "A CMS-driven banner block stayed on the category page for as long as the page was cached. The block never implemented IdentityInterface, so a save had no tag to purge.", "seo_title": "Purge a Custom Block by Cache Tag", "seo_description": "Implement IdentityInterface on a Magento block so Fastly and FPC purge it when the underlying record changes, instead of waiting out the TTL."} -->
+<p>The category page cached correctly. A merchandiser updated the promo row that feeds the banner on that page, flushed nothing, and waited. The banner did not change until the page TTL expired. The block rendered the promo during the miss and then became anonymous bytes inside the page. Full-page cache purges by tag. A block that does not declare identities adds no tag, so a save of the promo has nothing to purge.</p>
+
+<h2>Identities on the block</h2>
+<p><code>app/code/MaheshDave/PromoBanner/Block/Banner.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\PromoBanner\Block;
+
+use Magento\Framework\DataObject\IdentityInterface;
+use Magento\Framework\View\Element\Template;
+use MaheshDave\PromoBanner\Model\Promo;
+use MaheshDave\PromoBanner\Model\PromoRepository;
+
+class Banner extends Template implements IdentityInterface
+{
+    public function __construct(
+        Template\Context $context,
+        private readonly PromoRepository $promoRepository,
+        array $data = []
+    ) {
+        parent::__construct($context, $data);
+    }
+
+    public function getPromo(): ?Promo
+    {
+        $id = (int) $this->getData('promo_id');
+
+        return $id > 0 ? $this->promoRepository->get($id) : null;
+    }
+
+    public function getIdentities(): array
+    {
+        $promo = $this->getPromo();
+
+        return $promo === null ? [] : $promo->getIdentities();
+    }
+}
+</code></pre>
+<p>The model owns the tag format so the block and the purge on save cannot drift.</p>
+<p><code>app/code/MaheshDave/PromoBanner/Model/Promo.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\PromoBanner\Model;
+
+use Magento\Framework\DataObject\IdentityInterface;
+use Magento\Framework\Model\AbstractModel;
+
+class Promo extends AbstractModel implements IdentityInterface
+{
+    public const CACHE_TAG = 'maheshdave_promo';
+
+    public function getIdentities(): array
+    {
+        return [self::CACHE_TAG . '_' . $this->getId()];
+    }
+}
+</code></pre>
+<p>On save, the abstract model already asks for identities when the model implements the interface, and the page-cache layer collects them. Calling <code>clean_cache_by_tags</code> yourself on top of that double-purges and is how a busy admin save turns into a stampede. I only dispatch that event when the write path does not go through the model, which is the same situation as a bulk SQL update.</p>
+<p>The block has to actually be rendered inside the cached page. A block created in a controller and echoed, or filled via AJAX after load, is not part of the FPC document and its identities are never recorded. Layout XML is what puts it in the hole punch list Magento walks:</p>
+<pre><code class="language-xml"><referenceContainer name="content">
+    <block class="MaheshDave\PromoBanner\Block\Banner" name="maheshdave.promo.banner" template="MaheshDave_PromoBanner::banner.phtml">
+        <arguments>
+            <argument name="promo_id" xsi:type="string">14</argument>
+        </arguments>
+    </block>
+</referenceContainer>
+</code></pre>
+<p><code>cacheable="false"</code> on this block does purge nothing faster. It disables caching for the entire page, which hides the bug by never storing the page. Leave it cacheable and give it a tag.</p>
+
+<h2>See the tag, change the row, see it go</h2>
+<p>With developer mode on, the category response includes <code>X-Magento-Tags</code> containing <code>maheshdave_promo_14</code>. If the tag is absent, the block was not rendered on that request (wrong handle, empty <code>promo_id</code>). Save the promo in admin. The next category request is a miss and the banner text matches the save. A hit with the old text and the tag present means the save path did not purge: the admin form is writing SQL without the model. Move that write onto the repository, or register <code>Promo::CACHE_TAG</code> with the saved id and dispatch <code>clean_cache_by_tags</code> there.</p>

@@ -1,0 +1,964 @@
+[
+  {
+    "id": "draft-001",
+    "title": "Hooking Product Saves So Admin, Import, and REST All Agree",
+    "slug": "hooking-product-saves-so-admin-import-and-rest-all-agree",
+    "category": "Magento Architecture",
+    "tags": [
+      "plugins",
+      "observers",
+      "repositories"
+    ],
+    "published_at": "2026-05-13",
+    "purpose": "Decide where to intercept product saves when admin, REST, and import take different code paths."
+  },
+  {
+    "id": "draft-002",
+    "title": "Loading Extension Attributes in getList() Without N+1 Queries",
+    "slug": "loading-extension-attributes-in-getlist-without-n-1-queries",
+    "category": "Magento Architecture",
+    "tags": [
+      "extension attributes",
+      "service contracts",
+      "performance"
+    ],
+    "published_at": "2025-06-29",
+    "purpose": "Populate extension attributes for repository list calls with one batched query instead of one per item."
+  },
+  {
+    "id": "draft-003",
+    "title": "Virtual Types for Per-Integration Loggers and HTTP Clients",
+    "slug": "virtual-types-for-per-integration-loggers-and-http-clients",
+    "category": "Magento Architecture",
+    "tags": [
+      "di.xml",
+      "virtualType",
+      "logging"
+    ],
+    "published_at": "2024-07-09",
+    "purpose": "Give each integration its own log file and client config through di.xml virtual types instead of subclasses."
+  },
+  {
+    "id": "draft-004",
+    "title": "Declarative Schema: Renames, Drops, and the Whitelist File",
+    "slug": "declarative-schema-renames-drops-and-the-whitelist-file",
+    "category": "Magento Architecture",
+    "tags": [
+      "declarative schema",
+      "db_schema.xml",
+      "upgrades"
+    ],
+    "published_at": "2024-02-20",
+    "purpose": "Explain why column renames and drops in db_schema.xml lose data or do nothing without the whitelist and onCreate rules."
+  },
+  {
+    "id": "draft-005",
+    "title": "A Custom Indexer with Mview Changelogs for Partial Reindex",
+    "slug": "a-custom-indexer-with-mview-changelogs-for-partial-reindex",
+    "category": "Magento Architecture",
+    "tags": [
+      "indexers",
+      "mview",
+      "update by schedule"
+    ],
+    "published_at": "2025-03-18",
+    "purpose": "Build an indexer that reindexes only changed rows through mview.xml subscriptions."
+  },
+  {
+    "id": "draft-006",
+    "title": "One Queue Topic, Two Transports: MySQL and AMQP Consumers",
+    "slug": "one-queue-topic-two-transports-mysql-and-amqp-consumers",
+    "category": "Magento Architecture",
+    "tags": [
+      "message queues",
+      "RabbitMQ",
+      "consumers"
+    ],
+    "published_at": "2026-03-19",
+    "purpose": "Configure a topic that runs on the MySQL queue locally and on AMQP in production without code changes."
+  },
+  {
+    "id": "draft-007",
+    "title": "Isolating Slow Jobs with a Dedicated Cron Group",
+    "slug": "isolating-slow-jobs-with-a-dedicated-cron-group",
+    "category": "Magento Architecture",
+    "tags": [
+      "cron",
+      "cron_groups.xml",
+      "scheduling"
+    ],
+    "published_at": "2025-04-28",
+    "purpose": "Stop a long export from delaying indexer cron jobs by moving it to its own cron group and process."
+  },
+  {
+    "id": "draft-008",
+    "title": "Cacheable Custom GraphQL Queries with Identity Classes",
+    "slug": "cacheable-custom-graphql-queries-with-identity-classes",
+    "category": "Magento Architecture",
+    "tags": [
+      "GraphQL",
+      "cache tags",
+      "resolvers"
+    ],
+    "published_at": "2024-02-27",
+    "purpose": "Make a custom GraphQL query cacheable and invalidated correctly via @cache and an identity class."
+  },
+  {
+    "id": "draft-009",
+    "title": "Admin Mass Actions That Publish to a Queue Instead of Timing Out",
+    "slug": "admin-mass-actions-that-publish-to-a-queue-instead-of-timing-out",
+    "category": "Magento Architecture",
+    "tags": [
+      "UI components",
+      "mass actions",
+      "queues"
+    ],
+    "published_at": "2025-08-31",
+    "purpose": "Replace a synchronous grid mass action that times out on 5,000 rows with a queued, trackable job."
+  },
+  {
+    "id": "draft-010",
+    "title": "Reading Website-Scoped Config Correctly from Store Context",
+    "slug": "reading-website-scoped-config-correctly-from-store-context",
+    "category": "Magento Architecture",
+    "tags": [
+      "configuration",
+      "scopes",
+      "ScopeConfigInterface"
+    ],
+    "published_at": "2026-02-28",
+    "purpose": "Explain why a website-scoped setting reads the default value in cron, CLI, and API contexts, and how to fix it."
+  },
+  {
+    "id": "draft-011",
+    "title": "What addAttributeToSelect('*') Costs on Large EAV Catalogs",
+    "slug": "what-addattributetoselect-costs-on-large-eav-catalogs",
+    "category": "Magento Architecture",
+    "tags": [
+      "EAV",
+      "collections",
+      "catalog performance"
+    ],
+    "published_at": "2024-01-03",
+    "purpose": "Measure and cut the cost of broad EAV attribute selection on product collections."
+  },
+  {
+    "id": "draft-012",
+    "title": "Designing a Service Contract for a Custom Entity End to End",
+    "slug": "designing-a-service-contract-for-a-custom-entity-end-to-end",
+    "category": "Magento Architecture",
+    "tags": [
+      "service contracts",
+      "repositories",
+      "SearchCriteria"
+    ],
+    "published_at": "2025-04-06",
+    "purpose": "Build data interface, repository, and search results for one entity so REST and internal code share one API."
+  },
+  {
+    "id": "draft-013",
+    "title": "Assigning Large SKU Sets to a Shared Catalog Without Admin Timeouts",
+    "slug": "assigning-large-sku-sets-to-a-shared-catalog-without-admin-timeouts",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "shared catalog",
+      "REST",
+      "bulk"
+    ],
+    "published_at": "2025-01-06",
+    "purpose": "Move bulk shared catalog product assignment out of the admin UI into batched API calls."
+  },
+  {
+    "id": "draft-014",
+    "title": "Shared Catalog Prices vs Customer Group Prices on Big Catalogs",
+    "slug": "shared-catalog-prices-vs-customer-group-prices-on-big-catalogs",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "shared catalog",
+      "pricing",
+      "indexing"
+    ],
+    "published_at": "2024-08-27",
+    "purpose": "Choose between shared catalog custom prices and tier/group prices based on indexer and storage cost."
+  },
+  {
+    "id": "draft-015",
+    "title": "Carrying a Custom Field Through the Negotiable Quote Lifecycle",
+    "slug": "carrying-a-custom-field-through-the-negotiable-quote-lifecycle",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "negotiable quote",
+      "quote",
+      "extension attributes"
+    ],
+    "published_at": "2025-10-07",
+    "purpose": "Keep a custom quote field intact from buyer request through seller edits to order placement."
+  },
+  {
+    "id": "draft-016",
+    "title": "Company Roles and a Custom Permission Resource for Buyers",
+    "slug": "company-roles-and-a-custom-permission-resource-for-buyers",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "company roles",
+      "permissions",
+      "ACL"
+    ],
+    "published_at": "2024-10-23",
+    "purpose": "Add a company-level permission and enforce it in a storefront controller."
+  },
+  {
+    "id": "draft-017",
+    "title": "Purchase Order Approval Rules: What to Configure and What to Build",
+    "slug": "purchase-order-approval-rules-what-to-configure-and-what-to-build",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "purchase orders",
+      "approval rules",
+      "workflow"
+    ],
+    "published_at": "2024-12-09",
+    "purpose": "Decide when native approval rules cover a requirement and when a custom approval step is needed."
+  },
+  {
+    "id": "draft-018",
+    "title": "Syncing Companies and Company Users from an ERP via REST",
+    "slug": "syncing-companies-and-company-users-from-an-erp-via-rest",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "company",
+      "REST",
+      "ERP"
+    ],
+    "published_at": "2026-06-25",
+    "purpose": "Create and update companies and their users from an ERP master without duplicating admins."
+  },
+  {
+    "id": "draft-019",
+    "title": "Order Visibility Across Company Hierarchies",
+    "slug": "order-visibility-across-company-hierarchies",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "company hierarchy",
+      "orders",
+      "B2B"
+    ],
+    "published_at": "2024-04-24",
+    "purpose": "Explain which orders parent and child company users can see and how to test it."
+  },
+  {
+    "id": "draft-020",
+    "title": "Payment on Account and Credit Limits Driven by an ERP",
+    "slug": "payment-on-account-and-credit-limits-driven-by-an-erp",
+    "category": "Adobe Commerce B2B",
+    "tags": [
+      "company credit",
+      "payment on account",
+      "integration"
+    ],
+    "published_at": "2025-12-07",
+    "purpose": "Keep company credit balances authoritative in the ERP while checkout still enforces limits."
+  },
+  {
+    "id": "draft-021",
+    "title": "Sending Order Events to App Builder with Commerce Eventing",
+    "slug": "sending-order-events-to-app-builder-with-commerce-eventing",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "App Builder",
+      "I/O Events",
+      "eventing"
+    ],
+    "published_at": "2024-05-31",
+    "purpose": "Subscribe to order events in Commerce and handle them in a Runtime action reliably."
+  },
+  {
+    "id": "draft-022",
+    "title": "Synchronous Webhooks for Cart Validation and Their Timeout Budget",
+    "slug": "synchronous-webhooks-for-cart-validation-and-their-timeout-budget",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "webhooks",
+      "App Builder",
+      "checkout"
+    ],
+    "published_at": "2025-11-09",
+    "purpose": "Use Commerce webhooks to validate cart items externally without breaking checkout when the endpoint is slow."
+  },
+  {
+    "id": "draft-023",
+    "title": "Fast-Ack Runtime Actions for Async Processing",
+    "slug": "fast-ack-runtime-actions-for-async-processing",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "I/O Runtime",
+      "async",
+      "App Builder"
+    ],
+    "published_at": "2026-01-23",
+    "purpose": "Return quickly from a web action and do the heavy work asynchronously so callers do not retry duplicates."
+  },
+  {
+    "id": "draft-024",
+    "title": "Authenticating App Builder Actions Against Commerce APIs",
+    "slug": "authenticating-app-builder-actions-against-commerce-apis",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "OAuth",
+      "IMS",
+      "App Builder"
+    ],
+    "published_at": "2025-09-22",
+    "purpose": "Choose and implement the right credential type for a Runtime action calling Commerce REST."
+  },
+  {
+    "id": "draft-025",
+    "title": "Debugging Failed App Builder Deploys and Silent Activations",
+    "slug": "debugging-failed-app-builder-deploys-and-silent-activations",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "aio CLI",
+      "Runtime",
+      "troubleshooting"
+    ],
+    "published_at": "2024-12-29",
+    "purpose": "Trace an action that deploys fine but never runs, using activations and logs."
+  },
+  {
+    "id": "draft-026",
+    "title": "Filtering Event Payloads to Reduce Noise and Exposure",
+    "slug": "filtering-event-payloads-to-reduce-noise-and-exposure",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "eventing",
+      "payload filtering",
+      "security"
+    ],
+    "published_at": "2024-11-29",
+    "purpose": "Send only needed fields and only relevant events to downstream consumers."
+  },
+  {
+    "id": "draft-027",
+    "title": "Static Content on Build vs Deploy in Commerce Cloud",
+    "slug": "static-content-on-build-vs-deploy-in-commerce-cloud",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "ece-tools",
+      "SCD",
+      "Cloud"
+    ],
+    "published_at": "2025-05-27",
+    "purpose": "Decide where static content deployment runs to shorten downtime on Cloud deploys."
+  },
+  {
+    "id": "draft-028",
+    "title": "Per-Environment Settings with .magento.env.yaml and Env Variables",
+    "slug": "per-environment-settings-with-magento-env-yaml-and-env-variables",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "Cloud",
+      "configuration",
+      "env.php"
+    ],
+    "published_at": "2025-01-18",
+    "purpose": "Keep staging and production differences out of code and the database."
+  },
+  {
+    "id": "draft-029",
+    "title": "Reading a Failed Commerce Cloud Deployment from Its Logs",
+    "slug": "reading-a-failed-commerce-cloud-deployment-from-its-logs",
+    "category": "App Builder & Cloud",
+    "tags": [
+      "Cloud",
+      "deployment",
+      "logs"
+    ],
+    "published_at": "2026-07-20",
+    "purpose": "Locate the actual failing step of a Cloud deploy from activity and cloud logs."
+  },
+  {
+    "id": "draft-030",
+    "title": "Why Category Pages Stay Stale After a Reindex on Fastly",
+    "slug": "why-category-pages-stay-stale-after-a-reindex-on-fastly",
+    "category": "Fastly & Caching",
+    "tags": [
+      "Fastly",
+      "purge",
+      "cache tags"
+    ],
+    "published_at": "2025-06-03",
+    "purpose": "Explain how soft purge, tag selection, and indexer timing leave stale category pages, and how to fix it."
+  },
+  {
+    "id": "draft-031",
+    "title": "A Custom VCL Snippet to Bypass Cache for One Query Parameter",
+    "slug": "a-custom-vcl-snippet-to-bypass-cache-for-one-query-parameter",
+    "category": "Fastly & Caching",
+    "tags": [
+      "Fastly",
+      "VCL",
+      "snippets"
+    ],
+    "published_at": "2024-07-26",
+    "purpose": "Bypass the cache for a single tracking or preview parameter without hurting the hit rate elsewhere."
+  },
+  {
+    "id": "draft-032",
+    "title": "Custom Blocks That Never Invalidate: Cache Tags and Identities",
+    "slug": "custom-blocks-that-never-invalidate-cache-tags-and-identities",
+    "category": "Fastly & Caching",
+    "tags": [
+      "FPC",
+      "cache tags",
+      "IdentityInterface"
+    ],
+    "published_at": "2025-01-28",
+    "purpose": "Make a custom block's output purge when its source entity changes."
+  },
+  {
+    "id": "draft-033",
+    "title": "Diagnosing a Fastly MISS with Debug Headers",
+    "slug": "diagnosing-a-fastly-miss-with-debug-headers",
+    "category": "Fastly & Caching",
+    "tags": [
+      "Fastly",
+      "debugging",
+      "headers"
+    ],
+    "published_at": "2024-06-14",
+    "purpose": "Read Fastly debug headers to see why a page that should hit keeps missing."
+  },
+  {
+    "id": "draft-034",
+    "title": "Reproducing FPC Bugs Locally with Varnish in DDEV",
+    "slug": "reproducing-fpc-bugs-locally-with-varnish-in-ddev",
+    "category": "Fastly & Caching",
+    "tags": [
+      "Varnish",
+      "DDEV",
+      "FPC"
+    ],
+    "published_at": "2024-11-07",
+    "purpose": "Run Varnish locally so cache bugs reproduce before they reach Fastly."
+  },
+  {
+    "id": "draft-035",
+    "title": "GraphQL Caching: GET Requests, Cache IDs, and Store Headers",
+    "slug": "graphql-caching-get-requests-cache-ids-and-store-headers",
+    "category": "Fastly & Caching",
+    "tags": [
+      "GraphQL",
+      "caching",
+      "Fastly"
+    ],
+    "published_at": "2025-12-01",
+    "purpose": "Explain what makes GraphQL responses cacheable and why some never are."
+  },
+  {
+    "id": "draft-036",
+    "title": "How One cacheable=\"false\" Block Disables Full-Page Cache",
+    "slug": "how-one-cacheable-false-block-disables-full-page-cache",
+    "category": "Fastly & Caching",
+    "tags": [
+      "FPC",
+      "layout XML",
+      "private content"
+    ],
+    "published_at": "2024-04-15",
+    "purpose": "Find and replace layout blocks that silently make whole pages uncacheable."
+  },
+  {
+    "id": "draft-037",
+    "title": "Fastly 503 First-Byte Timeouts on Long Admin Requests",
+    "slug": "fastly-503-first-byte-timeouts-on-long-admin-requests",
+    "category": "Fastly & Caching",
+    "tags": [
+      "Fastly",
+      "timeouts",
+      "admin"
+    ],
+    "published_at": "2025-08-04",
+    "purpose": "Stop long admin exports and imports from failing at the edge."
+  },
+  {
+    "id": "draft-038",
+    "title": "How to Remove a Fastly VCL Snippet Using CLI",
+    "slug": "how-to-remove-a-fastly-vcl-snippet-using-cli",
+    "category": "Fastly & Caching",
+    "tags": [
+      "Fastly",
+      "VCL",
+      "CLI"
+    ],
+    "published_at": "2026-08-08",
+    "purpose": "KEEP AS-IS: manually written article, content untouched."
+  },
+  {
+    "id": "draft-039",
+    "title": "Reading a New Relic Trace for a Slow Category Page",
+    "slug": "reading-a-new-relic-trace-for-a-slow-category-page",
+    "category": "Performance & New Relic",
+    "tags": [
+      "New Relic",
+      "APM",
+      "catalog"
+    ],
+    "published_at": "2025-09-03",
+    "purpose": "Walk through a transaction trace to find the segment that actually costs time."
+  },
+  {
+    "id": "draft-040",
+    "title": "Naming Cron and Consumer Transactions in New Relic",
+    "slug": "naming-cron-and-consumer-transactions-in-new-relic",
+    "category": "Performance & New Relic",
+    "tags": [
+      "New Relic",
+      "cron",
+      "queues"
+    ],
+    "published_at": "2024-09-23",
+    "purpose": "Make background work show up as distinct, named transactions instead of one blob."
+  },
+  {
+    "id": "draft-041",
+    "title": "NRQL Queries for Checkout Latency by Store and Step",
+    "slug": "nrql-queries-for-checkout-latency-by-store-and-step",
+    "category": "Performance & New Relic",
+    "tags": [
+      "NRQL",
+      "checkout",
+      "New Relic"
+    ],
+    "published_at": "2026-05-18",
+    "purpose": "Build NRQL queries that show which checkout calls slowed down and for which store."
+  },
+  {
+    "id": "draft-042",
+    "title": "From New Relic Slow Query to an Index That Helps",
+    "slug": "from-new-relic-slow-query-to-an-index-that-helps",
+    "category": "Performance & New Relic",
+    "tags": [
+      "MySQL",
+      "EXPLAIN",
+      "New Relic"
+    ],
+    "published_at": "2025-05-10",
+    "purpose": "Take a slow query from APM, confirm it with EXPLAIN, and add an index through declarative schema."
+  },
+  {
+    "id": "draft-043",
+    "title": "Distributed Tracing Across Magento and External APIs",
+    "slug": "distributed-tracing-across-magento-and-external-apis",
+    "category": "Performance & New Relic",
+    "tags": [
+      "distributed tracing",
+      "New Relic",
+      "integrations"
+    ],
+    "published_at": "2024-02-02",
+    "purpose": "Follow one request from storefront through Magento to a downstream API."
+  },
+  {
+    "id": "draft-044",
+    "title": "Deployment Markers and Error-Rate Alerts After Releases",
+    "slug": "deployment-markers-and-error-rate-alerts-after-releases",
+    "category": "Performance & New Relic",
+    "tags": [
+      "New Relic",
+      "alerts",
+      "deployments"
+    ],
+    "published_at": "2026-09-28",
+    "purpose": "Catch a bad release within minutes using deployment markers and alert conditions."
+  },
+  {
+    "id": "draft-045",
+    "title": "Investigating a Performance Regression Between Two Releases",
+    "slug": "investigating-a-performance-regression-between-two-releases",
+    "category": "Performance & New Relic",
+    "tags": [
+      "regression",
+      "profiling",
+      "releases"
+    ],
+    "published_at": "2024-10-02",
+    "purpose": "Isolate which change in a release caused a latency jump."
+  },
+  {
+    "id": "draft-046",
+    "title": "Counting the Cost of Plugin Chains on Hot Methods",
+    "slug": "counting-the-cost-of-plugin-chains-on-hot-methods",
+    "category": "Performance & New Relic",
+    "tags": [
+      "interceptors",
+      "plugins",
+      "profiling"
+    ],
+    "published_at": "2025-03-25",
+    "purpose": "Measure interceptor overhead on frequently called methods and decide what to remove."
+  },
+  {
+    "id": "draft-047",
+    "title": "Why Quote Totals Are Collected Many Times per Checkout Request",
+    "slug": "why-quote-totals-are-collected-many-times-per-checkout-request",
+    "category": "Performance & New Relic",
+    "tags": [
+      "totals collectors",
+      "checkout",
+      "quote"
+    ],
+    "published_at": "2025-10-18",
+    "purpose": "Find repeated collectTotals calls and custom collectors that multiply checkout latency."
+  },
+  {
+    "id": "draft-048",
+    "title": "A Read-Only MCP Server Architecture for Magento Diagnostics",
+    "slug": "a-read-only-mcp-server-architecture-for-magento-diagnostics",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MCP",
+      "architecture",
+      "diagnostics"
+    ],
+    "published_at": "2026-03-30",
+    "purpose": "Design an MCP server that answers environment questions without the ability to change anything."
+  },
+  {
+    "id": "draft-049",
+    "title": "Exposing bin/magento Commands as Allowlisted MCP Tools",
+    "slug": "exposing-bin-magento-commands-as-allowlisted-mcp-tools",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MCP",
+      "CLI",
+      "security"
+    ],
+    "published_at": "2024-11-06",
+    "purpose": "Wrap a fixed set of read-only Magento commands as MCP tools with argument validation."
+  },
+  {
+    "id": "draft-050",
+    "title": "Environment Discovery: DDEV, Docker, or Cloud from Project Files",
+    "slug": "environment-discovery-ddev-docker-or-cloud-from-project-files",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MCP",
+      "DDEV",
+      "environment"
+    ],
+    "published_at": "2026-04-09",
+    "purpose": "Detect how to run commands in a project before running any."
+  },
+  {
+    "id": "draft-051",
+    "title": "Log Triage Tools with Redaction and Output Caps",
+    "slug": "log-triage-tools-with-redaction-and-output-caps",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MCP",
+      "logs",
+      "redaction"
+    ],
+    "published_at": "2024-09-12",
+    "purpose": "Return useful exception log summaries to an AI client without leaking secrets or flooding context."
+  },
+  {
+    "id": "draft-052",
+    "title": "Database Metadata Without Data: Schema Introspection for AI Tools",
+    "slug": "database-metadata-without-data-schema-introspection-for-ai-tools",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MCP",
+      "database",
+      "schema"
+    ],
+    "published_at": "2025-03-04",
+    "purpose": "Expose tables, columns, and indexes to an assistant while keeping row data out of reach."
+  },
+  {
+    "id": "draft-053",
+    "title": "A devtools:health CLI Command for Deployment Readiness",
+    "slug": "a-devtools-health-cli-command-for-deployment-readiness",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MaheshDave_DevTools",
+      "CLI",
+      "health checks"
+    ],
+    "published_at": "2026-08-20",
+    "purpose": "Build one CLI command that reports indexer, cron, cache, and queue readiness as JSON."
+  },
+  {
+    "id": "draft-054",
+    "title": "An Admin Page for Auditing Diagnostic Tool Calls",
+    "slug": "an-admin-page-for-auditing-diagnostic-tool-calls",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MaheshDave_DevTools",
+      "admin UI",
+      "audit"
+    ],
+    "published_at": "2024-07-01",
+    "purpose": "Record and review which diagnostics ran, by whom, and when, in a Magento admin grid."
+  },
+  {
+    "id": "draft-055",
+    "title": "Execution Boundaries for AI-Driven Magento CLI Workflows",
+    "slug": "execution-boundaries-for-ai-driven-magento-cli-workflows",
+    "category": "MCP & Developer Tooling",
+    "tags": [
+      "MCP",
+      "timeouts",
+      "safety"
+    ],
+    "published_at": "2024-01-21",
+    "purpose": "Define timeouts, write-command denials, and confirmation steps for assistant-run commands."
+  },
+  {
+    "id": "draft-056",
+    "title": "An Outbox Table for Reliable Order Export to an ERP",
+    "slug": "an-outbox-table-for-reliable-order-export-to-an-erp",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "ERP",
+      "outbox",
+      "queues"
+    ],
+    "published_at": "2026-06-09",
+    "purpose": "Guarantee every placed order reaches the ERP exactly once despite crashes and retries."
+  },
+  {
+    "id": "draft-057",
+    "title": "Stock Sync from Odoo over JSON-RPC Without Overselling",
+    "slug": "stock-sync-from-odoo-over-json-rpc-without-overselling",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "Odoo",
+      "inventory",
+      "MSI"
+    ],
+    "published_at": "2024-05-04",
+    "purpose": "Pull Odoo stock levels into MSI sources safely around reservations."
+  },
+  {
+    "id": "draft-058",
+    "title": "Mapping SPS Commerce EDI 850, 856, and 810 to Magento Entities",
+    "slug": "mapping-sps-commerce-edi-850-856-and-810-to-magento-entities",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "EDI",
+      "SPS Commerce",
+      "orders"
+    ],
+    "published_at": "2025-02-20",
+    "purpose": "Map purchase order, ship notice, and invoice documents to orders, shipments, and invoices."
+  },
+  {
+    "id": "draft-059",
+    "title": "Creating Shipments and Invoices from ERP Callbacks",
+    "slug": "creating-shipments-and-invoices-from-erp-callbacks",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "ShipOrderInterface",
+      "InvoiceOrderInterface",
+      "ERP"
+    ],
+    "published_at": "2026-09-05",
+    "purpose": "Create shipments and invoices from ERP data through sales service contracts, idempotently."
+  },
+  {
+    "id": "draft-060",
+    "title": "A Payment Method on the Gateway Command Pool Pattern",
+    "slug": "a-payment-method-on-the-gateway-command-pool-pattern",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "payment gateway",
+      "command pool",
+      "checkout"
+    ],
+    "published_at": "2026-01-10",
+    "purpose": "Implement authorize and capture for a third-party gateway using Magento's payment gateway framework."
+  },
+  {
+    "id": "draft-061",
+    "title": "Bulk MSI Source Item Updates from an External Feed",
+    "slug": "bulk-msi-source-item-updates-from-an-external-feed",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "MSI",
+      "SourceItemsSaveInterface",
+      "inventory"
+    ],
+    "published_at": "2025-11-07",
+    "purpose": "Update thousands of source items per run without per-SKU saves."
+  },
+  {
+    "id": "draft-062",
+    "title": "Large Product Loads Through the Asynchronous Bulk REST API",
+    "slug": "large-product-loads-through-the-asynchronous-bulk-rest-api",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "bulk API",
+      "async",
+      "import"
+    ],
+    "published_at": "2025-07-12",
+    "purpose": "Push large product batches through async bulk endpoints and track per-item results."
+  },
+  {
+    "id": "draft-063",
+    "title": "Price and Data Scope Pitfalls in Multi-Website Integrations",
+    "slug": "price-and-data-scope-pitfalls-in-multi-website-integrations",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "multi-website",
+      "scopes",
+      "pricing"
+    ],
+    "published_at": "2026-04-27",
+    "purpose": "Explain why integration writes land in the wrong scope and how to target the correct store."
+  },
+  {
+    "id": "draft-064",
+    "title": "A Custom Checkout Step with Server-Side Validation",
+    "slug": "a-custom-checkout-step-with-server-side-validation",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "checkout",
+      "UI components",
+      "validation"
+    ],
+    "published_at": "2024-03-23",
+    "purpose": "Add a checkout step whose data is validated on the server, not only in Knockout."
+  },
+  {
+    "id": "draft-065",
+    "title": "Two-Way CRM Customer Sync and Conflict Resolution",
+    "slug": "two-way-crm-customer-sync-and-conflict-resolution",
+    "category": "Enterprise Integrations",
+    "tags": [
+      "CRM",
+      "customers",
+      "sync"
+    ],
+    "published_at": "2026-02-17",
+    "purpose": "Decide which system wins per field and avoid update loops in a bidirectional customer sync."
+  },
+  {
+    "id": "draft-066",
+    "title": "A DDEV Setup for Magento 2.4.7 with OpenSearch and Redis",
+    "slug": "a-ddev-setup-for-magento-2-4-7-with-opensearch-and-redis",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "DDEV",
+      "OpenSearch",
+      "Redis"
+    ],
+    "published_at": "2026-07-30",
+    "purpose": "Build a reproducible local stack matching production service versions."
+  },
+  {
+    "id": "draft-067",
+    "title": "Moving a Magento Codebase from PHP 8.1 to 8.3",
+    "slug": "moving-a-magento-codebase-from-php-8-1-to-8-3",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "PHP 8.3",
+      "upgrade",
+      "static analysis"
+    ],
+    "published_at": "2025-06-18",
+    "purpose": "Find and fix PHP incompatibilities before an upgrade breaks production."
+  },
+  {
+    "id": "draft-068",
+    "title": "Migrating MySQL 5.7 to MySQL 8 or MariaDB Without Surprises",
+    "slug": "migrating-mysql-5-7-to-mysql-8-or-mariadb-without-surprises",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "MySQL",
+      "MariaDB",
+      "migration"
+    ],
+    "published_at": "2026-02-03",
+    "purpose": "Avoid collation, SQL mode, and reserved-word failures during a database engine migration."
+  },
+  {
+    "id": "draft-069",
+    "title": "Elasticsearch 7 to OpenSearch 2 Cutover for Magento",
+    "slug": "elasticsearch-7-to-opensearch-2-cutover-for-magento",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "OpenSearch",
+      "search",
+      "migration"
+    ],
+    "published_at": "2025-12-30",
+    "purpose": "Switch the search engine with a tested reindex and rollback path."
+  },
+  {
+    "id": "draft-070",
+    "title": "When a Deploy Actually Needs Maintenance Mode",
+    "slug": "when-a-deploy-actually-needs-maintenance-mode",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "zero downtime",
+      "deployment",
+      "setup:db:status"
+    ],
+    "published_at": "2025-08-07",
+    "purpose": "Use schema/data status checks to skip maintenance mode on releases without schema changes."
+  },
+  {
+    "id": "draft-071",
+    "title": "Composer Patches vs the Quality Patches Tool",
+    "slug": "composer-patches-vs-the-quality-patches-tool",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "Composer",
+      "patches",
+      "QPT"
+    ],
+    "published_at": "2024-05-21",
+    "purpose": "Choose how to apply core fixes so they survive upgrades and stay auditable."
+  },
+  {
+    "id": "draft-072",
+    "title": "A CI Pipeline That Compiles DI and Builds Static Content Once",
+    "slug": "a-ci-pipeline-that-compiles-di-and-builds-static-content-once",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "CI/CD",
+      "GitHub Actions",
+      "build"
+    ],
+    "published_at": "2024-08-06",
+    "purpose": "Build an artifact once in CI so production never compiles code."
+  },
+  {
+    "id": "draft-073",
+    "title": "Diagnosing 502s from PHP-FPM Pool Exhaustion",
+    "slug": "diagnosing-502s-from-php-fpm-pool-exhaustion",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "PHP-FPM",
+      "Nginx",
+      "troubleshooting"
+    ],
+    "published_at": "2024-03-16",
+    "purpose": "Tell FPM exhaustion apart from slow upstreams and size the pool from evidence."
+  },
+  {
+    "id": "draft-074",
+    "title": "Sanitizing a Production Database Dump for Staging",
+    "slug": "sanitizing-a-production-database-dump-for-staging",
+    "category": "DevOps & Infrastructure",
+    "tags": [
+      "database",
+      "staging",
+      "privacy"
+    ],
+    "published_at": "2026-06-30",
+    "purpose": "Produce a staging copy without customer PII or live integration credentials."
+  }
+]

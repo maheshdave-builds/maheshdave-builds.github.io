@@ -1,0 +1,64 @@
+<!--meta {"excerpt": "A REST order search returned page 1 of everything. The filter was built, then setPageSize created a new SearchCriteria and dropped it. addFilter on a builder that already has a group is the other half of the bug.", "seo_title": "SearchCriteria That Drops Its Own Filters", "seo_description": "Magento SearchCriteriaBuilder::create() resets the builder. Calling it twice, or mixing filter groups, returns the wrong page of orders."} -->
+<p>The integration asked for orders with status <code>processing</code>, page size 50. The response was 50 orders of every status. The repository was fine. The criteria object that arrived had no filter groups. The builder had been asked to <code>create()</code> twice, and <code>create()</code> clears the builder so the next caller does not inherit the previous request's filters. The second call, which only set the page size, was the object that got passed.</p>
+
+<h2>One create, at the end</h2>
+<p><code>app/code/MaheshDave/OrderExport/Model/ProcessingOrders.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Model;
+
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SortOrderBuilder;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+
+class ProcessingOrders
+{
+    public function __construct(
+        private readonly OrderRepositoryInterface $orderRepository,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly SortOrderBuilder $sortOrderBuilder
+    ) {
+    }
+
+    /**
+     * @return OrderInterface[]
+     */
+    public function getPage(int $page): array
+    {
+        $sort = $this->sortOrderBuilder
+            ->setField('entity_id')
+            ->setDirection('ASC')
+            ->create();
+        $criteria = $this->searchCriteriaBuilder
+            ->addFilter('status', 'processing')
+            ->addFilter('store_id', 1)
+            ->addSortOrder($sort)
+            ->setPageSize(50)
+            ->setCurrentPage($page)
+            ->create();
+
+        return $this->orderRepository->getList($criteria)->getItems();
+    }
+}
+</code></pre>
+<p><code>SortOrderBuilder::create()</code> also resets. Build the sort, then the criteria, and do not call <code>create()</code> on the criteria builder to "peek". Builders are mutable and, in the default DI setup, not a fresh object per class if someone registered them as shared in a way that leaks; Magento creates them as shared unless you inject a proxy or a factory. <code>create()</code> clearing state is what makes a shared builder safe. If you stash the builder and add filters across requests in a long-running consumer, call <code>create()</code> or you will AND the new filters with the previous message's filters. I inject the builder and finish with one <code>create()</code> per message.</p>
+
+<h2>AND versus OR</h2>
+<p>Two <code>addFilter</code> calls on the same builder are ANDed. They become one filter group. Orders that are processing AND in store 1 is what the code above asks for. Orders that are processing OR pending need two groups:</p>
+<pre><code class="language-php">$processing = $this->filterBuilder->setField('status')->setValue('processing')->create();
+$pending = $this->filterBuilder->setField('status')->setValue('pending')->create();
+$criteria = $this->searchCriteriaBuilder
+    ->addFilters([$processing, $pending])
+    ->setPageSize(50)
+    ->create();
+</code></pre>
+<p><code>addFilters</code> (plural) puts those filters in one group, and a group is OR. A later <code>addFilter</code> starts another group, which is AND across groups. Mixing them because the names look similar is how a "failed or exported, for this website" query drops the website. <code>FilterBuilder</code> is <code>Magento\Framework\Api\FilterBuilder</code>. It also resets on <code>create()</code>.</p>
+<p><code>getItems()</code> is keyed by entity id. <code>count($items)</code> is the page, not the total. The total is <code>getTotalCount()</code> on the search result. Clients that stop when the page contains fewer than 50 rows are fine; clients that stop when <code>count($items) === 0</code> are also fine. Clients that compare <code>count($items)</code> to <code>getTotalCount()</code> and expect them to match have confused the page with the whole result.</p>
+
+<h2>Look at the criteria, not the JSON</h2>
+<p>Log <code>$criteria->getFilterGroups()</code> before <code>getList</code> while reproducing. An empty array means the builder was reset or the filters were never added. A single group with two filters is the AND. Two groups means an OR plus something else. Then call the REST method the integration uses and compare <code>total_count</code> with:</p>
+<pre><code class="language-sql">SELECT COUNT(*) FROM sales_order WHERE status = 'processing' AND store_id = 1;
+</code></pre>
+<p>Those numbers match when the criteria survived. If the SQL count is 40 and <code>total_count</code> is the size of <code>sales_order</code>, the filter group is empty and the page size is the only part that arrived.</p>

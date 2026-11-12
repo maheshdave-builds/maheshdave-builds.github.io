@@ -1,0 +1,280 @@
+<!--meta {"excerpt": "A product change made in admin, over REST, through CSV import, and through mass attribute update reaches four different code paths. This article maps them and wires one recorder that catches all four.", "seo_title": "Catch Every Product Save Path in Magento 2", "seo_description": "Admin, REST, CSV import, and mass attribute update save products differently. Map the hooks for each and route them into one change recorder."} -->
+<p>A merchant asked for a simple thing: every time a product's price or status changes, push the SKU to the PIM. The first implementation was a plugin on <code>ProductRepositoryInterface::save()</code>. It worked in REST tests, passed QA, and then quietly missed every change the catalog team made through CSV import and the "Update attributes" mass action. Nobody noticed for three weeks.</p>
+<p>The root problem is that "a product was saved" is not one event in Magento. There are at least four write paths, and each one exposes a different hook. Before choosing a plugin, observer, or preference, you need to know which paths your requirement actually covers.</p>
+
+<h2>The four write paths</h2>
+<table>
+<thead><tr><th>Path</th><th>What runs</th><th>Hook that sees it</th></tr></thead>
+<tbody>
+<tr><td>REST / service code</td><td><code>ProductRepository::save()</code> → resource model save</td><td>Repository plugin, <code>catalog_product_save_after</code></td></tr>
+<tr><td>Admin product form</td><td>Admin save controller → model/resource save</td><td><code>catalog_product_save_after</code> (repository plugin only if your version's controller calls the repository)</td></tr>
+<tr><td>System → Import (CSV)</td><td>Direct multi-row SQL in <code>Magento\CatalogImportExport\Model\Import\Product</code></td><td><code>catalog_product_import_bunch_save_after</code></td></tr>
+<tr><td>Mass "Update attributes"</td><td><code>Magento\Catalog\Model\Product\Action::updateAttributes()</code></td><td><code>catalog_product_attribute_update_before</code></td></tr>
+</tbody>
+</table>
+<p>The model event <code>catalog_product_save_after</code> is dispatched by the abstract model's save cycle, so it fires whenever a product model is persisted through the resource model, including through the repository. That makes it a wider net than a repository plugin. Import and mass update never instantiate a product model per row, so neither hook sees them. That is by design: those paths are fast precisely because they skip the model layer.</p>
+<p>So the decision is not "plugin or observer". It is "one observer for model saves, plus one hook per bulk path, all feeding the same service".</p>
+
+<h2>Why not a preference or a plugin on the resource model</h2>
+<p>A preference on <code>Magento\Catalog\Model\ResourceModel\Product</code> would catch model saves but still miss import and mass update, and it conflicts with any other extension that prefers the same class. A plugin on the resource model's <code>save()</code> has the same coverage as the observer with more coupling. The observer wins on coverage per line of code, and the bulk paths need their own handling anyway because they deliver IDs or SKUs, not models.</p>
+
+<h2>The module</h2>
+<p>The recorder writes changed SKUs into a small table. A cron or consumer can drain that table toward the PIM later; that part is out of scope here. Recording synchronously into a table keeps the save path cheap and survives PIM outages.</p>
+
+<p><code>app/code/MaheshDave/ProductAudit/registration.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+use Magento\Framework\Component\ComponentRegistrar;
+
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'MaheshDave_ProductAudit', __DIR__);
+</code></pre>
+
+<p><code>app/code/MaheshDave/ProductAudit/etc/module.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="MaheshDave_ProductAudit">
+        <sequence>
+            <module name="Magento_Catalog"/>
+            <module name="Magento_CatalogImportExport"/>
+        </sequence>
+    </module>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/ProductAudit/etc/db_schema.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="maheshdave_product_change" resource="default" engine="innodb" comment="Changed product SKUs pending export">
+        <column xsi:type="varchar" name="sku" length="64" nullable="false" comment="SKU"/>
+        <column xsi:type="varchar" name="source" length="32" nullable="false" comment="Write path"/>
+        <column xsi:type="timestamp" name="changed_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Last change"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="sku"/>
+        </constraint>
+    </table>
+</schema>
+</code></pre>
+<p>The SKU is the primary key on purpose. Ten saves of the same product between two export runs collapse into one row, which is the behavior the PIM wants.</p>
+
+<p><code>app/code/MaheshDave/ProductAudit/Model/ChangeRecorder.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ProductAudit\Model;
+
+use Magento\Framework\App\ResourceConnection;
+
+class ChangeRecorder
+{
+    private const TABLE = 'maheshdave_product_change';
+    private const CHUNK = 500;
+
+    public function __construct(
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    /**
+     * @param string[] $skus
+     */
+    public function record(array $skus, string $source): void
+    {
+        $skus = array_values(array_unique(array_filter(array_map('strval', $skus))));
+        if ($skus === []) {
+            return;
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName(self::TABLE);
+
+        foreach (array_chunk($skus, self::CHUNK) as $chunk) {
+            $rows = array_map(
+                static fn (string $sku): array => ['sku' => $sku, 'source' => $source],
+                $chunk
+            );
+            $connection->insertOnDuplicate($table, $rows, ['source']);
+        }
+    }
+
+    /**
+     * @param int[] $productIds
+     */
+    public function recordByIds(array $productIds, string $source): void
+    {
+        $productIds = array_values(array_unique(array_map('intval', $productIds)));
+        if ($productIds === []) {
+            return;
+        }
+
+        $connection = $this->resource->getConnection();
+        foreach (array_chunk($productIds, self::CHUNK) as $chunk) {
+            $select = $connection->select()
+                ->from($this->resource->getTableName('catalog_product_entity'), ['sku'])
+                ->where('entity_id IN (?)', $chunk);
+            $this->record($connection->fetchCol($select), $source);
+        }
+    }
+}
+</code></pre>
+<p><code>insertOnDuplicate()</code> with an explicit update column list means a repeat change only rewrites <code>source</code>; <code>changed_at</code> refreshes through <code>on_update</code>.</p>
+
+<h2>Wiring the three hooks</h2>
+<p><code>app/code/MaheshDave/ProductAudit/etc/events.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_product_save_after">
+        <observer name="maheshdave_product_audit_save" instance="MaheshDave\ProductAudit\Observer\ProductSaveAfter"/>
+    </event>
+    <event name="catalog_product_import_bunch_save_after">
+        <observer name="maheshdave_product_audit_import" instance="MaheshDave\ProductAudit\Observer\ImportBunchSaveAfter"/>
+    </event>
+    <event name="catalog_product_attribute_update_before">
+        <observer name="maheshdave_product_audit_mass_update" instance="MaheshDave\ProductAudit\Observer\MassAttributeUpdate"/>
+    </event>
+</config>
+</code></pre>
+<p>This file lives in global <code>etc/</code>, not <code>etc/adminhtml/</code>. Import can run from cron or CLI-based tooling, and REST runs in the <code>webapi_rest</code> area; an admin-only file would miss both.</p>
+
+<p><code>app/code/MaheshDave/ProductAudit/Observer/ProductSaveAfter.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ProductAudit\Observer;
+
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use MaheshDave\ProductAudit\Model\ChangeRecorder;
+
+class ProductSaveAfter implements ObserverInterface
+{
+    private const WATCHED = ['price', 'status', 'name', 'special_price'];
+
+    public function __construct(
+        private readonly ChangeRecorder $recorder
+    ) {
+    }
+
+    public function execute(Observer $observer): void
+    {
+        $product = $observer->getEvent()->getProduct();
+        if (!$product instanceof ProductInterface) {
+            return;
+        }
+
+        if ($product->isObjectNew() || $this->hasWatchedChange($product)) {
+            $this->recorder->record([(string) $product->getSku()], 'model_save');
+        }
+    }
+
+    private function hasWatchedChange(ProductInterface $product): bool
+    {
+        foreach (self::WATCHED as $code) {
+            if ($product->dataHasChangedFor($code)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+</code></pre>
+<p><code>dataHasChangedFor()</code> compares against the original data loaded with the model. A product saved without loading first (a bare model with only an ID and one attribute) reports every set field as changed, which errs toward recording too much. That is the right failure direction for a sync.</p>
+
+<p><code>app/code/MaheshDave/ProductAudit/Observer/ImportBunchSaveAfter.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ProductAudit\Observer;
+
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use MaheshDave\ProductAudit\Model\ChangeRecorder;
+
+class ImportBunchSaveAfter implements ObserverInterface
+{
+    public function __construct(
+        private readonly ChangeRecorder $recorder
+    ) {
+    }
+
+    public function execute(Observer $observer): void
+    {
+        $bunch = (array) $observer->getEvent()->getBunch();
+        $skus = [];
+        foreach ($bunch as $row) {
+            if (!empty($row['sku'])) {
+                $skus[] = (string) $row['sku'];
+            }
+        }
+
+        $this->recorder->record($skus, 'import');
+    }
+}
+</code></pre>
+<p>The import adapter dispatches this event once per bunch with the raw rows. Rows that only touch an attribute the PIM ignores will still be recorded; filtering by column here is possible, but import rows only contain the columns present in the CSV, so you would check <code>array_key_exists()</code> against your watched codes.</p>
+
+<p><code>app/code/MaheshDave/ProductAudit/Observer/MassAttributeUpdate.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ProductAudit\Observer;
+
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use MaheshDave\ProductAudit\Model\ChangeRecorder;
+
+class MassAttributeUpdate implements ObserverInterface
+{
+    public function __construct(
+        private readonly ChangeRecorder $recorder
+    ) {
+    }
+
+    public function execute(Observer $observer): void
+    {
+        $event = $observer->getEvent();
+        $productIds = (array) $event->getData('product_ids');
+        $attributes = array_keys((array) $event->getData('attributes_data'));
+
+        if (array_intersect($attributes, ['price', 'status', 'name', 'special_price']) === []) {
+            return;
+        }
+
+        $this->recorder->recordByIds($productIds, 'mass_update');
+    }
+}
+</code></pre>
+<p>This is a <em>before</em> event, so a failed update would still leave rows behind. For a sync queue that is acceptable: the exporter sends current values, and an unchanged product produces a harmless no-op on the PIM side. If your downstream cannot tolerate that, record in a plugin on <code>afterUpdateAttributes()</code> of <code>Magento\Catalog\Model\Product\Action</code> instead.</p>
+<p>On large stores the admin mass update may run asynchronously through the <code>product_action_attribute.update</code> consumer. The event still fires, just inside the consumer process, which is one more reason the observer config belongs in global scope.</p>
+
+<h2>Paths this still does not cover</h2>
+<ul>
+<li>Direct SQL from other extensions or ERP connectors that write <code>catalog_product_entity_decimal</code> themselves.</li>
+<li>Scheduled changes in Adobe Commerce (staging) that become active at a time boundary rather than through a save.</li>
+<li>Price changes produced by catalog price rules, which live in the index, not on the product.</li>
+</ul>
+<p>If any of those matter, the honest answer is a database-level approach: an mview subscription on the attribute tables feeding a custom indexer, which captures writes regardless of who made them.</p>
+
+<h2>Checking each path</h2>
+<pre><code class="language-bash">bin/magento module:enable MaheshDave_ProductAudit
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+</code></pre>
+<p>Then exercise one path at a time and look at the <code>source</code> column:</p>
+<pre><code class="language-bash">curl -s -X PUT "https://example.test/rest/default/V1/products/24-MB01" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"product":{"price":39.00}}'
+</code></pre>
+<pre><code class="language-sql">SELECT sku, source, changed_at
+FROM maheshdave_product_change
+ORDER BY changed_at DESC
+LIMIT 10;
+</code></pre>
+<p>Expected: <code>model_save</code> for REST and the admin form, <code>import</code> after a CSV import of a few SKUs, and <code>mass_update</code> after "Update attributes" on a price or status change. If the admin form produces no row, check that the attribute you edited is in <code>WATCHED</code> before suspecting the event.</p>

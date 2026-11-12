@@ -1,0 +1,126 @@
+<!--meta {"excerpt": "The same order-export topic should run on the database queue in DDEV and on RabbitMQ in production. Magento resolves that from env.php, as long as the XML does not pin a connection.", "seo_title": "MySQL Queue Locally, RabbitMQ in Production", "seo_description": "Publish one Magento order-export topic and let env.php choose the db queue or RabbitMQ, with a consumer you can run in both places."} -->
+<p>An order export that only runs when RabbitMQ is up will not run on a developer laptop, so people test it for the first time on staging. The inverse, a consumer hardcoded to the MySQL queue, sits idle in production after the broker is installed because nothing publishes to it. Magento already picks the transport at deploy time. The module should define the topic once and leave the connection unset.</p>
+<p>Connection resolution, as documented for <code>communication.xml</code>, <code>queue_publisher.xml</code>, <code>queue_topology.xml</code>, and <code>queue_consumer.xml</code>: if you omit <code>connection</code>, Magento uses <code>amqp</code> when <code>env.php</code> contains an AMQP config, <code>stomp</code> when ActiveMQ Artemis is configured (2.4.5+), and <code>db</code> otherwise. Pinning <code>connection="db"</code> disables that. Pinning both and toggling <code>disabled</code> also works, but then every environment change is a code change. Omitting the attribute is the version I ship.</p>
+
+<h2>What gets published</h2>
+<p>The message is the order id as a string. A data interface is worth it when the payload has several fields; an id is enough here because the consumer reloads the order and therefore sees the current state rather than a snapshot that went stale in the queue.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/communication.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="maheshdave.order.export" request="string"/>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/queue_publisher.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
+    <publisher topic="maheshdave.order.export"/>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/queue_topology.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+    <exchange name="magento" type="topic">
+        <binding id="maheshdaveOrderExport" topic="maheshdave.order.export" destinationType="queue" destination="maheshdave.order.export"/>
+    </exchange>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/queue_consumer.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="maheshdave.order.export" queue="maheshdave.order.export" handler="MaheshDave\OrderExport\Model\ExportHandler::process" maxMessages="100"/>
+</config>
+</code></pre>
+<p><code>maxMessages="100"</code> makes the process exit after a bounded amount of work so a supervisor or cron restarts it. Without a cap, a consumer that leaks memory lives until someone notices the RSS.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/Model/ExportPublisher.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Model;
+
+use Magento\Framework\MessageQueue\PublisherInterface;
+
+class ExportPublisher
+{
+    public const TOPIC = 'maheshdave.order.export';
+
+    public function __construct(
+        private readonly PublisherInterface $publisher
+    ) {
+    }
+
+    public function publish(int $orderId): void
+    {
+        $this->publisher->publish(self::TOPIC, (string) $orderId);
+    }
+}
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/Model/ExportHandler.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Model;
+
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Psr\Log\LoggerInterface;
+
+class ExportHandler
+{
+    public function __construct(
+        private readonly OrderRepositoryInterface $orderRepository,
+        private readonly LoggerInterface $logger
+    ) {
+    }
+
+    public function process(string $orderId): void
+    {
+        $order = $this->orderRepository->get((int) $orderId);
+        $this->logger->info('Exporting order', ['increment_id' => $order->getIncrementId()]);
+    }
+}
+</code></pre>
+<p>Throwing from <code>process()</code> rejects the message and Magento retries it. Catching every exception and returning makes a poison message look successful. If the ERP is down, throw. If the order id is nonsense, log and return so it does not retry forever. That split belongs in this method once the real client exists; the handler above is the boundary, and a missing order throws <code>NoSuchEntityException</code>, which is the retry case I accept because a replica lag of a few seconds is normal right after placement.</p>
+
+<h2>Where the transport is chosen</h2>
+<p>Local <code>app/etc/env.php</code> has no <code>queue/amqp</code> key, so this topic uses the <code>queue</code> and <code>queue_message</code> tables. Production has the broker block Magento writes when you configure RabbitMQ (host, port, user, password, virtualhost). Do not commit that block. After changing it, <code>bin/magento setup:upgrade</code> recreates the queue topology for the resolved connection.</p>
+<p>One explicit override is legitimate: a consumer that must stay on MySQL even in production, because it is a small control message and you do not want the broker as a dependency. Set <code>connection="db"</code> on that consumer and on its exchange only. Do not set it on this export.</p>
+
+<h2>Seeing it move</h2>
+<p><code>app/code/MaheshDave/OrderExport/registration.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+use Magento\Framework\Component\ComponentRegistrar;
+
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'MaheshDave_OrderExport', __DIR__);
+</code></pre>
+<p><code>app/code/MaheshDave/OrderExport/etc/module.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="MaheshDave_OrderExport">
+        <sequence>
+            <module name="Magento_Sales"/>
+            <module name="Magento_MessageQueue"/>
+        </sequence>
+    </module>
+</config>
+</code></pre>
+<pre><code class="language-bash">bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento queue:consumers:list | grep maheshdave.order.export
+bin/magento queue:consumers:start maheshdave.order.export --max-messages=1
+</code></pre>
+<p>Publish from a one-off integration test or by placing an order through a plugin on <code>OrderRepositoryInterface::save</code> that calls <code>ExportPublisher</code> only when the order is new. Then:</p>
+<pre><code class="language-sql">SELECT id, topic_name, body FROM queue_message ORDER BY id DESC LIMIT 5;
+</code></pre>
+<p>On a laptop this returns a row with topic <code>maheshdave.order.export</code> and the order id as the body, and the consumer log line follows. On production the same SQL returns nothing, because the row is in RabbitMQ; <code>rabbitmqctl list_queues name messages</code> (or the managed equivalent) shows <code>maheshdave.order.export</code>. If production still writes <code>queue_message</code>, the AMQP block is missing or the config cache was warmed before <code>env.php</code> changed.</p>

@@ -117,9 +117,14 @@ function useActiveSection() {
 }
 
 function PublicSite() {
-  const { pathname } = useRouter()
+  const { pathname, navigate } = useRouter()
   useRouteScroll()
   const [active, selectSection] = useActiveSection()
+  useEffect(() => {
+    if (pathname === '/blog' || pathname.startsWith('/blog/')) {
+      navigate(pathname.replace(/^\/blog/, '/articles') || '/articles', { replace: true })
+    }
+  }, [pathname, navigate])
 
   const scrollToSection = (id) => {
     const target = document.getElementById(id)

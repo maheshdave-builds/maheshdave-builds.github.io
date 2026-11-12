@@ -211,9 +211,6 @@ export function SiteFooter() {
                 Magento Stack Exchange
               </a>
             ) : null}
-            <a href={profile.resumeUrl || '/Mahesh_Dave_Resume_2026.pdf'} target="_blank" rel="noreferrer">
-              Resume (PDF)
-            </a>
           </div>
         </nav>
       </div>

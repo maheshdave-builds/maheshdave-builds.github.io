@@ -1,0 +1,70 @@
+<!--meta {"excerpt": "Retry-export on the order grid processed the selected rows inside the admin request. Two thousand rows blew the Fastly first-byte timeout. The request should publish ids and return.", "seo_title": "Queue an Admin Mass Action", "seo_description": "Publish selected order ids from a Magento mass action and return. Doing the ERP call inside the admin request dies at the proxy timeout."} -->
+<p>"Retry export" on the status grid worked for the five orders QA selected. Operations selected the whole failed filter, about two thousand rows, and the admin tab spun until Fastly returned 503. The controller was calling the ERP inside the request. The browser, PHP-FPM, and Fastly all have timeouts shorter than that loop. The mass action's job is to record the selection and return a message. A consumer does the work.</p>
+
+<h2>The listing item</h2>
+<p>Inside <code>maheshdave_export_status_listing.xml</code>, as a sibling of <code>columns</code>:</p>
+<pre><code class="language-xml"><massaction name="listing_massaction">
+    <action name="retry">
+        <settings>
+            <url path="maheshdave_export/status/retry"/>
+            <type>retry</type>
+            <label translate="true">Retry export</label>
+            <actionType>basic</actionType>
+        </settings>
+    </action>
+</massaction>
+</code></pre>
+<p><code>actionType>basic</code> posts the selected ids. A confirmation modal is available and I use it when the action is destructive; a retry is not, and a modal on a retry trains people to click through it.</p>
+
+<h2>The controller publishes</h2>
+<p><code>app/code/MaheshDave/OrderExport/Controller/Adminhtml/Status/Retry.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Controller\Adminhtml\Status;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\MessageQueue\PublisherInterface;
+use Magento\Ui\Component\MassAction\Filter;
+use MaheshDave\OrderExport\Model\ResourceModel\Status\Grid\CollectionFactory;
+
+class Retry extends Action implements HttpPostActionInterface
+{
+    public const ADMIN_RESOURCE = 'MaheshDave_OrderExport::status';
+    public const TOPIC = 'maheshdave.order.export';
+
+    public function __construct(
+        Context $context,
+        private readonly Filter $filter,
+        private readonly CollectionFactory $collectionFactory,
+        private readonly PublisherInterface $publisher
+    ) {
+        parent::__construct($context);
+    }
+
+    public function execute()
+    {
+        $collection = $this->filter->getCollection($this->collectionFactory->create());
+        $count = 0;
+        foreach ($collection->getAllIds() as $incrementId) {
+            $this->publisher->publish(self::TOPIC, (string) $incrementId);
+            $count++;
+        }
+        $this->messageManager->addSuccessMessage(__('%1 orders queued for export.', $count));
+
+        return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('maheshdave_export/status/index');
+    }
+}
+</code></pre>
+<p><code>Filter</code> applies the selection, or the "select all across pages" excluded-id set, onto the collection. Reading <code>$this->getRequest()->getParam('selected')</code> yourself misses the excluded-ids case and retries the wrong page. <code>getAllIds()</code> returns the primary key. Publishing inside the loop is acceptable at a few thousand ids because each publish is an insert, not an HTTP call. If the selection can hit hundreds of thousands, write one bulk insert into <code>queue_message</code> or chunk through a single message that contains the filter, not the ids. I have not needed that for an operational retry.</p>
+<p>The consumer is the one from the queue article, <code>maheshdave.order.export</code>, and it must tolerate a duplicate id. A merchant will click the action twice. <code>insertOnDuplicate</code> on the status row, and an ERP call keyed by increment id, make the second run a no-op. If the ERP call is not idempotent, do not queue it this way.</p>
+<p>There is no CSRF token to add by hand. Admin POST actions go through Magento's form key via the UI component. A raw <code>fetch</code> you add later has to send <code>form_key</code>. This one does not.</p>
+
+<h2>What you should see</h2>
+<p>Select two failed rows, run Retry export. The page comes back in well under a second with "2 orders queued for export." Then:</p>
+<pre><code class="language-sql">SELECT topic_name, body FROM queue_message ORDER BY id DESC LIMIT 5;
+</code></pre>
+<p>Two bodies, the two increment ids, topic <code>maheshdave.order.export</code>. Start the consumer with <code>--max-messages=2</code> and the ERP log (or the handler log) shows those two orders and nothing else. If the admin request itself logs ERP traffic, the controller is still doing the work and the queue is decoration.</p>

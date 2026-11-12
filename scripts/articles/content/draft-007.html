@@ -1,0 +1,141 @@
+<!--meta {"excerpt": "A GraphQL product field that calls a repository inside the resolver runs one query per product on a listing. Resolve the whole page in one load and read the map from the field resolver.", "seo_title": "Stop Per-Item Queries in a GraphQL Product Field", "seo_description": "Batch-load a custom product flag for a GraphQL listing in one query, then read it from the per-item resolver. Includes the query to prove it."} -->
+<p>A category page asks GraphQL for 24 products and a custom <code>backorder_note</code> field. The resolver loads a row by SKU. The page is correct and the database log shows 24 identical selects. GraphQL calls the field resolver once per item; Magento does not batch those calls for you unless the field is backed by a data loader you wrote.</p>
+<p>The approach that holds up: the field resolver implements <code>BatchResolverInterface</code>, so Magento hands it every product on the page in one call. It loads those SKUs with a single <code>IN (?)</code> query and answers each item from the map.</p>
+
+<h2>Schema</h2>
+<p>This is a field on <code>ProductInterface</code>, not a new root query. Root queries you invent are outside the cacheable query list Adobe documents (<code>products</code>, <code>categories</code>, <code>route</code>, and the others on that page). A field on <code>products</code> rides the query that is already cacheable.</p>
+<p><code>app/code/MaheshDave/CatalogNote/etc/schema.graphqls</code></p>
+<pre><code class="language-graphql">interface ProductInterface {
+    backorder_note: String @resolver(class: "MaheshDave\\CatalogNote\\Model\\Resolver\\BackorderNote") @doc(description: "Merchandising note when the product is on backorder")
+}
+</code></pre>
+
+<p><code>app/code/MaheshDave/CatalogNote/etc/db_schema.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="maheshdave_backorder_note" resource="default" engine="innodb" comment="Backorder notes by SKU">
+        <column xsi:type="varchar" name="sku" length="64" nullable="false" comment="SKU"/>
+        <column xsi:type="varchar" name="note" length="255" nullable="false" comment="Note"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="sku"/>
+        </constraint>
+    </table>
+</schema>
+</code></pre>
+
+<p><code>app/code/MaheshDave/CatalogNote/Model/NoteLoader.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\CatalogNote\Model;
+
+use Magento\Framework\App\ResourceConnection;
+
+class NoteLoader
+{
+    /** @var array<string, string>|null */
+    private ?array $notes = null;
+
+    public function __construct(
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    /**
+     * @param string[] $skus
+     */
+    public function warm(array $skus): void
+    {
+        if ($this->notes !== null) {
+            return;
+        }
+        $skus = array_values(array_unique(array_filter($skus)));
+        $this->notes = [];
+        if ($skus === []) {
+            return;
+        }
+        $connection = $this->resource->getConnection();
+        $select = $connection->select()
+            ->from($this->resource->getTableName('maheshdave_backorder_note'), ['sku', 'note'])
+            ->where('sku IN (?)', $skus);
+        foreach ($connection->fetchPairs($select) as $sku => $note) {
+            $this->notes[(string) $sku] = (string) $note;
+        }
+    }
+
+    public function get(string $sku): ?string
+    {
+        return $this->notes[$sku] ?? null;
+    }
+}
+</code></pre>
+<p>The loader is a normal injectable, so Magento gives you one instance per request. That is the memoization. Do not store this map on a singleton you registered yourself; the shared instance would leak the previous request's SKUs across PHP-FPM workers only if you made it static, and a <code>static</code> property here would survive for the life of the worker and serve another customer's catalog. Keep it on the object.</p>
+
+<p>Magento 2.4.7 (and the 2.4 line that includes <code>BatchResolverInterface</code>) will call <code>resolve()</code> once with every parent product when the resolver implements that interface instead of <code>ResolverInterface</code>. Confirmed against <code>lib/internal/Magento/Framework/GraphQl/Query/Resolver/BatchResolverInterface.php</code> on the 2.4.7 tag. A class that implements the single-item interface never sees the rest of the page.</p>
+<p><code>app/code/MaheshDave/CatalogNote/Model/Resolver/BackorderNote.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\CatalogNote\Model\Resolver;
+
+use Magento\Framework\GraphQl\Config\Element\Field;
+use Magento\Framework\GraphQl\Query\Resolver\BatchRequestItemInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use MaheshDave\CatalogNote\Model\NoteLoader;
+
+class BackorderNote implements BatchResolverInterface
+{
+    public function __construct(
+        private readonly NoteLoader $noteLoader
+    ) {
+    }
+
+    /**
+     * @param BatchRequestItemInterface[] $requests
+     */
+    public function resolve(ContextInterface $context, Field $field, array $requests): BatchResponse
+    {
+        $skus = [];
+        foreach ($requests as $request) {
+            $sku = (string) ($request->getValue()['sku'] ?? '');
+            if ($sku !== '') {
+                $skus[] = $sku;
+            }
+        }
+        $this->noteLoader->warm($skus);
+
+        $response = new BatchResponse();
+        foreach ($requests as $request) {
+            $sku = (string) ($request->getValue()['sku'] ?? '');
+            $response->addResponse($request, $sku === '' ? null : $this->noteLoader->get($sku));
+        }
+
+        return $response;
+    }
+}
+</code></pre>
+<p><code>BatchResponse</code> stores values in an <code>SplObjectStorage</code> keyed by the request object. You must pass the same <code>$request</code> instance you were given; a copy will not match and <code>findResponseFor()</code> throws when Magento reads the result back. <code>getValue()</code> is the parent array the product resolver already built, which includes <code>sku</code> for a <code>ProductInterface</code> field. It is null when the field is resolved without a parent, and the resolver returns null rather than querying.</p>
+
+<p><code>registration.php</code> registers <code>MaheshDave_CatalogNote</code>. <code>etc/module.xml</code> sequences <code>Magento_CatalogGraphQl</code> and <code>Magento_GraphQl</code>.</p>
+
+<h2>Proof</h2>
+<pre><code class="language-bash">bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+bin/magento dev:query-log:enable
+: > var/debug/db.log
+</code></pre>
+<pre><code class="language-graphql">query {
+  products(filter: { sku: { in: ["24-MB01", "24-MB04", "24-WG01"] } }) {
+    items { sku name backorder_note }
+  }
+}
+</code></pre>
+<pre><code class="language-bash">curl -s -G "https://example.test/graphql" --data-urlencode "query={products(filter:{sku:{in:[\"24-MB01\",\"24-MB04\",\"24-WG01\"]}}){items{sku backorder_note}}}"
+grep -c "maheshdave_backorder_note" var/debug/db.log
+bin/magento dev:query-log:disable
+</code></pre>
+<p>The count must be 1. A count of 3 means the plugin did not run (compiled DI is stale, or the plugin is in global <code>di.xml</code> but a preference replaced <code>Products</code>) or <code>warm()</code> is not short-circuiting. Seed the table first or every value is null and you will "fix" a loader that was fine.</p>

@@ -1,0 +1,169 @@
+<!--meta {"excerpt": "The export-status screen was a custom controller that loaded every row into a phtml. Filters were PHP array functions. The UI listing data source already does paging, filters, and ACL, if the collection name matches.", "seo_title": "Admin Grid Data That Stays on the Server", "seo_description": "Build a Magento UI listing over the export-status table so filters and paging run in SQL. The data provider name has to match the collection."} -->
+<p>The first admin screen for export status selected every row in <code>maheshdave_order_export_status</code>, json-encoded it, and let Knockout filter. At a few hundred orders it felt instant. At the volume the ERP actually produces, the HTML request spent longer in PHP than the grid spent rendering, and a "filter by failed" still transferred the successes. Magento's listing component already sends filters and page size to <code>mui/index/render</code>. The work is to point that pipeline at the table, not to build a second one.</p>
+
+<h2>The name has to match in three places</h2>
+<p>The data provider <code>name</code>, the <code>js_config</code> provider string, and the <code>collections</code> item in <code>di.xml</code> are one identifier. A typo does not throw. The grid renders with an empty collection and a successful HTTP 200, which is why this survives QA on a fixture of zero rows.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/view/adminhtml/ui_component/maheshdave_export_status_listing.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">maheshdave_export_status_listing.export_status_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>export_status_columns</spinner>
+        <deps>
+            <dep>maheshdave_export_status_listing.export_status_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="export_status_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">increment_id</param>
+            </storageConfig>
+            <aclResource>MaheshDave_OrderExport::status</aclResource>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider"
+                      name="maheshdave_export_status_listing_data_source">
+            <settings>
+                <requestFieldName>increment_id</requestFieldName>
+                <primaryFieldName>increment_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <columns name="export_status_columns">
+        <selectionsColumn name="ids">
+            <settings>
+                <indexField>increment_id</indexField>
+            </settings>
+        </selectionsColumn>
+        <column name="increment_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Order</label>
+            </settings>
+        </column>
+        <column name="state">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">State</label>
+            </settings>
+        </column>
+    </columns>
+</listing>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/di.xml</code> (the collection argument, next to the preference from the service contract):</p>
+<pre><code class="language-xml"><type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+    <arguments>
+        <argument name="collections" xsi:type="array">
+            <item name="maheshdave_export_status_listing_data_source" xsi:type="string">MaheshDave\OrderExport\Model\ResourceModel\Status\Grid\Collection</item>
+        </argument>
+    </arguments>
+</type>
+<type name="MaheshDave\OrderExport\Model\ResourceModel\Status\Grid\Collection">
+    <arguments>
+        <argument name="mainTable" xsi:type="string">maheshdave_order_export_status</argument>
+        <argument name="resourceModel" xsi:type="string">MaheshDave\OrderExport\Model\ResourceModel\Status</argument>
+    </arguments>
+</type>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/Model/ResourceModel/Status.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Model\ResourceModel;
+
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+
+class Status extends AbstractDb
+{
+    protected function _construct(): void
+    {
+        $this->_init('maheshdave_order_export_status', 'increment_id');
+    }
+}
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/Model/ResourceModel/Status/Grid/Collection.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Model\ResourceModel\Status\Grid;
+
+use Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult;
+
+class Collection extends SearchResult
+{
+}
+</code></pre>
+<p><code>SearchResult</code> takes <code>$mainTable</code> and <code>$resourceModel</code> in its constructor. Setting them in <code>di.xml</code> keeps the collection class empty, which is what you want: grid behavior (filters, order, page size) is applied by <code>Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</code> onto this collection. A collection that calls <code>load()</code> inside <code>_initSelect()</code> defeats the paging, because the limit is applied too late or not at all if you already fetched.</p>
+
+<h2>The page that hosts it</h2>
+<p><code>app/code/MaheshDave/OrderExport/Controller/Adminhtml/Status/Index.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Controller\Adminhtml\Status;
+
+use Magento\Backend\App\Action;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\View\Result\PageFactory;
+
+class Index extends Action implements HttpGetActionInterface
+{
+    public const ADMIN_RESOURCE = 'MaheshDave_OrderExport::status';
+
+    public function __construct(
+        Action\Context $context,
+        private readonly PageFactory $pageFactory
+    ) {
+        parent::__construct($context);
+    }
+
+    public function execute()
+    {
+        $page = $this->pageFactory->create();
+        $page->setActiveMenu('MaheshDave_OrderExport::status');
+        $page->getConfig()->getTitle()->prepend(__('Order export status'));
+
+        return $page;
+    }
+}
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/etc/adminhtml/routes.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="maheshdave_export" frontName="maheshdave_export">
+            <module name="MaheshDave_OrderExport"/>
+        </route>
+    </router>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/OrderExport/view/adminhtml/layout/maheshdave_export_status_index.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <uiComponent name="maheshdave_export_status_listing"/>
+        </referenceContainer>
+    </body>
+</page>
+</code></pre>
+<p>The layout handle is <code>{frontName}_{controller}_{action}</code>. The file name is that handle. A file named after the UI component never loads, and the page is an empty admin content area with a 200.</p>
+
+<h2>Confirm the SQL, not the pixels</h2>
+<pre><code class="language-bash">bin/magento cache:flush
+bin/magento dev:query-log:enable
+</code></pre>
+<p>Open <code>admin/maheshdave_export/status/index</code>, filter State equals <code>failed</code>. In <code>var/debug/db.log</code> the select on <code>maheshdave_order_export_status</code> contains <code>WHERE state = 'failed'</code> and a <code>LIMIT</code>. If the filter changes the rows on screen but the SQL has no WHERE, the filtering is happening in the browser and this listing is not actually wired. Turn the query log off when you are done.</p>

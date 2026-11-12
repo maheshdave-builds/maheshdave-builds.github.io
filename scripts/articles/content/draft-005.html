@@ -1,0 +1,208 @@
+<!--meta {"excerpt": "A nightly full rebuild of a derived table was fine at 20k products and unacceptable at 400k. This custom indexer uses an mview subscription so only rows touched since the last cron run are recalculated.", "seo_title": "Custom Magento Indexer with Mview Partial Reindex", "seo_description": "Build a Magento 2 indexer whose mview subscription on the review table feeds a changelog, so cron recalculates only changed products."} -->
+<p>A category listing needed "approved review count" as a sortable value. The first implementation recalculated a summary table from a nightly cron with a <code>TRUNCATE</code> and a big <code>INSERT ... SELECT</code>. At 20,000 products nobody cared. At 400,000 products with marketplaces feeding reviews all day, the table was wrong for most of the day and the rebuild locked it for minutes.</p>
+<p>Magento already has the machinery for "recalculate only what changed": an indexer with an mview subscription. Triggers on the source table write changed IDs into a changelog, and the <code>indexer_update_all_views</code> cron job hands those IDs to your indexer. You write the calculation once, scoped to a list of IDs, and get both full and partial reindex.</p>
+
+<h2>The pieces</h2>
+<ul>
+<li><code>indexer.xml</code> registers the indexer so <code>indexer:status</code>, <code>indexer:reindex</code>, and the admin Index Management grid know about it.</li>
+<li><code>mview.xml</code> declares which tables to watch and which column identifies the entity. Magento creates the changelog table and the triggers when the indexer is switched to "Update by Schedule".</li>
+<li>One class implementing both <code>Magento\Framework\Indexer\ActionInterface</code> (full, list, row) and <code>Magento\Framework\Mview\ActionInterface</code> (changelog batch).</li>
+</ul>
+
+<h2>Module and target table</h2>
+<p><code>app/code/MaheshDave/ReviewIndex/registration.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+use Magento\Framework\Component\ComponentRegistrar;
+
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'MaheshDave_ReviewIndex', __DIR__);
+</code></pre>
+
+<p><code>app/code/MaheshDave/ReviewIndex/etc/module.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="MaheshDave_ReviewIndex">
+        <sequence>
+            <module name="Magento_Review"/>
+            <module name="Magento_Indexer"/>
+        </sequence>
+    </module>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/ReviewIndex/etc/db_schema.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="maheshdave_review_count_idx" resource="default" engine="innodb" comment="Approved review count per product">
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="int" name="approved_count" unsigned="true" nullable="false" default="0" comment="Approved reviews"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="product_id"/>
+        </constraint>
+    </table>
+</schema>
+</code></pre>
+<p>No foreign key to <code>catalog_product_entity</code> here. Index tables are disposable and rebuilt from source; a cascade would add lock contention on product deletes for no real benefit.</p>
+
+<h2>Registration and subscription</h2>
+<p><code>app/code/MaheshDave/ReviewIndex/etc/indexer.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Indexer/etc/indexer.xsd">
+    <indexer id="maheshdave_review_count" view_id="maheshdave_review_count"
+             class="MaheshDave\ReviewIndex\Model\Indexer\ReviewCount">
+        <title translate="true">Product Approved Review Count</title>
+        <description translate="true">Approved review count per product for sorting and badges</description>
+    </indexer>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/ReviewIndex/etc/mview.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Mview/etc/mview.xsd">
+    <view id="maheshdave_review_count" class="MaheshDave\ReviewIndex\Model\Indexer\ReviewCount" group="indexer">
+        <subscriptions>
+            <table name="review" entity_column="entity_pk_value"/>
+        </subscriptions>
+    </view>
+</config>
+</code></pre>
+<p><code>entity_column</code> is the column whose value is written into the changelog. For product reviews, <code>review.entity_pk_value</code> holds the product ID, so the changelog will contain product IDs directly. Choosing this column well is the main design decision in any mview setup: if the source table does not carry your entity ID, you either subscribe to a different table or translate IDs inside <code>execute()</code>.</p>
+<p>Status changes (pending → approved) update the same <code>review</code> row, so the trigger covers moderation too. Deleting a review fires the delete trigger with the old row's value, which is exactly what we need to decrement the count.</p>
+
+<h2>The indexer class</h2>
+<p><code>app/code/MaheshDave/ReviewIndex/Model/Indexer/ReviewCount.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ReviewIndex\Model\Indexer;
+
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Indexer\ActionInterface as IndexerActionInterface;
+use Magento\Framework\Mview\ActionInterface as MviewActionInterface;
+use Magento\Review\Model\Review;
+
+class ReviewCount implements IndexerActionInterface, MviewActionInterface
+{
+    private const INDEX_TABLE = 'maheshdave_review_count_idx';
+    private const BATCH = 1000;
+
+    public function __construct(
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    public function executeFull()
+    {
+        $connection = $this->resource->getConnection();
+        $connection->delete($this->resource->getTableName(self::INDEX_TABLE));
+        $this->insertCounts($connection, null);
+    }
+
+    public function executeList(array $ids)
+    {
+        $this->reindexIds($ids);
+    }
+
+    public function executeRow($id)
+    {
+        $this->reindexIds([$id]);
+    }
+
+    public function execute($ids)
+    {
+        $this->reindexIds($ids);
+    }
+
+    /**
+     * @param int[]|string[] $ids
+     */
+    private function reindexIds(array $ids): void
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if ($ids === []) {
+            return;
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName(self::INDEX_TABLE);
+
+        foreach (array_chunk($ids, self::BATCH) as $chunk) {
+            $connection->beginTransaction();
+            try {
+                $connection->delete($table, ['product_id IN (?)' => $chunk]);
+                $this->insertCounts($connection, $chunk);
+                $connection->commit();
+            } catch (\Throwable $e) {
+                $connection->rollBack();
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * @param int[]|null $productIds null means all products
+     */
+    private function insertCounts(AdapterInterface $connection, ?array $productIds): void
+    {
+        $select = $connection->select()
+            ->from(['r' => $this->resource->getTableName('review')], [])
+            ->join(
+                ['re' => $this->resource->getTableName('review_entity')],
+                're.entity_id = r.entity_id',
+                []
+            )
+            ->where('re.entity_code = ?', Review::ENTITY_PRODUCT_CODE)
+            ->where('r.status_id = ?', Review::STATUS_APPROVED)
+            ->group('r.entity_pk_value')
+            ->columns([
+                'product_id' => 'r.entity_pk_value',
+                'approved_count' => new \Zend_Db_Expr('COUNT(*)'),
+            ]);
+
+        if ($productIds !== null) {
+            $select->where('r.entity_pk_value IN (?)', $productIds);
+        }
+
+        $connection->query(
+            $connection->insertFromSelect(
+                $select,
+                $this->resource->getTableName(self::INDEX_TABLE),
+                ['product_id', 'approved_count']
+            )
+        );
+    }
+}
+</code></pre>
+<p>Products whose last approved review was removed simply disappear from the table after the delete, and readers treat a missing row as zero. That is cheaper than writing zeros for 400,000 products on every full reindex.</p>
+<p>The full reindex here deletes and rebuilds in place, so readers briefly see an empty table. For this data that is acceptable. If it is not for yours, core uses a replica-table swap through <code>Magento\Framework\Indexer\Table\StrategyInterface</code>; it adds complexity worth paying only when readers cannot tolerate a gap.</p>
+<p><code>\Zend_Db_Expr</code> is still what <code>Magento\Framework\DB\Select</code> expects for expressions in 2.4.x. Projects on 2.4.6+ may see it aliased through <code>laminas</code> packages; the class name used by core code remains <code>Zend_Db_Expr</code>.</p>
+
+<h2>Turning it on</h2>
+<pre><code class="language-bash">bin/magento module:enable MaheshDave_ReviewIndex
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento indexer:set-mode schedule maheshdave_review_count
+bin/magento indexer:reindex maheshdave_review_count
+bin/magento indexer:status maheshdave_review_count
+</code></pre>
+<p>Switching to schedule mode is what creates the changelog table <code>maheshdave_review_count_cl</code> and the triggers on <code>review</code>. In "Update on Save" mode nothing is subscribed, and since this indexer has no save hooks of its own, it would only change on full reindex. If you want realtime mode to work too, add an observer on <code>review_save_after</code> that calls <code>executeRow()</code>; for review volume I would not bother.</p>
+
+<h2>Watching a partial reindex happen</h2>
+<p>Approve a pending review in admin (or update one directly on a dev database), then:</p>
+<pre><code class="language-sql">SELECT * FROM maheshdave_review_count_cl ORDER BY version_id DESC LIMIT 5;
+SHOW TRIGGERS LIKE 'review';
+</code></pre>
+<p>The changelog should hold the product ID with a new <code>version_id</code>. Then process the backlog the way production cron would:</p>
+<pre><code class="language-bash">bin/magento cron:run --group=index
+bin/magento indexer:status maheshdave_review_count
+</code></pre>
+<pre><code class="language-sql">SELECT * FROM maheshdave_review_count_idx WHERE product_id = 42;
+SELECT version_id FROM mview_state WHERE view_id = 'maheshdave_review_count';
+</code></pre>
+<p>The count should reflect the approval, and <code>mview_state.version_id</code> should have advanced to the changelog's latest version. If the changelog grows but the state never moves, the <code>index</code> cron group is not running; that is a cron problem, not an indexer problem, and <code>indexer:status</code> will show the backlog as "N in backlog" on 2.4.x.</p>

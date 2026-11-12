@@ -1,0 +1,31 @@
+<!--meta {"excerpt": "New Relic showed a 2-second SELECT on the export-status table during the admin grid. EXPLAIN said it was scanning the whole table. The index belongs in db_schema.xml, not in a migration someone runs by hand.", "seo_title": "Index a Query New Relic Flagged", "seo_description": "Take a slow Magento query from New Relic, confirm it with EXPLAIN, and add the index in db_schema.xml so the next deploy keeps it."} -->
+<p>The export-status grid filtered by <code>state = 'failed'</code> and ordered by <code>updated_at</code>. New Relic's slow SQL list showed that select at about two seconds once the table passed a few hundred thousand rows. The database tab is not proof. It is a candidate. I copy the SQL, run <code>EXPLAIN</code> on a replica, and only then add an index. An index for a query that is slow because it returns 100,000 rows does nothing but slow down the writes.</p>
+<pre><code class="language-sql">EXPLAIN SELECT increment_id, state, updated_at
+FROM maheshdave_order_export_status
+WHERE state = 'failed'
+ORDER BY updated_at DESC
+LIMIT 20;
+</code></pre>
+<p><code>type</code> ALL and <code>rows</code> equal to the table size means there is no usable index. <code>Using filesort</code> in <code>Extra</code> on top of that is the sort of the whole filtered set. The index that matches this plan is <code>(state, updated_at)</code>. <code>state</code> alone filters but still filesorts. <code>updated_at</code> alone does not satisfy the WHERE, so MySQL ignores it for this query.</p>
+
+<h2>Declare it</h2>
+<p>An <code>ALTER TABLE</code> on production, or an index added in phpMyAdmin, disappears the next time someone rebuilds an environment from <code>db_schema.xml</code>, and declarative schema may also drop it if the whitelist says the module owns the table and the XML does not mention the index. Put the index in the schema and regenerate the whitelist.</p>
+<p><code>app/code/MaheshDave/OrderExport/etc/db_schema.xml</code> gains, inside the existing table node:</p>
+<pre><code class="language-xml"><index referenceId="MAHESHDAVE_ORDER_EXPORT_STATUS_STATE_UPDATED" indexType="btree">
+    <column name="state"/>
+    <column name="updated_at"/>
+</index>
+</code></pre>
+<pre><code class="language-bash">bin/magento setup:db-declaration:generate-whitelist --module-name=MaheshDave_OrderExport
+bin/magento setup:upgrade --dry-run=1
+</code></pre>
+<p>The dry-run log should show an <code>ADD INDEX</code> and nothing else. If it shows column drops, stop. The whitelist or the XML does not match the table that is live. On a table this size the alter is the risk: it can lock writes for the duration on MySQL versions and settings that do not allow <code>ALGORITHM=INPLACE</code> for that index. Read the statement in the dry-run log. Run it in the window you would run any other alter, not as a side effect of a code deploy you described as "no schema change".</p>
+<p>After <code>setup:upgrade</code>:</p>
+<pre><code class="language-sql">EXPLAIN SELECT increment_id, state, updated_at
+FROM maheshdave_order_export_status
+WHERE state = 'failed'
+ORDER BY updated_at DESC
+LIMIT 20;
+</code></pre>
+<p>Do not add a second index on <code>updated_at</code> alone "just in case". The grid's WHERE is <code>state</code> first. A leftover single-column index makes the optimizer's choice depend on statistics, and the plan you explained today is not the plan you get after the next analyze. One composite index that matches the query is the change.</p>
+<p><code>type</code> is <code>ref</code> and <code>key</code> is the new index. <code>rows</code> is the number of failed orders, not the table. Reload the admin grid and the New Relic slow-SQL row for this statement should fall off within the agent's harvest, not next week. If EXPLAIN still says ALL, the query in the grid is not the query you think: the data provider may be adding a join or a different order. Copy it from <code>var/debug/db.log</code> with the query log on, and explain that text. Index the SQL the application runs.</p>

@@ -1,0 +1,85 @@
+<!--meta {"excerpt": "Deployment checks were a page of bin/magento commands everyone ran differently. devtools:health prints indexer backlog, invalid caches, and recent cron errors as JSON, and it does not change anything.", "seo_title": "A Read-Only Magento Health Command", "seo_description": "MaheshDave_DevTools adds devtools:health, a read-only JSON report of indexer mode, cache status, and cron errors."} -->
+<p>After a deploy, three people ran three different checks. One reindexed. One flushed cache. One looked at cron. The reindex and the flush were not checks, and they hid the actual failure. The command I want on a deploy pipeline is read-only, exits non-zero when something is wrong, and prints JSON so the pipeline can store it. It lives in <code>MaheshDave_DevTools</code> because it is operational tooling, not a feature of the catalog.</p>
+
+<p><code>app/code/MaheshDave/DevTools/Console/Command/HealthCommand.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\DevTools\Console\Command;
+
+use Magento\Cron\Model\ResourceModel\Schedule\CollectionFactory as ScheduleCollectionFactory;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Indexer\Model\Indexer\CollectionFactory as IndexerCollectionFactory;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class HealthCommand extends Command
+{
+    public function __construct(
+        private readonly IndexerCollectionFactory $indexerCollectionFactory,
+        private readonly TypeListInterface $cacheTypeList,
+        private readonly ScheduleCollectionFactory $scheduleCollectionFactory
+    ) {
+        parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this->setName('devtools:health');
+        $this->setDescription('Read-only indexer, cache, and cron status as JSON');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $indexers = [];
+        $indexerBad = false;
+        foreach ($this->indexerCollectionFactory->create() as $indexer) {
+            $backlog = $indexer->getState()->getStatus();
+            $indexers[] = [
+                'id' => $indexer->getId(),
+                'status' => $backlog,
+                'scheduled' => $indexer->isScheduled(),
+            ];
+            if ($backlog !== 'valid') {
+                $indexerBad = true;
+            }
+        }
+
+        $invalidCaches = [];
+        foreach ($this->cacheTypeList->getInvalidated() as $type) {
+            $invalidCaches[] = $type->getId();
+        }
+
+        $errors = [];
+        $schedules = $this->scheduleCollectionFactory->create();
+        $schedules->addFieldToFilter('status', 'error');
+        $schedules->setOrder('scheduled_at', 'DESC');
+        $schedules->setPageSize(5);
+        foreach ($schedules as $schedule) {
+            $errors[] = [
+                'job' => $schedule->getJobCode(),
+                'at' => $schedule->getScheduledAt(),
+                'message' => mb_substr((string) $schedule->getMessages(), 0, 240),
+            ];
+        }
+
+        $report = [
+            'indexers' => $indexers,
+            'invalid_caches' => $invalidCaches,
+            'recent_cron_errors' => $errors,
+        ];
+        $output->writeln((string) json_encode($report, JSON_PRETTY_PRINT));
+
+        return ($indexerBad || $invalidCaches !== [] || $errors !== []) ? Command::FAILURE : Command::SUCCESS;
+    }
+}
+</code></pre>
+<p>Register it on <code>Magento\Framework\Console\CommandListInterface</code> in <code>etc/di.xml</code> with an item of type object pointing at this class. The command does not call <code>cache:flush</code>, does not reindex, and does not change indexer mode. <code>getInvalidated()</code> and the indexer state are reads. Cron errors are reads of <code>cron_schedule</code>. Exit code 1 is a failed check, not an exception. A pipeline that treats any non-zero as "deploy failed" should decide whether a single old cron error from yesterday is enough to fail the deploy. I fail on it and I delete or age out rows so yesterday's error does not block today's release. If you only want errors since the deploy started, filter <code>scheduled_at</code> with a <code>from</code> option. I did not add the option until a team asked, because a command with five flags becomes the page of commands this replaced.</p>
+<p>Indexer status <code>working</code> during the deploy window fails the check even when the indexer is healthy and simply running. Run the command after <code>setup:upgrade</code> has finished and cron has had a cycle, not in the middle of it. <code>scheduled: false</code> on a catalog indexer in production is the finding I care about more than <code>invalid</code>, because an indexer left on save after a debug session will lock product saves. The JSON includes the flag. The exit code does not fail on it yet; I print it so a human sees it. Failing the deploy because one custom indexer is on save has cried wolf on every project where that indexer has no mview.</p>
+
+<h2>Run it</h2>
+<pre><code class="language-bash">bin/magento devtools:health
+echo $?
+</code></pre>
+<p>The output is a JSON object with <code>indexers</code>, <code>invalid_caches</code>, and <code>recent_cron_errors</code>. Exit 0 means every indexer reported <code>valid</code>, no cache type was invalidated, and <code>cron_schedule</code> had no error rows in the five most recent errors, meaning none. Exit 1 is a reason to look at the JSON, not a reason to flush. If the command itself is missing, <code>setup:di:compile</code> has not picked up the <code>CommandListInterface</code> argument, or the module is disabled.</p>

@@ -1,0 +1,211 @@
+<!--meta {"excerpt": "Three integrations writing to system.log with one shared HTTP client config is a debugging tax. Virtual types give each integration its own log file and timeouts with zero new PHP classes.", "seo_title": "Per-Integration Loggers and Clients with Virtual Types", "seo_description": "Use di.xml virtual types to give each Magento integration its own Monolog channel, log file, and Guzzle timeouts without subclassing anything."} -->
+<p>When an ERP sync fails at 2 a.m., the first question is "what did we send and what came back?" On many projects the answer is buried in <code>var/log/system.log</code> between cache warnings, payment debug lines, and two other integrations that also log to the default channel. The second question, "why did it hang for 60 seconds?", usually ends at a shared HTTP client with no timeout.</p>
+<p>Both problems have the same fix, and it does not need a single new PHP class: virtual types in <code>di.xml</code>.</p>
+
+<h2>What a virtual type actually is</h2>
+<p>A virtual type is a named set of constructor arguments for an existing class. The object manager creates an instance of the real class with those arguments whenever the virtual name is requested. There is no generated class file and no inheritance; you cannot <code>instanceof</code> a virtual type and you cannot type-hint one. That is the point: the consuming class depends on <code>Psr\Log\LoggerInterface</code>, and configuration decides which logger it gets.</p>
+<p>The alternative people reach for is a subclass of <code>Magento\Framework\Logger\Handler\Base</code> with a <code>$fileName</code> property. It works, but it is a PHP file per integration that exists only to hold a string.</p>
+
+<h2>The consuming class</h2>
+<p>The client below knows nothing about which log file or timeout it uses. It is written exactly as it would be with the default logger.</p>
+
+<p><code>app/code/MaheshDave/ErpConnector/Model/ErpClient.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ErpConnector\Model;
+
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
+
+class ErpClient
+{
+    private const XML_PATH_BASE_URL = 'maheshdave_erp/connection/base_url';
+
+    public function __construct(
+        private readonly ClientInterface $httpClient,
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly LoggerInterface $logger
+    ) {
+    }
+
+    /**
+     * @return array<string, mixed>
+     * @throws LocalizedException
+     */
+    public function ping(): array
+    {
+        $baseUrl = rtrim((string) $this->scopeConfig->getValue(self::XML_PATH_BASE_URL), '/');
+        if ($baseUrl === '') {
+            throw new LocalizedException(__('ERP base URL is not configured.'));
+        }
+
+        $started = microtime(true);
+        try {
+            $response = $this->httpClient->request('GET', $baseUrl . '/health');
+        } catch (GuzzleException $e) {
+            $this->logger->error('ERP ping failed', [
+                'url' => $baseUrl . '/health',
+                'error' => $e->getMessage(),
+                'elapsed_ms' => (int) ((microtime(true) - $started) * 1000),
+            ]);
+            throw new LocalizedException(__('ERP is unreachable: %1', $e->getMessage()), $e);
+        }
+
+        $result = [
+            'status' => $response->getStatusCode(),
+            'elapsed_ms' => (int) ((microtime(true) - $started) * 1000),
+        ];
+        $this->logger->info('ERP ping', $result);
+
+        return $result;
+    }
+}
+</code></pre>
+<p>Guzzle is a dependency of <code>magento/framework</code> in 2.4.x, so <code>GuzzleHttp\ClientInterface</code> is available without adding a package. Depending on the interface keeps the class testable with a mock handler.</p>
+
+<h2>The wiring</h2>
+<p><code>app/code/MaheshDave/ErpConnector/etc/di.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="MaheshDave\ErpConnector\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/erp_connector.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MaheshDave\ErpConnector\Logger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">erp_connector</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="file" xsi:type="object">MaheshDave\ErpConnector\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MaheshDave\ErpConnector\HttpClient" type="GuzzleHttp\Client">
+        <arguments>
+            <argument name="config" xsi:type="array">
+                <item name="connect_timeout" xsi:type="number">3</item>
+                <item name="timeout" xsi:type="number">10</item>
+                <item name="http_errors" xsi:type="boolean">true</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="MaheshDave\ErpConnector\Model\ErpClient">
+        <arguments>
+            <argument name="httpClient" xsi:type="object">MaheshDave\ErpConnector\HttpClient</argument>
+            <argument name="logger" xsi:type="object">MaheshDave\ErpConnector\Logger</argument>
+        </arguments>
+    </type>
+</config>
+</code></pre>
+<p>A few things worth knowing about this file:</p>
+<ul>
+<li><code>fileName</code> is relative to the Magento root and starts with a slash, the same convention core handlers use for <code>/var/log/system.log</code>.</li>
+<li><code>Magento\Framework\Logger\Monolog</code> is Magento's Monolog subclass. Passing it a fresh <code>handlers</code> array replaces the default handlers, so these entries no longer appear in <code>system.log</code> or <code>debug.log</code>. Usually that is what you want. If ops alerting watches <code>exception.log</code>, add the core handler <code>Magento\Framework\Logger\Handler\Exception</code> as a second item.</li>
+<li>The Guzzle constructor parameter is literally named <code>$config</code>, which is why the argument name is <code>config</code>. Argument names in <code>di.xml</code> must match parameter names, not types.</li>
+<li>Virtual type names look like class names by convention only. Namespacing them under the module avoids collisions; two modules defining <code>ErpLogger</code> would silently override each other.</li>
+</ul>
+
+<h2>A second integration is configuration only</h2>
+<p>When the shipping carrier integration arrives, it gets its own handler, logger, and client by repeating the pattern with different names and a 30-second timeout for label generation. The carrier class does not change, and neither does the ERP config. That isolation is what makes virtual types worth it: tuning one integration's timeouts can no longer break another.</p>
+<p>The tradeoff is discoverability. A developer reading <code>ErpClient</code> sees <code>LoggerInterface</code> and assumes <code>system.log</code>. I add the log file name to the module's README and keep all virtual types for a module in its global <code>di.xml</code>, never scattered across area files, so there is one place to look.</p>
+
+<h2>Exercising it</h2>
+<p>A small command makes the wiring testable from a shell.</p>
+
+<p><code>app/code/MaheshDave/ErpConnector/Console/Command/PingCommand.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\ErpConnector\Console\Command;
+
+use Magento\Framework\Exception\LocalizedException;
+use MaheshDave\ErpConnector\Model\ErpClient;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class PingCommand extends Command
+{
+    public function __construct(
+        private readonly ErpClient $erpClient
+    ) {
+        parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this->setName('maheshdave:erp:ping');
+        $this->setDescription('Call the ERP health endpoint using the connector client');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        try {
+            $result = $this->erpClient->ping();
+        } catch (LocalizedException $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
+        }
+
+        $output->writeln(sprintf('HTTP %d in %d ms', $result['status'], $result['elapsed_ms']));
+
+        return Command::SUCCESS;
+    }
+}
+</code></pre>
+<p>Constructor injection in a console command means the client and its whole dependency graph are built when <code>bin/magento</code> lists commands. For a light class like this that is fine. For commands with expensive dependencies, inject a <code>Proxy</code> (<code>MaheshDave\ErpConnector\Model\ErpClient\Proxy</code> in <code>di.xml</code>) so listing commands stays fast.</p>
+
+<p>Register the command, alongside the virtual types, in the same <code>di.xml</code>:</p>
+<pre><code class="language-xml"><type name="Magento\Framework\Console\CommandListInterface">
+    <arguments>
+        <argument name="commands" xsi:type="array">
+            <item name="maheshdave_erp_ping" xsi:type="object">MaheshDave\ErpConnector\Console\Command\PingCommand</item>
+        </argument>
+    </arguments>
+</type>
+</code></pre>
+
+<p><code>app/code/MaheshDave/ErpConnector/etc/module.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="MaheshDave_ErpConnector"/>
+</config>
+</code></pre>
+
+<p><code>app/code/MaheshDave/ErpConnector/registration.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+use Magento\Framework\Component\ComponentRegistrar;
+
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'MaheshDave_ErpConnector', __DIR__);
+</code></pre>
+
+<p>The module has no <code>system.xml</code>, so <code>bin/magento config:set</code> would reject the path. Set the base URL in <code>app/etc/env.php</code>, which is where an environment-specific endpoint belongs anyway:</p>
+<pre><code class="language-php">'system' => [
+    'default' => [
+        'maheshdave_erp' => [
+            'connection' => [
+                'base_url' => 'https://erp-sandbox.example.test',
+            ],
+        ],
+    ],
+],
+</code></pre>
+<pre><code class="language-bash">bin/magento module:enable MaheshDave_ErpConnector
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento maheshdave:erp:ping
+tail -n 5 var/log/erp_connector.log
+</code></pre>
+<p>A healthy run prints something like <code>HTTP 200 in 84 ms</code> and writes a line tagged <code>erp_connector.INFO: ERP ping</code>. Point the base URL at a blackholed address (for example a non-routable IP) and the command should fail after about three seconds with the connect timeout, not after PHP's default socket timeout. That three-second failure is the real test that the client virtual type was injected.</p>
+<p>If the log line lands in <code>system.log</code> instead, the <code>logger</code> argument did not apply. The usual cause is a typo in the argument name, which the object manager ignores silently, or a stale <code>generated/metadata</code> in production mode.</p>

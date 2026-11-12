@@ -1,0 +1,57 @@
+<!--meta {"excerpt": "An around plugin logged the duration of place order by calling proceed(), then called proceed() again in a branch that was not supposed to run. Customers got two orders. Around is the wrong tool unless you need to skip the call.", "seo_title": "The around Plugin That Ran Twice", "seo_description": "Calling proceed() twice in a Magento around plugin places two orders. Use after for logging, and call proceed() once."} -->
+<p>Duplicate orders, same quote, two increment ids, a few hundred milliseconds apart. The payment gateway showed one capture. The second order had no capture and a processing status that nothing could fulfill. The audit of plugins on <code>PaymentInformationManagementInterface::savePaymentInformationAndPlaceOrder</code> found an around plugin whose job was to log how long placement took. The happy path called <code>$proceed</code>, logged, and returned. A catch block called <code>$proceed</code> again because the author thought the first call had not counted after an exception. Exceptions from <code>$proceed</code> mean the call happened. A second call places a second order if the first one committed, and throws a quote-is-not-active error if it did not. Both happened, depending on timing.</p>
+
+<h2>Logging does not need around</h2>
+<p><code>after</code> runs only if the method returned. You lose the duration of failures. That is a bad trade if you are building a metric, and it is the right trade if a mistake in the metric code can place an order. I log duration from the New Relic transaction instead, and the plugin that remains is <code>after</code> for a result I need to change. When I do write <code>around</code>, <code>$proceed</code> is called once, on one line, and the result is what I return.</p>
+<p><code>app/code/MaheshDave/DevTools/Plugin/PlaceOrderTiming.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\DevTools\Plugin;
+
+use Magento\Checkout\Api\PaymentInformationManagementInterface;
+use Psr\Log\LoggerInterface;
+
+class PlaceOrderTiming
+{
+    public function __construct(
+        private readonly LoggerInterface $logger
+    ) {
+    }
+
+    public function aroundSavePaymentInformationAndPlaceOrder(
+        PaymentInformationManagementInterface $subject,
+        callable $proceed,
+        $cartId,
+        $paymentMethod,
+        $billingAddress = null
+    ) {
+        $started = microtime(true);
+        try {
+            $orderId = $proceed($cartId, $paymentMethod, $billingAddress);
+        } catch (\Throwable $e) {
+            $this->logger->error('place order failed', [
+                'cart_id' => $cartId,
+                'ms' => (int) ((microtime(true) - $started) * 1000),
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+        $this->logger->info('place order finished', [
+            'cart_id' => $cartId,
+            'order_id' => $orderId,
+            'ms' => (int) ((microtime(true) - $started) * 1000),
+        ]);
+
+        return $orderId;
+    }
+}
+</code></pre>
+<p>One <code>$proceed</code>. The catch logs and rethrows the same exception. It does not call the gateway again. Returning a new exception instead of throwing the original one drops the stack and can convert a <code>LocalizedException</code> the storefront knows how to print into a generic 500. Rethrow.</p>
+<p><code>around</code> is the plugin type that can skip the original method by not calling <code>$proceed</code>. That is the only reason I reach for it: a feature flag that returns a cached result, or a guard that throws before any side effect. An <code>around</code> that always calls <code>$proceed</code> and only adds behavior before or after is an <code>before</code> plus an <code>after</code>, and those cannot run the original method twice. Code review on this class is the question "how many times is <code>$proceed</code> invoked on each path", including paths added in a later pull request. I have rejected a "retry" branch here. Retry of place order belongs in the client, with a new idempotency key, not in a plugin that shares the same quote.</p>
+
+<h2>Seeing a double call before production</h2>
+<p>Add the plugin, place one order, and count rows:</p>
+<pre><code class="language-sql">SELECT entity_id, increment_id, created_at FROM sales_order WHERE quote_id = 4242;
+</code></pre>
+<p>One row. Temporarily throw after <code>$proceed</code> in a dev branch and confirm the log line says failed and that a retry of the HTTP request is what creates the second order, not the catch block. If the catch block creates it, <code>$proceed</code> is in there. The log line alone is not the test. The row count is.</p>

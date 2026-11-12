@@ -1,0 +1,46 @@
+<!--meta {"excerpt": "The purchase-order number was validated in a Knockout rule. The ERP integration posted the cart through the API and stored an empty number. Validate it on the quote before place order.", "seo_title": "Validate a Checkout Field on the Server", "seo_description": "A Knockout rule does not run for REST or GraphQL checkout. Require the purchase-order number on the quote in a before-place-order plugin."} -->
+<p>The checkout step required a purchase-order number. The Knockout validation rule blocked the button. Finance then found orders with an empty number. Those orders had been placed by the customer's procurement tool, which calls <code>PaymentInformationManagementInterface::savePaymentInformationAndPlaceOrder</code> and never loads <code>checkout/onepage</code>. A UI rule is a convenience. The rule that matters reads the quote on the server.</p>
+<p>Store the value as a quote extension attribute or a column on <code>quote</code> that sales converts to the order. I use a column <code>maheshdave_po_number</code> on <code>quote</code> and <code>sales_order</code>, declared in <code>db_schema.xml</code>, copied in a <code>sales_model_service_quote_submit_before</code> observer by <code>$order->setData('maheshdave_po_number', $quote->getData('maheshdave_po_number'))</code>. Fieldset <code>sales_convert_quote</code> can do that copy too, when the field is in <code>fieldset.xml</code>. I use the observer when I want the copy to be obvious in code review.</p>
+
+<p><code>app/code/MaheshDave/CheckoutPo/Plugin/RequirePoNumber.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\CheckoutPo\Plugin;
+
+use Magento\Checkout\Api\PaymentInformationManagementInterface;
+use Magento\Framework\Exception\InputException;
+use Magento\Quote\Api\CartRepositoryInterface;
+
+class RequirePoNumber
+{
+    public function __construct(
+        private readonly CartRepositoryInterface $cartRepository
+    ) {
+    }
+
+    public function beforeSavePaymentInformationAndPlaceOrder(
+        PaymentInformationManagementInterface $subject,
+        $cartId,
+        $paymentMethod,
+        $billingAddress = null
+    ): array {
+        $quote = $this->cartRepository->getActive((int) $cartId);
+        $poNumber = trim((string) $quote->getData('maheshdave_po_number'));
+        if ($poNumber === '' || strlen($poNumber) > 40) {
+            throw new InputException(__('Enter a purchase order number, 40 characters or fewer.'));
+        }
+
+        return [$cartId, $paymentMethod, $billingAddress];
+    }
+}
+</code></pre>
+<p>The payment plugin does not trust the request parameter. By the time place order runs, the number has to already be on the quote, written by a small repository method the checkout step and the procurement API both call. Validating <code>$this->request->getParam('po_number')</code> passes the browser, which posts the field, and still passes an API client that never sends it, because the param is simply absent and a careless <code>if ($poNumber)</code> was skipped. The quote is the document both clients share.</p>
+<p>Save the number before payment, not in the same request as place order, unless that request's service sets it on the quote object and this plugin reads the object. A plugin that runs before the code which copies the param onto the quote will reject a valid browser checkout. I set the attribute in <code>savePaymentInformation</code>'s before-plugin only when the payment additional data contains <code>po_number</code>, and the require-plugin reads whatever is on the quote after that. Order them with <code>sortOrder</code>. The writer is 10, the requirement is 20.</p>
+
+<h2>The client that does not use the browser</h2>
+<pre><code class="language-bash">curl -s -X POST "https://example.test/rest/default/V1/carts/mine/payment-information" \
+  -H "Authorization: Bearer $CUSTOMER_TOKEN" -H "Content-Type: application/json" \
+  -d '{"paymentMethod":{"method":"checkmo"},"billingAddress":{"email":"buyer@example.test","country_id":"US","street":["1 Main"],"telephone":"123","postcode":"10001","city":"NY","firstname":"A","lastname":"B"}}'
+</code></pre>
+<p>With an empty <code>maheshdave_po_number</code> on that quote, the response is an input exception and <code>sales_order</code> has no new row. Set the column on the quote, repeat, and the order's column matches. The Knockout rule can stay. It is not the test. The curl is the test. Admin reorder and negotiable-quote acceptance do not call this method. If those paths must require the same number, put the same check on the service they call and keep the exception text identical.</p>

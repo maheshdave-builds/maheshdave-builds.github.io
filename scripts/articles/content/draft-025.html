@@ -1,0 +1,53 @@
+<!--meta {"excerpt": "The price integration saved products in the admin store, so every website showed the US price. Product price is scoped per website only if you save it with that store's context.", "seo_title": "Price Writes Landing on the Wrong Website", "seo_description": "A product save without the right store context writes the website-scoped price to default. Emulate the store, then save."} -->
+<p>The feed had one price per website. The importer called <code>ProductRepositoryInterface::save()</code> with the price set and no store context. Magento was in the admin store (store id 0). Website-scoped price attributes store the default value in that case, and every website that did not have an override showed the US price. The EU website override was never written. The API response looked successful.</p>
+<p>A price attribute with website scope is stored in the attribute's value table with <code>store_id</code> 0 for the default and with the store id of each store view when overridden. Saving under the wrong store writes a row you did not intend, and the fallback logic then hides the bug: the website with no row shows default, so US looks correct and EU looks "not updated".</p>
+
+<p><code>app/code/MaheshDave/PriceFeed/Model/WebsitePriceWriter.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\PriceFeed\Model;
+
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\StoreManagerInterface;
+
+class WebsitePriceWriter
+{
+    public function __construct(
+        private readonly ProductRepositoryInterface $productRepository,
+        private readonly StoreManagerInterface $storeManager,
+        private readonly Emulation $emulation
+    ) {
+    }
+
+    public function write(string $sku, string $storeCode, float $price): void
+    {
+        $store = $this->storeManager->getStore($storeCode);
+        $this->emulation->startEnvironmentEmulation((int) $store->getId());
+        try {
+            $product = $this->productRepository->get($sku, true, (int) $store->getId(), true);
+            $product->setPrice($price);
+            $this->productRepository->save($product);
+        } catch (NoSuchEntityException $e) {
+            throw $e;
+        } finally {
+            $this->emulation->stopEnvironmentEmulation();
+        }
+    }
+}
+</code></pre>
+<p>The third argument of <code>get()</code> is the store id used to load values. Edit mode true skips the flat in-memory cache of a product loaded for another store earlier in the same process. A long-running importer that does not pass the store id, and does not force reload, will save the first website's product over and over with a new price. I have shipped that bug. The <code>finally</code> stops emulation even when save throws, so the next SKU is not stuck in the EU store.</p>
+<p>Emulation changes the current store for the whole process, including any plugin on <code>save</code> that calls <code>getValue</code> without a scope. That is what you want here and it is also why this code must not run inside a web request that still has to render another store. Run it from CLI. Do not call it from a storefront controller.</p>
+<p>After the write, the price index is stale until <code>catalog_product_price</code> runs. The value you read back from the EAV table can be right while the storefront is wrong. Reindex that one indexer, or wait for schedule mode. Checking only the storefront is how this gets reported as "the save didn't work" an hour before cron.</p>
+
+<h2>The row that proves it</h2>
+<pre><code class="language-sql">SELECT s.code, c.value
+FROM catalog_product_entity_decimal c
+JOIN eav_attribute a ON a.attribute_id = c.attribute_id AND a.attribute_code = 'price'
+JOIN store s ON s.store_id = c.store_id
+JOIN catalog_product_entity p ON p.entity_id = c.entity_id
+WHERE p.sku = '24-MB01';
+</code></pre>
+<p>You want a row whose store code is the EU store view, not only <code>admin</code> / store id 0. One row at store id 0 means the writer never left the admin store. Then open the EU storefront only after the price indexer has run, or you will compare an indexed price with an EAV price and reopen the ticket.</p>

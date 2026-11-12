@@ -1,0 +1,77 @@
+<!--meta {"excerpt": "After a catalog reindex, product pages refreshed and category pages kept yesterday's product list. The indexer purged product tags. Category pages are stored under cat_c.", "seo_title": "Stale Category Pages After a Reindex", "seo_description": "A Magento reindex often purges product cache tags and leaves category tags. Register cat_c and flush those tags or Fastly keeps the old listing."} -->
+<p>Product pages updated within a minute of a price import. Category pages, which list those products, still showed the old price and the old position until someone purged the whole site. The import and the indexer were doing what they were written to do: they registered product cache tags. A category page in full-page cache is tagged with the category, <code>cat_c_{id}</code>, and Fastly keeps serving it until that tag is purged. Soft-purging a product tag does not select the category object.</p>
+<p><code>Magento\Catalog\Model\Category::CACHE_TAG</code> is <code>cat_c</code>. <code>Magento\Catalog\Model\Product::CACHE_TAG</code> is <code>cat_p</code>. The page-cache identifier is <code>{tag}_{id}</code>. Fastly's Commerce module purges the tags Magento hands it through the cache-invalidation flow. If the tag was never registered, there is nothing to purge, and a "soft purge" setting is not the thing that is wrong.</p>
+
+<h2>Register the category ids the reindex actually changed</h2>
+<p>Plug in after the category-product indexer processes a list of product ids, resolve the categories those products are in, and register those category tags. Then dispatch <code>clean_cache_by_tags</code>, which is the event the cache-invalidation layer listens on.</p>
+<p><code>app/code/MaheshDave/CatalogCache/Plugin/PurgeCategoriesAfterProductReindex.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\CatalogCache\Plugin;
+
+use Magento\Catalog\Model\Category;
+use Magento\Catalog\Model\Indexer\Product\Category as CategoryProductIndexer;
+use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Indexer\CacheContext;
+use Magento\Framework\App\ResourceConnection;
+
+class PurgeCategoriesAfterProductReindex
+{
+    public function __construct(
+        private readonly CacheContext $cacheContext,
+        private readonly ManagerInterface $eventManager,
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    /**
+     * @param int[] $ids
+     */
+    public function afterExecuteList(CategoryProductIndexer $subject, $result, array $ids)
+    {
+        $this->purgeForProducts($ids);
+
+        return $result;
+    }
+
+    /**
+     * @param int[] $productIds
+     */
+    private function purgeForProducts(array $productIds): void
+    {
+        $productIds = array_values(array_unique(array_map('intval', $productIds)));
+        if ($productIds === []) {
+            return;
+        }
+        $connection = $this->resource->getConnection();
+        $select = $connection->select()
+            ->from($this->resource->getTableName('catalog_category_product'), ['category_id'])
+            ->where('product_id IN (?)', $productIds)
+            ->distinct(true);
+        $categoryIds = array_map('intval', $connection->fetchCol($select));
+        if ($categoryIds === []) {
+            return;
+        }
+        $this->cacheContext->registerEntities(Category::CACHE_TAG, $categoryIds);
+        $this->eventManager->dispatch('clean_cache_by_tags', ['object' => $this->cacheContext]);
+    }
+}
+</code></pre>
+<p><code>app/code/MaheshDave/CatalogCache/etc/di.xml</code></p>
+<pre><code class="language-xml"><?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Model\Indexer\Product\Category">
+        <plugin name="maheshdave_purge_categories" type="MaheshDave\CatalogCache\Plugin\PurgeCategoriesAfterProductReindex"/>
+    </type>
+</config>
+</code></pre>
+<p>This plugin runs for the partial list. A full <code>executeFull</code> on a large catalog would resolve every category and purge almost the whole FPC, which is the flush you were trying not to do, only slower. I do not attach it to <code>executeFull</code>. A nightly full reindex can purge <code>cat_c</code> once, deliberately, in a maintenance window. Schedule mode ("Update by Schedule") calls the list path with the changelog ids, which is the path this covers.</p>
+<p>Anchor categories and categories that include the product through a rule rather than <code>catalog_category_product</code> are not in that select. If the stale page is a visual-merchandiser category, the row may live in the index table <code>catalog_category_product_index</code> instead. Read the store-scoped index table for that case, and expect one row per store, so <code>distinct</code> still matters.</p>
+
+<h2>Check the tag, then the page</h2>
+<pre><code class="language-bash">bin/magento setup:di:compile
+bin/magento indexer:reindex catalog_category_product
+</code></pre>
+<p>In developer mode the category response sends <code>X-Magento-Tags</code>. Confirm <code>cat_c_4</code> (or whichever id) is on the category URL before you blame Fastly. Change a product in that category, run <code>bin/magento cron:run --group=index</code> if the indexer is on schedule, and request the category again. The first request after the purge is a miss and shows the new price. If the tags header contains only <code>cat_p_*</code> and store tags, the category block is not adding its identity, and purging <code>cat_c</code> will never select that object. That is a block identity problem, not an indexer problem.</p>

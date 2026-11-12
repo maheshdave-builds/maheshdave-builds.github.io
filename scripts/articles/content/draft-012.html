@@ -1,0 +1,52 @@
+<!--meta {"excerpt": "A website-scoped ERP URL was correct in admin and wrong in cron, which has no store and therefore reads the default scope. Pass the website id into getValue.", "seo_title": "Website Config Read from the Wrong Scope", "seo_description": "Cron and CLI have no current store, so a website-scoped Magento config path returns the default. Read it with an explicit website id."} -->
+<p>The ERP base URL was set at the website scope for the EU site and left empty at default, on purpose, so the US site could not accidentally call the EU endpoint. Admin saves from the EU website worked. The cron export called the empty URL and logged "ERP base URL is not configured" for orders that belonged to the EU website. <code>ScopeConfigInterface::getValue($path)</code> with no scope uses the current scope. Cron, consumers, and <code>bin/magento</code> have no current store, so that call returns the default-scope value, which was empty.</p>
+
+<h2>Read the scope you mean</h2>
+<p><code>app/code/MaheshDave/OrderExport/Model/ErpConfig.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Model;
+
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+
+class ErpConfig
+{
+    private const XML_PATH = 'maheshdave_erp/connection/base_url';
+
+    public function __construct(
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly StoreManagerInterface $storeManager
+    ) {
+    }
+
+    public function getBaseUrlForStore(int $storeId): string
+    {
+        $websiteId = (int) $this->storeManager->getStore($storeId)->getWebsiteId();
+        $url = trim((string) $this->scopeConfig->getValue(self::XML_PATH, ScopeInterface::SCOPE_WEBSITE, $websiteId));
+        if ($url === '') {
+            throw new LocalizedException(__('ERP base URL is not configured for website %1.', $websiteId));
+        }
+
+        return rtrim($url, '/');
+    }
+}
+</code></pre>
+<p>The third argument is the website id, not the store id, because the scope type is <code>SCOPE_WEBSITE</code>. Passing a store id there reads a different website's row, or none, and it does not throw. The order has a <code>store_id</code>. Resolve the website from that store. Do not take the website id from "the current website" inside a consumer; there isn't one.</p>
+<p>A path that is configured at store-view scope has to be read with <code>ScopeInterface::SCOPE_STORE</code> and the store id. Website scope does not fall through per store view. If two store views in one website must call different endpoints, the field was created at the wrong scope and no amount of <code>getValue</code> flags will split it. Recreate it as store scope, or the values will keep colliding.</p>
+
+<h2>Where the store id comes from</h2>
+<p>The export message in this project is the order id. The consumer loads the order and then asks for config:</p>
+<pre><code class="language-php">$order = $this->orderRepository->get((int) $orderId);
+$baseUrl = $this->erpConfig->getBaseUrlForStore((int) $order->getStoreId());
+</code></pre>
+<p>That is the whole fix. Iterating <code>$this->storeManager->getWebsites()</code> is the other correct shape, and I use it when the job is not tied to an order: a catalog push that must run once per website. Running it once and reading default scope sends every website's products to whichever URL was saved at default, including websites you thought were isolated.</p>
+
+<h2>Prove the scope, not the value</h2>
+<pre><code class="language-bash">bin/magento config:show maheshdave_erp/connection/base_url
+bin/magento config:show --scope=websites --scope-code=eu maheshdave_erp/connection/base_url
+</code></pre>
+<p>The first command prints the default, often empty. The second prints the EU URL. After the consumer change, an EU order logs the EU host. A US order, with no website value and no default, throws the localized exception naming the website id, which is the outcome you configured. If both commands print the same URL, the value was saved at default and the website field in admin was never saved; the code is then doing what it should with the data it has.</p>

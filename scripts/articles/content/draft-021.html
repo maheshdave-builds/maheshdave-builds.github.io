@@ -1,0 +1,52 @@
+<!--meta {"excerpt": "An App Builder action that called the ERP before returning caused Adobe I/O to retry the order event, and the ERP created two documents. Acknowledge first, then do the work in a second invocation.", "seo_title": "Ack Commerce Events Before the Work", "seo_description": "Return from an App Builder Runtime action before calling the ERP. Event retries otherwise create duplicate documents."} -->
+<p>The order-placed event was subscribed to a Runtime action that loaded the order from Commerce, posted it to the ERP, and then returned 200. The ERP call took longer than the event delivery window often enough that I/O delivered the same event again. The action had no memory of the first attempt, so the ERP created a second document. The fix is not a longer timeout. The action that receives the event has to finish quickly and durably record the event id, and a second action does the ERP call.</p>
+<p>This is the shape I deploy. The event envelope fields below are the CloudEvents fields Adobe I/O Events delivers to a Runtime web action (<code>specversion</code>, <code>id</code>, <code>type</code>, <code>data</code>). Confirm the Commerce payload inside <code>data</code> against the event you subscribed to; order increment id placement in that object has moved between event versions, so the code reads it defensively and records the raw event id either way.</p>
+
+<p><code>actions/order-placed/index.js</code></p>
+<pre><code class="language-javascript">const { Core } = require('@adobe/aio-sdk')
+
+async function main (params) {
+  const logger = Core.Logger('order-placed', { level: params.LOG_LEVEL || 'info' })
+  const event = readEvent(params)
+  if (!event.id) {
+    logger.error('event id missing')
+    return { statusCode: 200, body: { status: 'ignored' } }
+  }
+
+  const state = await Core.State.init()
+  const seen = await state.get(`order-event:${event.id}`)
+  if (seen) {
+    return { statusCode: 200, body: { status: 'duplicate' } }
+  }
+  await state.put(`order-event:${event.id}`, JSON.stringify({ type: event.type, at: Date.now() }), { ttl: 604800 })
+
+  // The heavy call belongs in a separate action, invoked after this returns.
+  logger.info(JSON.stringify({ id: event.id, type: event.type, order: event.order }))
+  return { statusCode: 200, body: { status: 'accepted', id: event.id } }
+}
+
+function readEvent (params) {
+  let body = params
+  if (typeof params.__ow_body === 'string' && params.__ow_body !== '') {
+    try {
+      body = JSON.parse(params.__ow_body)
+    } catch (e) {
+      body = {}
+    }
+  }
+  const data = body.data || {}
+  return {
+    id: body.id || '',
+    type: body.type || '',
+    order: data.increment_id || data.order_increment_id || ''
+  }
+}
+
+exports.main = main
+</code></pre>
+<p>Returning 200 for a malformed event is deliberate. A 500 makes I/O retry a body you will never parse. A duplicate event id returns 200 without writing a second state record. State TTL is seven days; an event redelivered after that can be processed again, which is why the ERP call itself also has to be idempotent on the order increment id. State is the fast dedupe, not the only one.</p>
+<p>I do not call the ERP in this function. The follow-up action is a second Runtime action triggered by a queue or by <code>OpenWhisk</code> activation you fire only after <code>state.put</code> succeeds. If <code>state.put</code> throws, return 500 so the event is retried; you have not recorded it, and you have not called the ERP. That is the only 500 in this file.</p>
+<p>The Commerce credential for the follow-up action comes from action parameters (<code>params.COMMERCE_BASE_URL</code>, an IMS token), set as secrets in the App Builder workspace, not written into <code>index.js</code>. Logging the whole <code>params</code> object logs those secrets into activation logs. Log the event id and the order number.</p>
+
+<h2>How I check it</h2>
+<p>Publish a test event twice with the same <code>id</code>. The first activation log says <code>accepted</code>. The second says <code>duplicate</code>. <code>aio runtime activation list</code> shows both under a second. If the first activation is multiple seconds and the ERP dashboard shows a document, the ERP call is still in this action and the state write is not protecting you from a timeout retry that happens before <code>state.put</code>.</p>

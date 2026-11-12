@@ -1,0 +1,74 @@
+<!--meta {"excerpt": "A plugin called the ERP during place order. The ERP timed out, the customer retried, and some orders never left Magento because the process died after commit. Write an outbox row in the same transaction as the order and publish after.", "seo_title": "An Outbox for Order Export", "seo_description": "Write an order-export outbox row when the order is placed, then publish it from a consumer. Do not call the ERP inside place order."} -->
+<p>Calling the ERP from <code>checkout_submit_all_after</code> couples the customer's request to a system you do not control. When the ERP is slow, checkout is slow. When the PHP process is killed after the order commits and before the HTTP call returns, the order exists and the ERP never hears about it. There is no row you can query to find those. An outbox row written next to the order is the list of work, and it survives the crash because it commits with the order.</p>
+<p>Magento does not enlist your HTTP call in the database transaction. It will enlist an insert you run on the same connection before the order save completes, if you do the insert in <code>sales_order_save_after</code> while the transaction is still open. Observers on that event run inside the save. A queue publish does not. I insert the outbox row in the observer and publish only after a successful response is not required; a cron publishes rows that are still <code>pending</code>, so a publish that never happened is recovered.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/Observer/WriteOutbox.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Observer;
+
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use Magento\Sales\Api\Data\OrderInterface;
+
+class WriteOutbox implements ObserverInterface
+{
+    public function __construct(
+        private readonly ResourceConnection $resource
+    ) {
+    }
+
+    public function execute(Observer $observer): void
+    {
+        $order = $observer->getEvent()->getOrder();
+        if (!$order instanceof OrderInterface || !$order->getEntityId()) {
+            return;
+        }
+        if (!$order->getOrigData('entity_id')) {
+            $this->resource->getConnection()->insertOnDuplicate(
+                $this->resource->getTableName('maheshdave_order_outbox'),
+                ['order_id' => (int) $order->getEntityId(), 'status' => 'pending'],
+                []
+            );
+        }
+    }
+}
+</code></pre>
+<p><code>getOrigData('entity_id')</code> is empty on the insert and populated on later saves, so a status change does not enqueue the order again. <code>events.xml</code> listens to <code>sales_order_save_after</code>. The table's primary key is <code>order_id</code>, which makes a double-fired event harmless.</p>
+
+<p><code>app/code/MaheshDave/OrderExport/Cron/PublishOutbox.php</code></p>
+<pre><code class="language-php"><?php
+declare(strict_types=1);
+
+namespace MaheshDave\OrderExport\Cron;
+
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\MessageQueue\PublisherInterface;
+
+class PublishOutbox
+{
+    public function __construct(
+        private readonly ResourceConnection $resource,
+        private readonly PublisherInterface $publisher
+    ) {
+    }
+
+    public function execute(): void
+    {
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName('maheshdave_order_outbox');
+        $select = $connection->select()->from($table, ['order_id'])->where('status = ?', 'pending')->limit(100);
+        foreach ($connection->fetchCol($select) as $orderId) {
+            $this->publisher->publish('maheshdave.order.export', (string) $orderId);
+            $connection->update($table, ['status' => 'queued'], ['order_id = ?' => (int) $orderId, 'status = ?' => 'pending']);
+        }
+    }
+}
+</code></pre>
+<p>The update is conditional on <code>status = pending</code> so two cron processes cannot both publish the same row and both mark it. They can both publish if they read before either updates. The consumer must tolerate a duplicate order id, which it should anyway. If you need exactly-once publish, lock the row with <code>SELECT ... FOR UPDATE</code> in a transaction. I have not needed it at this volume; the consumer's idempotency is the real guarantee, and the outbox is the guarantee that the message is not lost.</p>
+<p>Mark the row <code>sent</code> in the consumer after the ERP accepts it, and <code>failed</code> with a last error after the final retry. A row that stays <code>queued</code> and never becomes <code>sent</code> is a consumer problem. A row that stays <code>pending</code> is a cron problem. Those are different pages in an incident, which is the reason for the two statuses.</p>
+
+<h2>Kill the process on purpose</h2>
+<p>Place an order. <code>SELECT * FROM maheshdave_order_outbox WHERE order_id = ...</code> shows <code>pending</code> even if you then kill the PHP-FPM worker. Run the cron. The row moves to <code>queued</code> and <code>queue_message</code> has the id. Run the consumer. The row moves to <code>sent</code>. If you only look at the ERP and not at this table, you will miss the orders sitting in <code>failed</code>, which is the queue you actually have to drain.</p>
