@@ -223,7 +223,7 @@ export default function ArticlePage({ slug }) {
       visible?.seo_description ||
       (visible ? truncate(visible.excerpt || toPlainText(visible.content), 155) : 'This article could not be found.'),
     image: visible ? getArticleCoverImage(visible) : '/social-share.png',
-    canonicalPath: visible?.canonical_url || `/articles/${encodeURIComponent(slug)}`,
+    canonicalPath: visible?.canonical_url || `/articles/${encodeURIComponent(slug)}/`,
     type: 'article',
     noindex: !visible,
     jsonLd: visible

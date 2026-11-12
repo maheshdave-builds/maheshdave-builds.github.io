@@ -512,7 +512,7 @@
   ],
   "site": {
     "siteTitle": "Mahesh Dave · Adobe Commerce Team Lead",
-    "siteDescription": "Mahesh Dave, Adobe Commerce Team Lead. Portfolio and blog of Magento 2 and Adobe Commerce articles on architecture, GraphQL, Fastly, New Relic, and integrations.",
+    "siteDescription": "Mahesh Dave · Adobe Commerce Team Lead specializing in enterprise commerce architecture, headless storefronts, integrations, and AI-assisted engineering.",
     "siteLogo": "/uploads/branding/1793042375792-onsuqy.jpg",
     "copy": {
       "heroEyebrow": "ADOBE COMMERCE · ARCHITECTURE · LEADERSHIP",
@@ -529,10 +529,10 @@
       "educationDescription": "Academic qualifications and educational background.",
       "toolkitTitle": "Tools behind the solutions.",
       "toolkitDescription": "Technologies and tools powering commerce development and delivery.",
-      "articlesTitle": "Mahesh Dave Blog",
-      "articlesDescription": "Adobe Commerce and Magento 2 articles on architecture, APIs, Fastly, New Relic, and integrations.",
-      "articlesPageTitle": "Mahesh Dave Blog",
-      "articlesPageDescription": "Mahesh Dave blog: Adobe Commerce and Magento 2 articles on architecture, GraphQL, Fastly, New Relic, and integrations.",
+      "articlesTitle": "Technical Insights",
+      "articlesDescription": "Insights on Adobe Commerce, architecture, performance, and AI.",
+      "articlesPageTitle": "Technical Insights",
+      "articlesPageDescription": "Practical insights into commerce engineering, integrations, and performance.",
       "articlesPageBannerImage": "/images/maheshdave-articles-banner.jpg",
       "articleListenEnabled": true,
       "articleLikesEnabled": true,

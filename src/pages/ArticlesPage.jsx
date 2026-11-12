@@ -63,24 +63,24 @@ export default function ArticlesPage() {
 
   const bannerImage = resolveArticlesPageBannerImage(site.copy)
 
-  const pageTitle = site.copy?.articlesPageTitle || 'Mahesh Dave Blog'
-  const pageDescription = site.copy?.articlesPageDescription || site.copy?.articlesDescription || 'Mahesh Dave blog: Adobe Commerce and Magento 2 articles on architecture, GraphQL, Fastly, New Relic, and integrations.'
+  const pageTitle = site.copy?.articlesPageTitle || 'Technical Insights'
+  const pageDescription = site.copy?.articlesPageDescription || site.copy?.articlesDescription || 'Practical notes on Adobe Commerce, integration architecture, performance, and AI-assisted engineering.'
   useSeo({
-    title: `${pageTitle} — Adobe Commerce and Magento 2 articles`,
+    title: `${pageTitle} — ${site.siteTitle}`,
     description: pageDescription,
-    canonicalPath: '/articles',
+    canonicalPath: '/articles/',
     type: 'website',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'Blog',
-      name: 'Mahesh Dave Blog',
+      name: pageTitle,
       description: pageDescription,
-      url: 'https://maheshdave-builds.github.io/articles',
+      url: 'https://maheshdave-builds.github.io/articles/',
       author: { '@type': 'Person', name: 'Mahesh Dave', url: 'https://maheshdave-builds.github.io/' },
       blogPost: articles.slice(0, 30).map((article) => ({
         '@type': 'BlogPosting',
         headline: article.title,
-        url: `https://maheshdave-builds.github.io/articles/${encodeURIComponent(article.slug)}`,
+        url: `https://maheshdave-builds.github.io/articles/${encodeURIComponent(article.slug)}/`,
         datePublished: article.published_at || undefined,
       })),
     },
