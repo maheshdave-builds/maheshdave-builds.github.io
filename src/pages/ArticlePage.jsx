@@ -112,7 +112,7 @@ export default function ArticlePage({ slug }) {
     playNext()
   }
   const stopSpeech = () => { window.speechSynthesis?.cancel(); speechQueueRef.current = []; speechIndexRef.current = 0; setSpeaking(false); setSpeechBusy(false); setSpeechMessage('Stopped') }
-  const articleUrl = visible?.slug ? absoluteUrl(`/articles/${encodeURIComponent(visible.slug)}`) : ''
+  const articleUrl = visible?.slug ? absoluteUrl(`/articles/${encodeURIComponent(visible.slug)}/`) : ''
   const shareOn = (platform) => {
     const encodedUrl = encodeURIComponent(articleUrl); const encodedTitle = encodeURIComponent(visible?.title || '')
     const urls = { x: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`, linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` }
@@ -223,7 +223,7 @@ export default function ArticlePage({ slug }) {
       visible?.seo_description ||
       (visible ? truncate(visible.excerpt || toPlainText(visible.content), 155) : 'This article could not be found.'),
     image: visible ? getArticleCoverImage(visible) : '/social-share.png',
-    canonicalPath: visible?.canonical_url || `/articles/${encodeURIComponent(slug)}`,
+    canonicalPath: visible?.canonical_url || `/articles/${encodeURIComponent(slug)}/`,
     type: 'article',
     noindex: !visible,
     jsonLd: visible
@@ -236,7 +236,7 @@ export default function ArticlePage({ slug }) {
           dateModified: visible.updated_at || visible.published_at,
           author: { '@type': 'Person', name: visible.author || 'Mahesh Dave' },
           publisher: { '@type': 'Person', name: 'Mahesh Dave', url: SITE_ORIGIN },
-          mainEntityOfPage: absoluteUrl(`/articles/${visible.slug}`),
+          mainEntityOfPage: absoluteUrl(`/articles/${visible.slug}/`),
           image: absoluteUrl(getArticleCoverImage(visible)),
           keywords: visible.tags?.join(', '),
         }
@@ -245,7 +245,7 @@ export default function ArticlePage({ slug }) {
   })
 
   const share = async () => {
-    const url = articleUrl || absoluteUrl(`/articles/${encodeURIComponent(slug)}`)
+    const url = articleUrl || absoluteUrl(`/articles/${encodeURIComponent(slug)}/`)
     try {
       if (navigator.share) {
         await navigator.share({ title: visible?.title, url })
