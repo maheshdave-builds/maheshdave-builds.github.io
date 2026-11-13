@@ -23,6 +23,7 @@ import { Link } from '../lib/RouterLink'
 import { useSeo, SITE_ORIGIN } from '../lib/useSeo'
 import { formatDate, isArticlePublic, readingTime, truncate } from '../lib/format'
 import { articleHasUploadedCover, getArticleCoverImage } from '../lib/articleImages'
+import { ARTICLES_INDEX_PATH, articlePublicPath } from '../lib/articleUrl'
 import ArticleCoverMedia from '../components/ArticleCoverMedia'
 import { toPlainText } from '../lib/sanitize'
 import { migrateStructureOrder } from '../lib/content'
@@ -357,7 +358,7 @@ function Articles({ articles, copy, sliderIntervalSeconds, status, error, reload
     <section id="articles" className="section-wrap articles-section" aria-labelledby="articles-title">
       <div className="articles-section-heading">
         <SectionHeading eyebrow="ARTICLES & IDEAS" id="articles-title" title={copy.articlesTitle} description={copy.articlesDescription} />
-        <Link className="articles-view-all-link" to="/articles">View All Articles <ArrowUpRight size={15} aria-hidden="true" /></Link>
+        <Link className="articles-view-all-link" to={ARTICLES_INDEX_PATH}>View All Articles <ArrowUpRight size={15} aria-hidden="true" /></Link>
       </div>
 
       {status === 'loading' ? (
@@ -365,7 +366,7 @@ function Articles({ articles, copy, sliderIntervalSeconds, status, error, reload
       ) : status === 'error' ? (
         <div className="articles-empty-state" role="alert"><BookOpen size={22} aria-hidden="true" /><div><h3>Articles could not be loaded</h3><p>{error || 'The published article collection is temporarily unavailable.'}</p><button className="button button-secondary button-sm" onClick={reload}>Try again</button></div></div>
       ) : published.length ? (
-        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} imageFit="contain" getTitle={(article) => article.title} getImage={getArticleCoverImage} renderSlideImage={(article, url) => (articleHasUploadedCover(article) ? <img src={url} alt="" loading="lazy" /> : <ArticleCoverMedia article={article} placeholderClassName="article-cover-placeholder cinema-cover-placeholder" alt="" />)} getLink={(article) => `/articles/${encodeURIComponent(article.slug)}`} renderDetails={(article, index, primary) => primary ? <><p className="cinema-summary">{article.excerpt || truncate(toPlainText(article.content), 160)}</p><p className="cinema-meta">{article.category || 'ENGINEERING NOTES'}{article.published_at ? ` · ${formatDate(article.published_at)}` : ''} · {readingTime(article.content)} min read</p><Link className="cinema-link" to={`/articles/${encodeURIComponent(article.slug)}`}>Read article <ArrowUpRight size={15}/></Link></> : null} />
+        <CinematicSlider intervalSeconds={sliderIntervalSeconds} label="Articles" items={published} imageFit="contain" getTitle={(article) => article.title} getImage={getArticleCoverImage} renderSlideImage={(article, url) => (articleHasUploadedCover(article) ? <img src={url} alt="" loading="lazy" /> : <ArticleCoverMedia article={article} placeholderClassName="article-cover-placeholder cinema-cover-placeholder" alt="" />)} getLink={(article) => articlePublicPath(article.slug)} renderDetails={(article, index, primary) => primary ? <><p className="cinema-summary">{article.excerpt || truncate(toPlainText(article.content), 160)}</p><p className="cinema-meta">{article.category || 'ENGINEERING NOTES'}{article.published_at ? ` · ${formatDate(article.published_at)}` : ''} · {readingTime(article.content)} min read</p><Link className="cinema-link" to={articlePublicPath(article.slug)}>Read article <ArrowUpRight size={15}/></Link></> : null} />
       ) : (
         <div className="articles-empty-state">
           <BookOpen size={22} aria-hidden="true" />

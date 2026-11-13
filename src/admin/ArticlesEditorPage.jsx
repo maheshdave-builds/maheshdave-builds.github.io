@@ -15,6 +15,7 @@ import {
   Palette,
 } from 'lucide-react'
 import { Link } from '../lib/RouterLink'
+import { articlePublicPath } from '../lib/articleUrl'
 import { useRouter } from '../lib/routerCore'
 import { useAdminContent } from '../contexts/hooks'
 import { deleteRecord, saveRecord, uploadImage } from '../lib/content'
@@ -459,13 +460,13 @@ export default function ArticlesEditorPage({ mode, recordId }) {
                         <Link to={`/mdadmin/articles/${article.id}`}>{article.title}</Link>
                       </strong>
                       <small>
-                        /articles/{article.slug} · {readingTime(article.content)} min read
+                        /articles/{article.slug}.html · {readingTime(article.content)} min read
                         {article.published_at ? ` · ${formatDate(article.published_at)}` : ''}
                       </small>
                     </div>
                     <div className="record-actions">
                       {article.slug ? (
-                        <Link className="record-action" to={`/articles/${encodeURIComponent(article.slug)}?preview=local`} aria-label="Preview article" target="_blank" rel="noreferrer">
+                        <Link className="record-action" to={`${articlePublicPath(article.slug)}?preview=local`} aria-label="Preview article" target="_blank" rel="noreferrer">
                           <Eye size={14} />
                         </Link>
                       ) : null}
@@ -554,6 +555,7 @@ export default function ArticlesEditorPage({ mode, recordId }) {
                   onBlur={() => change('slug', slugify(form.slug || form.title))}
                   placeholder="article-url"
                 />
+                <span>.html</span>
               </div>
               <small className="field-hint">Changing a published slug breaks existing links. Set a canonical URL if you do.</small>
             </label>

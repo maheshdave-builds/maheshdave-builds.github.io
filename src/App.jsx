@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { RouterProvider } from './lib/router'
 import { useRouteScroll, useRouter, matchRoute } from './lib/routerCore'
+import { ARTICLES_INDEX_PATH, articlePublicPath, isArticlesIndexPath, slugFromArticleParam } from './lib/articleUrl'
 import { ContentProvider } from './contexts/ContentContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { PublicThemeProvider } from './components/PublicThemeProvider'
@@ -122,7 +123,8 @@ function PublicSite() {
   const [active, selectSection] = useActiveSection()
   useEffect(() => {
     if (pathname === '/blog' || pathname.startsWith('/blog/')) {
-      navigate(pathname.replace(/^\/blog/, '/articles') || '/articles', { replace: true })
+      const rest = pathname.replace(/^\/blog\/?/, '')
+      navigate(rest ? articlePublicPath(rest) : ARTICLES_INDEX_PATH, { replace: true })
     }
   }, [pathname, navigate])
 
@@ -132,16 +134,17 @@ function PublicSite() {
   }
 
   const articleMatch = matchRoute('/articles/:slug', pathname)
+  const articleSlug = articleMatch ? slugFromArticleParam(articleMatch.slug) : ''
 
-  if (pathname === '/articles') {
+  if (isArticlesIndexPath(pathname)) {
     return <><SiteHeader activeSection="articles" /><ArticlesPage /><SiteFooter /></>
   }
 
-  if (articleMatch) {
+  if (articleSlug) {
     return (
       <>
         <SiteHeader activeSection="" />
-        <ArticlePage slug={articleMatch.slug} />
+        <ArticlePage slug={articleSlug} />
         <SiteFooter />
       </>
     )

@@ -10,6 +10,7 @@ import { useSeo } from '../lib/useSeo'
 import { articleHasUploadedCover } from '../lib/articleImages'
 import { resolveArticlesPageBannerImage } from '../lib/articleBanner'
 import { articleMatchesQuery, articlesPathWithQuery, readArticleQuery } from '../lib/articleSearch'
+import { ARTICLES_INDEX_PATH, articlePublicPath } from '../lib/articleUrl'
 import ArticleCoverMedia from '../components/ArticleCoverMedia'
 
 const PAGE_SIZE = 9
@@ -68,19 +69,19 @@ export default function ArticlesPage() {
   useSeo({
     title: `${pageTitle} — ${site.siteTitle}`,
     description: pageDescription,
-    canonicalPath: '/articles/',
+    canonicalPath: ARTICLES_INDEX_PATH,
     type: 'website',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'Blog',
       name: pageTitle,
       description: pageDescription,
-      url: 'https://maheshdave-builds.github.io/articles/',
+      url: `https://maheshdave-builds.github.io${ARTICLES_INDEX_PATH}`,
       author: { '@type': 'Person', name: 'Mahesh Dave', url: 'https://maheshdave-builds.github.io' },
       blogPost: articles.slice(0, 30).map((article) => ({
         '@type': 'BlogPosting',
         headline: article.title,
-        url: `https://maheshdave-builds.github.io/articles/${encodeURIComponent(article.slug)}/`,
+        url: `https://maheshdave-builds.github.io${articlePublicPath(article.slug)}`,
         datePublished: article.published_at || undefined,
       })),
     },
@@ -135,7 +136,7 @@ export default function ArticlesPage() {
           className={`article-list-card${view === 'list' ? ' article-list-card-list' : ''}`}
           key={article.id || article.slug}
         >
-          <Link className={`article-list-card-media${articleHasUploadedCover(article) ? ' is-uploaded' : ' is-placeholder'}`} to={`/articles/${encodeURIComponent(article.slug)}`}>
+          <Link className={`article-list-card-media${articleHasUploadedCover(article) ? ' is-uploaded' : ' is-placeholder'}`} to={articlePublicPath(article.slug)}>
             <ArticleCoverMedia
               article={article}
               imgClassName=""
@@ -145,9 +146,9 @@ export default function ArticlesPage() {
           </Link>
           <div className="article-list-card-body">
             <p className="cinema-meta">{article.category || 'ENGINEERING NOTES'}{article.published_at ? ` · ${formatDate(article.published_at)}` : ''} · {readingTime(article.content)} min read</p>
-            <h2><Link to={`/articles/${encodeURIComponent(article.slug)}`}>{article.title}</Link></h2>
+            <h2><Link to={articlePublicPath(article.slug)}>{article.title}</Link></h2>
             <p>{article.excerpt || truncate(toPlainText(article.content), 180)}</p>
-            <Link className="cinema-link" to={`/articles/${encodeURIComponent(article.slug)}`}>Read article <ArrowUpRight size={15}/></Link>
+            <Link className="cinema-link" to={articlePublicPath(article.slug)}>Read article <ArrowUpRight size={15}/></Link>
           </div>
         </motion.article>
       ))}

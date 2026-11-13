@@ -5,6 +5,7 @@ import { Link } from '../lib/RouterLink'
 import { TextLink } from '../components/Button'
 import CinematicSlider from '../components/CinematicSlider'
 import { absoluteUrl, useSeo, SITE_ORIGIN } from '../lib/useSeo'
+import { ARTICLES_INDEX_PATH, articlePublicPath } from '../lib/articleUrl'
 import { formatDate, isArticlePublic, readingTime, sortArticles, truncate } from '../lib/format'
 import { sanitizeHtml, toPlainText } from '../lib/sanitize'
 import { fetchArticleBySlug, contentSource } from '../lib/content'
@@ -112,7 +113,7 @@ export default function ArticlePage({ slug }) {
     playNext()
   }
   const stopSpeech = () => { window.speechSynthesis?.cancel(); speechQueueRef.current = []; speechIndexRef.current = 0; setSpeaking(false); setSpeechBusy(false); setSpeechMessage('Stopped') }
-  const articleUrl = visible?.slug ? absoluteUrl(`/articles/${encodeURIComponent(visible.slug)}/`) : ''
+  const articleUrl = visible?.slug ? absoluteUrl(articlePublicPath(visible.slug)) : ''
   const shareOn = (platform) => {
     const encodedUrl = encodeURIComponent(articleUrl); const encodedTitle = encodeURIComponent(visible?.title || '')
     const urls = { x: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`, linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` }
@@ -223,7 +224,7 @@ export default function ArticlePage({ slug }) {
       visible?.seo_description ||
       (visible ? truncate(visible.excerpt || toPlainText(visible.content), 155) : 'This article could not be found.'),
     image: visible ? getArticleCoverImage(visible) : '/social-share.png',
-    canonicalPath: visible?.canonical_url || `/articles/${encodeURIComponent(slug)}/`,
+    canonicalPath: visible?.canonical_url || articlePublicPath(slug),
     type: 'article',
     noindex: !visible,
     jsonLd: visible
@@ -236,7 +237,7 @@ export default function ArticlePage({ slug }) {
           dateModified: visible.updated_at || visible.published_at,
           author: { '@type': 'Person', name: visible.author || 'Mahesh Dave' },
           publisher: { '@type': 'Person', name: 'Mahesh Dave', url: SITE_ORIGIN },
-          mainEntityOfPage: absoluteUrl(`/articles/${visible.slug}/`),
+          mainEntityOfPage: absoluteUrl(articlePublicPath(visible.slug)),
           image: absoluteUrl(getArticleCoverImage(visible)),
           keywords: visible.tags?.join(', '),
         }
@@ -245,7 +246,7 @@ export default function ArticlePage({ slug }) {
   })
 
   const share = async () => {
-    const url = articleUrl || absoluteUrl(`/articles/${encodeURIComponent(slug)}/`)
+    const url = articleUrl || absoluteUrl(articlePublicPath(slug))
     try {
       if (navigator.share) {
         await navigator.share({ title: visible?.title, url })
@@ -283,7 +284,7 @@ export default function ArticlePage({ slug }) {
             This article may have been unpublished, renamed, or the link may be incorrect. Published notes are listed
             on the portfolio.
           </p>
-          <Link className="button button-primary" to="/articles">
+          <Link className="button button-primary" to={ARTICLES_INDEX_PATH}>
             <ArrowLeft size={16} aria-hidden="true" /> All Articles
           </Link>
         </div>
@@ -295,7 +296,7 @@ export default function ArticlePage({ slug }) {
     <main id="main" className="article-shell">
       <article className="article-main">
         <nav className="article-breadcrumb" aria-label="Breadcrumb">
-          <Link to="/articles">
+          <Link to={ARTICLES_INDEX_PATH}>
             <ArrowLeft size={14} aria-hidden="true" /> All Articles
           </Link>
         </nav>
@@ -367,7 +368,7 @@ export default function ArticlePage({ slug }) {
             getTitle={(article) => article.title}
             getImage={getArticleCoverImage}
             renderSlideImage={(article, url) => (articleHasUploadedCover(article) ? <img src={url} alt="" loading="lazy" /> : <ArticleCoverMedia article={article} placeholderClassName="article-cover-placeholder cinema-cover-placeholder" alt="" />)}
-            getLink={(article) => `/articles/${encodeURIComponent(article.slug)}`}
+            getLink={(article) => articlePublicPath(article.slug)}
             renderDetails={(article, _index, primary) => primary ? (
               <>
                 <p className="cinema-summary">{article.excerpt || truncate(toPlainText(article.content), 160)}</p>
@@ -377,7 +378,7 @@ export default function ArticlePage({ slug }) {
                   {' · '}
                   {readingTime(article.content)} min read
                 </p>
-                <Link className="cinema-link" to={`/articles/${encodeURIComponent(article.slug)}`}>
+                <Link className="cinema-link" to={articlePublicPath(article.slug)}>
                   Read article <ArrowUpRight size={15} aria-hidden="true" />
                 </Link>
               </>

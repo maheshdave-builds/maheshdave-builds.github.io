@@ -1,4 +1,5 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { ARTICLES_INDEX_PATH, articlePublicPath } from '../src/lib/articleUrl.js'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -52,15 +53,29 @@ async function prerenderRoutes() {
   
   const hubTitle = 'Technical Insights'
   const hubDescription = 'Practical insights into commerce engineering, integrations, and performance.'
-  const hubList = publicArticles
-    .filter((article) => article.slug && article.title)
-    .map((article) => `<li><a href="${origin}/articles/${encodeURIComponent(String(article.slug).trim())}/">${escapeHtml(article.title)}</a></li>`)
-    .join('')
+  const hubJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: hubTitle,
+    description: hubDescription,
+    url: `${origin}${ARTICLES_INDEX_PATH}`,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: publicArticles
+        .filter((article) => article.slug && article.title)
+        .map((article, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: article.title,
+          url: `${origin}${articlePublicPath(article.slug)}`,
+        })),
+    },
+  }
   let hubHtml = template
     .replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(hubTitle)} — Mahesh Dave</title>`)
     .replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHtml(hubDescription)}" />`)
-    .replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/articles/" />`)
-    .replace('<div id="root"></div>', () => `<div id="root"><main><h1>${escapeHtml(hubTitle)}</h1><p>${escapeHtml(hubDescription)}</p><ul>${hubList}</ul></main></div>`)
+    .replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}${ARTICLES_INDEX_PATH}" />`)
+    .replace('</head>', `  <script type="application/ld+json">\n  ${JSON.stringify(hubJsonLd)}\n  </script>\n</head>`)
 
   await writeFile(path.resolve(articlesDir, 'index.html'), hubHtml)
   // GitHub Pages serves articles.html at /articles with HTTP 200 (a directory
@@ -77,7 +92,7 @@ async function prerenderRoutes() {
 
     const title = article.seo_title || article.title || 'Article'
     const desc = article.seo_description || truncate(article.excerpt || article.content, 155)
-    const canonical = `${origin}/articles/${encodeURIComponent(slug)}/`
+    const canonical = `${origin}${articlePublicPath(slug)}`
     const coverImage = article.cover_image?.startsWith('http')
       ? article.cover_image
       : article.cover_image
@@ -107,12 +122,8 @@ async function prerenderRoutes() {
       keywords: Array.isArray(article.tags) ? article.tags.join(', ') : 'Adobe Commerce, Magento 2',
     }
 
-    const staticBody = String(article.content || '')
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
     let articleHtml = template
       .replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)} — Mahesh Dave</title>`)
-      .replace('<div id="root"></div>', () => `<div id="root"><article><h1>${escapeHtml(article.title || title)}</h1><p>${escapeHtml(desc)}</p>${staticBody}</article></div>`)
       .replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHtml(desc)}" />`)
       .replace(/<meta property="og:title" content=".*?" \/>/i, `<meta property="og:title" content="${escapeHtml(title)} — Mahesh Dave" />`)
       .replace(/<meta property="og:description" content=".*?" \/>/i, `<meta property="og:description" content="${escapeHtml(desc)}" />`)

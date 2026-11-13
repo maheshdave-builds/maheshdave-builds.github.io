@@ -1,4 +1,5 @@
 /** Shared article search used by the archive page and the header search. */
+import { ARTICLES_INDEX_PATH } from './articleUrl'
 
 export function articleSearchText(article) {
   return [article?.title, article?.excerpt, article?.content, article?.category, article?.author, ...(article?.tags || [])]
@@ -21,12 +22,12 @@ export function readArticleQuery(search = '') {
   return new URLSearchParams(raw.startsWith('?') ? raw.slice(1) : raw).get('q') || ''
 }
 
-/** Build `/articles` while preserving unrelated query params and applying `q`. */
+/** Build `/articles.html` while preserving unrelated query params and applying `q`. */
 export function articlesPathWithQuery(query, extraSearch = '') {
   const params = new URLSearchParams(String(extraSearch || '').replace(/^\?/, ''))
   params.delete('__ghp')
   if (String(query || '').trim()) params.set('q', query)
   else params.delete('q')
   const qs = params.toString()
-  return qs ? `/articles?${qs}` : '/articles'
+  return qs ? `${ARTICLES_INDEX_PATH}?${qs}` : ARTICLES_INDEX_PATH
 }

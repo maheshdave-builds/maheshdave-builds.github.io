@@ -6,6 +6,7 @@ import { useRouter } from '../lib/routerCore'
 import { isArticlePublic, sortArticles, truncate } from '../lib/format'
 import { toPlainText } from '../lib/sanitize'
 import { articleMatchesQuery, articlesPathWithQuery, readArticleQuery } from '../lib/articleSearch'
+import { articlePublicPath, isArticlesIndexPath } from '../lib/articleUrl'
 
 const SUGGESTION_LIMIT = 6
 
@@ -99,18 +100,18 @@ export default function NavArticleSearch({ menuOpen = false, onInteract }) {
   const optionCount = suggestions.length + (query.trim() ? 1 : 0)
 
   const goToResults = () => {
-    const next = articlesPathWithQuery(query, pathname === '/articles' ? search : '')
+    const next = articlesPathWithQuery(query, isArticlesIndexPath(pathname) ? search : '')
     setOpen(false)
     setExpanded(false)
     setActiveIndex(-1)
-    if (`${pathname}${search || ''}` !== next) navigate(next, { replace: pathname === '/articles' })
+    if (`${pathname}${search || ''}` !== next) navigate(next, { replace: isArticlesIndexPath(pathname) })
   }
 
   const applyLiveQuery = (value) => {
     setQuery(value)
     setActiveIndex(-1)
     setOpen(true)
-    if (pathname === '/articles') {
+    if (isArticlesIndexPath(pathname)) {
       const next = articlesPathWithQuery(value, search)
       if (`${pathname}${search || ''}` !== next) navigate(next, { replace: true })
     }
@@ -140,7 +141,7 @@ export default function NavArticleSearch({ menuOpen = false, onInteract }) {
         const article = suggestions[activeIndex]
         setOpen(false)
         setExpanded(false)
-        navigate(`/articles/${encodeURIComponent(article.slug)}`)
+        navigate(articlePublicPath(article.slug))
         return
       }
       goToResults()
@@ -221,7 +222,7 @@ export default function NavArticleSearch({ menuOpen = false, onInteract }) {
               role="option"
               aria-selected={activeIndex === index}
               className={`nav-article-search-option${activeIndex === index ? ' is-active' : ''}`}
-              to={`/articles/${encodeURIComponent(article.slug)}`}
+              to={articlePublicPath(article.slug)}
               onClick={() => {
                 setOpen(false)
                 setExpanded(false)

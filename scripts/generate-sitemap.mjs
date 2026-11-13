@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises'
+import { ARTICLES_INDEX_PATH, articlePublicPath } from '../src/lib/articleUrl.js'
 
 const origin = 'https://maheshdave-builds.github.io'
 const source = JSON.parse(await readFile(new URL('../public/articles-content.json', import.meta.url), 'utf8'))
@@ -25,13 +26,13 @@ const publicArticles = articles.filter((article) => {
 })
 
 const articleUrls = publicArticles.map((article) => ({
-  loc: `${origin}/articles/${encodeURIComponent(String(article.slug).trim())}/`,
+  loc: `${origin}${articlePublicPath(article.slug)}`,
   lastmod: lastmod(article.updated_at || article.published_at || article.created_at),
 }))
 const newest = articleUrls.map((url) => url.lastmod).filter(Boolean).sort().at(-1) || today
 const urls = [
   { loc: `${origin}/`, lastmod: newest },
-  { loc: `${origin}/articles/`, lastmod: newest },
+  { loc: `${origin}${ARTICLES_INDEX_PATH}`, lastmod: newest },
   ...articleUrls,
 ]
 const seen = new Set()
