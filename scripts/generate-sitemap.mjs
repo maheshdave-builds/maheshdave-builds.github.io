@@ -30,7 +30,7 @@ const articleUrls = publicArticles.map((article) => ({
 }))
 const newest = articleUrls.map((url) => url.lastmod).filter(Boolean).sort().at(-1) || today
 const urls = [
-  { loc: origin, lastmod: newest },
+  { loc: `${origin}/`, lastmod: newest },
   { loc: `${origin}/articles`, lastmod: newest },
   ...articleUrls,
 ]

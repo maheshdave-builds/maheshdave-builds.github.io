@@ -63,6 +63,9 @@ async function prerenderRoutes() {
     .replace('<div id="root"></div>', () => `<div id="root"><main><h1>${escapeHtml(hubTitle)}</h1><p>${escapeHtml(hubDescription)}</p><ul>${hubList}</ul></main></div>`)
 
   await writeFile(path.resolve(articlesDir, 'index.html'), hubHtml)
+  // GitHub Pages serves articles.html at /articles with HTTP 200 (a directory
+  // index would 301 to /articles/), so the extensionless URL is written as a file too.
+  await writeFile(path.resolve(distDir, 'articles.html'), hubHtml)
 
   // 2. Individual Article Pages (/articles/:slug)
   let count = 0
@@ -122,6 +125,8 @@ async function prerenderRoutes() {
       .replace('</head>', `  <script type="application/ld+json">\n  ${JSON.stringify(articleJsonLd, null, 2)}\n  </script>\n</head>`)
 
     await writeFile(path.resolve(articleDir, 'index.html'), articleHtml)
+    // Extensionless /articles/<slug> is served from <slug>.html with HTTP 200.
+    await writeFile(path.resolve(articlesDir, `${slug}.html`), articleHtml)
     count++
   }
 
