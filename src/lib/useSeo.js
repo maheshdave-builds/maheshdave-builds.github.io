@@ -70,7 +70,8 @@ export function useSeo({ title, description, image, canonicalPath, type = 'websi
 
 function absolute(path) {
   if (!path) return undefined
-  if (/^https?:\/\//i.test(path)) return path
+  if (/^https?:\/\//i.test(path)) return path.replace(/\/+$/, '')
+  if (path === '/') return SITE_ORIGIN
   return `${SITE_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`
 }
 

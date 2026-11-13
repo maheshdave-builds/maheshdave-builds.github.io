@@ -30,13 +30,13 @@ const articleUrls = publicArticles.map((article) => ({
 }))
 const newest = articleUrls.map((url) => url.lastmod).filter(Boolean).sort().at(-1) || today
 const urls = [
-  { loc: `${origin}/`, lastmod: newest },
+  { loc: origin, lastmod: newest },
   { loc: `${origin}/articles`, lastmod: newest },
   ...articleUrls,
 ]
 const seen = new Set()
 for (const url of urls) {
-  if (!url.loc.startsWith(`${origin}/`)) throw new Error(`Sitemap URL is off-host: ${url.loc}`)
+  if (url.loc !== origin && !url.loc.startsWith(`${origin}/`)) throw new Error(`Sitemap URL is off-host: ${url.loc}`)
   if (seen.has(url.loc)) throw new Error(`Duplicate sitemap URL: ${url.loc}`)
   seen.add(url.loc)
 }

@@ -76,7 +76,7 @@ export default function ArticlesPage() {
       name: pageTitle,
       description: pageDescription,
       url: 'https://maheshdave-builds.github.io/articles',
-      author: { '@type': 'Person', name: 'Mahesh Dave', url: 'https://maheshdave-builds.github.io/' },
+      author: { '@type': 'Person', name: 'Mahesh Dave', url: 'https://maheshdave-builds.github.io' },
       blogPost: articles.slice(0, 30).map((article) => ({
         '@type': 'BlogPosting',
         headline: article.title,
