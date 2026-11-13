@@ -5,127 +5,127 @@
     <lastmod>2026-08-22</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/</loc>
+    <loc>https://maheshdave-builds.github.io/articles</loc>
     <lastmod>2026-08-22</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/hooking-product-saves-so-admin-import-and-rest-all-agree/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/hooking-product-saves-so-admin-import-and-rest-all-agree</loc>
     <lastmod>2025-11-21</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/loading-extension-attributes-in-getlist-without-n-1-queries/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/loading-extension-attributes-in-getlist-without-n-1-queries</loc>
     <lastmod>2024-10-10</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/virtual-types-for-per-integration-loggers-and-http-clients/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/virtual-types-for-per-integration-loggers-and-http-clients</loc>
     <lastmod>2024-07-02</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/declarative-schema-renames-drops-and-the-whitelist-file/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/declarative-schema-renames-drops-and-the-whitelist-file</loc>
     <lastmod>2026-06-10</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/a-custom-indexer-with-mview-changelogs-for-partial-reindex/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/a-custom-indexer-with-mview-changelogs-for-partial-reindex</loc>
     <lastmod>2024-11-09</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/one-queue-topic-on-mysql-locally-and-rabbitmq-in-production/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/one-queue-topic-on-mysql-locally-and-rabbitmq-in-production</loc>
     <lastmod>2024-02-17</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/a-product-field-in-graphql-that-does-not-query-once-per-item/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/a-product-field-in-graphql-that-does-not-query-once-per-item</loc>
     <lastmod>2025-06-07</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/why-a-graphql-query-never-hits-fastly/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/why-a-graphql-query-never-hits-fastly</loc>
     <lastmod>2025-01-17</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/a-rest-endpoint-that-shares-its-service-contract-with-cron/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/a-rest-endpoint-that-shares-its-service-contract-with-cron</loc>
     <lastmod>2024-03-20</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/an-admin-grid-whose-collection-is-not-loaded-in-the-browser/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/an-admin-grid-whose-collection-is-not-loaded-in-the-browser</loc>
     <lastmod>2025-04-29</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/a-mass-action-that-queues-work-instead-of-timing-out/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/a-mass-action-that-queues-work-instead-of-timing-out</loc>
     <lastmod>2025-09-12</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/website-scoped-config-that-reads-the-default-value-from-cron/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/website-scoped-config-that-reads-the-default-value-from-cron</loc>
     <lastmod>2026-01-28</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/searchcriteria-filters-that-silently-return-the-wrong-page/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/searchcriteria-filters-that-silently-return-the-wrong-page</loc>
     <lastmod>2025-07-08</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/category-pages-that-stay-stale-after-a-catalog-reindex/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/category-pages-that-stay-stale-after-a-catalog-reindex</loc>
     <lastmod>2026-05-09</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/bypassing-fastly-for-one-query-parameter-only/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/bypassing-fastly-for-one-query-parameter-only</loc>
     <lastmod>2024-05-26</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/a-custom-block-fastly-never-purges/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/a-custom-block-fastly-never-purges</loc>
     <lastmod>2025-02-22</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/the-block-that-turns-off-full-page-cache-for-the-whole-page/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/the-block-that-turns-off-full-page-cache-for-the-whole-page</loc>
     <lastmod>2025-03-27</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/naming-cron-and-consumer-transactions-in-new-relic/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/naming-cron-and-consumer-transactions-in-new-relic</loc>
     <lastmod>2024-08-04</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/nrql-for-checkout-latency-by-store/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/nrql-for-checkout-latency-by-store</loc>
     <lastmod>2026-02-28</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/from-a-new-relic-slow-query-to-an-index-you-can-ship/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/from-a-new-relic-slow-query-to-an-index-you-can-ship</loc>
     <lastmod>2025-10-16</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/ack-an-order-event-in-app-builder-before-the-work-starts/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/ack-an-order-event-in-app-builder-before-the-work-starts</loc>
     <lastmod>2026-04-07</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/a-webhook-receiver-that-survives-retries/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/a-webhook-receiver-that-survives-retries</loc>
     <lastmod>2024-01-09</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/an-outbox-so-placed-orders-reach-the-erp-after-a-crash/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/an-outbox-so-placed-orders-reach-the-erp-after-a-crash</loc>
     <lastmod>2025-08-12</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/updating-msi-source-items-in-bulk-from-an-external-feed/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/updating-msi-source-items-in-bulk-from-an-external-feed</loc>
     <lastmod>2024-12-19</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/price-writes-that-land-in-the-wrong-website/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/price-writes-that-land-in-the-wrong-website</loc>
     <lastmod>2024-04-20</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/blocking-checkout-for-a-company-that-is-not-approved/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/blocking-checkout-for-a-company-that-is-not-approved</loc>
     <lastmod>2025-12-25</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/server-side-validation-for-a-custom-checkout-field/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/server-side-validation-for-a-custom-checkout-field</loc>
     <lastmod>2024-09-03</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/an-around-plugin-that-called-proceed-twice/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/an-around-plugin-that-called-proceed-twice</loc>
     <lastmod>2026-08-22</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/a-read-only-health-command-for-magento-diagnostics/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/a-read-only-health-command-for-magento-diagnostics</loc>
     <lastmod>2026-07-18</lastmod>
   </url>
   <url>
-    <loc>https://maheshdave-builds.github.io/articles/how-to-remove-a-fastly-vcl-snippet-using-cli/</loc>
+    <loc>https://maheshdave-builds.github.io/articles/how-to-remove-a-fastly-vcl-snippet-using-cli</loc>
     <lastmod>2026-08-08</lastmod>
   </url>
 </urlset>

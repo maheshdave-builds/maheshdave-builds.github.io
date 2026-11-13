@@ -54,12 +54,12 @@ async function prerenderRoutes() {
   const hubDescription = 'Practical insights into commerce engineering, integrations, and performance.'
   const hubList = publicArticles
     .filter((article) => article.slug && article.title)
-    .map((article) => `<li><a href="${origin}/articles/${encodeURIComponent(String(article.slug).trim())}/">${escapeHtml(article.title)}</a></li>`)
+    .map((article) => `<li><a href="${origin}/articles/${encodeURIComponent(String(article.slug).trim())}">${escapeHtml(article.title)}</a></li>`)
     .join('')
   let hubHtml = template
     .replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(hubTitle)} — Mahesh Dave</title>`)
     .replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHtml(hubDescription)}" />`)
-    .replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/articles/" />`)
+    .replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/articles" />`)
     .replace('<div id="root"></div>', () => `<div id="root"><main><h1>${escapeHtml(hubTitle)}</h1><p>${escapeHtml(hubDescription)}</p><ul>${hubList}</ul></main></div>`)
 
   await writeFile(path.resolve(articlesDir, 'index.html'), hubHtml)
@@ -74,7 +74,7 @@ async function prerenderRoutes() {
 
     const title = article.seo_title || article.title || 'Article'
     const desc = article.seo_description || truncate(article.excerpt || article.content, 155)
-    const canonical = `${origin}/articles/${encodeURIComponent(slug)}/`
+    const canonical = `${origin}/articles/${encodeURIComponent(slug)}`
     const coverImage = article.cover_image?.startsWith('http')
       ? article.cover_image
       : article.cover_image
