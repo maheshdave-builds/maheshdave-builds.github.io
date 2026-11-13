@@ -141,6 +141,16 @@
 }
 
 @media (max-width: 700px) {
+  .article-list-card:not(.article-list-card-list) h2,
+  .article-list-card-list h2 {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+    min-height: 0;
+    overflow-wrap: break-word;
+  }
+
   .article-list-card-list {
     flex-direction: column !important;
     align-items: stretch !important;
