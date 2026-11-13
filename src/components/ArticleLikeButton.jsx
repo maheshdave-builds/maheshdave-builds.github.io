@@ -13,7 +13,9 @@ export default function ArticleLikeButton({ slug, className = '', initialCount }
     setLiked(hasUserLikedArticle(slug))
     fetchArticleLikeCount(slug)
       .then((value) => {
-        if (active) setCount(value)
+        if (!active) return
+        const next = Number(value) || 0
+        setCount((current) => Math.max(current, next))
       })
       .catch(() => {
         if (active) setCount((current) => Math.max(current, baseCount))
@@ -30,7 +32,8 @@ export default function ArticleLikeButton({ slug, className = '', initialCount }
     setCount((current) => current + 1)
     try {
       const next = await likeArticle(slug)
-      setCount(next)
+      const resolved = Number(next) || 0
+      setCount((current) => Math.max(current, resolved))
     } catch {
       setLiked(hasUserLikedArticle(slug))
       setCount((current) => Math.max(0, current - 1))

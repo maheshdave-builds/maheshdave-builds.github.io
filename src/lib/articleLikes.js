@@ -127,6 +127,18 @@ function mergeLikeCount(slug, published = inMemoryLikes, pending = readPendingLi
   return Number(published[key] || inMemoryLikes[key] || 0) + Number(pending[key] || 0)
 }
 
+/**
+ * article-likes.json is a starting baseline. The counter only records likes
+ * cast from the site, so the visible total is that baseline plus those likes.
+ * Using the higher of the two left the baseline frozen until the counter
+ * caught up to it.
+ */
+function withLiveLikes(baseline, remote) {
+  const base = Number(baseline) || 0
+  const live = Number(remote) || 0
+  return base + Math.max(0, live)
+}
+
 async function fetchCounterValue(slug, hit = false) {
   const key = counterKey(slug)
   if (!key) return 0
@@ -156,7 +168,7 @@ export async function fetchArticleLikeCount(slug) {
   const fallback = await fetchFallbackLikeCount(key)
   try {
     const remote = await fetchCounterValue(key, false)
-    return Math.max(fallback, remote)
+    return withLiveLikes(fallback, remote)
   } catch {
     return fallback
   }
@@ -164,7 +176,8 @@ export async function fetchArticleLikeCount(slug) {
 
 /**
  * Register a like once per browser and return the updated global count.
- * Counts are stored on a public counter service so every visitor sees the same total.
+ * The counter stores each like so every visitor sees the same total on top of
+ * the published baseline.
  */
 export async function likeArticle(slug) {
   const key = String(slug || '').trim()
@@ -176,7 +189,7 @@ export async function likeArticle(slug) {
   try {
     const remote = await fetchCounterValue(key, true)
     const fallback = await fetchFallbackLikeCount(key)
-    return Math.max(fallback, remote)
+    return withLiveLikes(fallback, remote)
   } catch {
     incrementPendingLike(key)
     return fetchFallbackLikeCount(key)
